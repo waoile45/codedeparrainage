@@ -17,14 +17,54 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
       setError('Email ou mot de passe incorrect')
       setLoading(false)
-    } else {
-      router.push('/')
+      return
     }
+
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from('users')
+        .select('xp, level, streak_days, last_login')
+        .eq('id', data.user.id)
+        .single()
+
+      if (profile) {
+        const now = new Date()
+        const lastLogin = profile.last_login ? new Date(profile.last_login) : null
+        const isNewDay = !lastLogin || lastLogin.toDateString() !== now.toDateString()
+
+        if (isNewDay) {
+          const yesterday = new Date(now)
+          yesterday.setDate(yesterday.getDate() - 1)
+          const isStreak = lastLogin && lastLogin.toDateString() === yesterday.toDateString()
+
+          const newXp = profile.xp + 2
+          const newStreak = isStreak ? profile.streak_days + 1 : 1
+          const newLevel =
+            newXp >= 10000 ? 'Parrain Légendaire' :
+            newXp >= 5000 ? 'Super Parrain' :
+            newXp >= 2000 ? 'Parrain Or' :
+            newXp >= 500 ? 'Parrain Argent' :
+            newXp >= 100 ? 'Parrain Bronze' : 'Débutant'
+
+          await supabase
+            .from('users')
+            .update({
+              xp: newXp,
+              level: newLevel,
+              streak_days: newStreak,
+              last_login: now.toISOString(),
+            })
+            .eq('id', data.user.id)
+        }
+      }
+    }
+
+    router.push('/')
   }
 
   return (
