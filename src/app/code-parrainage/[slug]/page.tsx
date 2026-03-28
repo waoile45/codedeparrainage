@@ -50,6 +50,30 @@ export default async function CompanyPage({ params }: Props) {
 
   const autresSlug = ['boursobank', 'winamax', 'fortuneo', 'free', 'binance', 'betclic'].filter(s => s !== slug)
 
+
+
+  function getDomain(slug: string) {
+    const domains: Record<string, string> = {
+      'boursobank': 'boursobank.com',
+      'fortuneo': 'fortuneo.fr',
+      'hello-bank': 'hello.bank',
+      'revolut': 'revolut.com',
+      'lydia': 'lydia-app.com',
+      'winamax': 'winamax.fr',
+      'betclic': 'betclic.fr',
+      'pmu': 'pmu.fr',
+      'free': 'free.fr',
+      'sfr': 'sfr.fr',
+      'igraal': 'igraal.com',
+      'poulpeo': 'poulpeo.com',
+      'binance': 'binance.com',
+      'coinbase': 'coinbase.com',
+      'edf': 'edf.fr',
+      'engie': 'engie.fr',
+    }
+    return domains[slug] ?? slug + '.com'
+  }
+  
   return (
     <main className="min-h-screen bg-gray-50">
 
@@ -68,8 +92,12 @@ export default async function CompanyPage({ params }: Props) {
 
         <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-violet-100 flex items-center justify-center text-2xl font-medium text-violet-600">
-              {company.name.slice(0, 2).toUpperCase()}
+            <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center overflow-hidden">
+              <img
+                src={"https://www.google.com/s2/favicons?domain=" + getDomain(company.slug) + "&sz=64"}
+                alt={company.name}
+                className="w-12 h-12 object-contain"
+              />
             </div>
             <div>
               <h1 className="text-2xl font-medium text-gray-900">

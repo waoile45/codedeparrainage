@@ -167,12 +167,42 @@ export default function CodesPage() {
               const isAvisOpen = avisOpen === ann.id
               const isMsgOpen = msgOpen === ann.id
 
+              function getCompanyDomain(slug: string) {
+    const domains: Record<string, string> = {
+      'boursobank': 'boursobank.com',
+      'fortuneo': 'fortuneo.fr',
+      'hello-bank': 'hello.bank',
+      'revolut': 'revolut.com',
+      'lydia': 'lydia-app.com',
+      'winamax': 'winamax.fr',
+      'betclic': 'betclic.fr',
+      'pmu': 'pmu.fr',
+      'free': 'free.fr',
+      'sfr': 'sfr.fr',
+      'igraal': 'igraal.com',
+      'poulpeo': 'poulpeo.com',
+      'binance': 'binance.com',
+      'coinbase': 'coinbase.com',
+      'edf': 'edf.fr',
+      'engie': 'engie.fr',
+    }
+    return domains[slug] ?? slug + '.com'
+  }
+
               return (
                 <div key={ann.id} className="bg-white border border-gray-100 rounded-2xl p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-sm font-medium text-violet-600">
-                        {ann.companies?.name?.slice(0, 2).toUpperCase()}
+                      <div className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center overflow-hidden">
+                        <img
+                          src={"https://www.google.com/s2/favicons?domain=" + getCompanyDomain(ann.companies?.slug) + "&sz=64"}
+                          alt={ann.companies?.name}
+                          className="w-8 h-8 object-contain"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                            e.currentTarget.parentElement!.innerHTML = '<span class="text-xs font-medium text-violet-600">' + ann.companies?.name?.slice(0, 2).toUpperCase() + '</span>'
+                          }}
+                        />
                       </div>
                       <div>
                         <a href={"/code-parrainage/" + ann.companies?.slug} className="font-medium text-gray-900 hover:text-violet-600">
