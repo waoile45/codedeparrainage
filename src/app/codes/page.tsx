@@ -9,9 +9,12 @@ export default function CodesPage() {
   const [bumping, setBumping] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
   const [avisOpen, setAvisOpen] = useState<string | null>(null)
+  const [msgOpen, setMsgOpen] = useState<string | null>(null)
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
+  const [msgContent, setMsgContent] = useState('')
   const [avisLoading, setAvisLoading] = useState(false)
+  const [msgLoading, setMsgLoading] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -20,7 +23,7 @@ export default function CodesPage() {
       setUser(user)
       const { data } = await supabase
         .from('announcements')
-        .select('*, users (pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating)')
+        .select('*, users (id, pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating)')
         .order('last_bumped_at', { ascending: false })
       setAnnouncements(data ?? [])
     }
@@ -39,7 +42,7 @@ export default function CodesPage() {
     if (res.ok) {
       const { data: updated } = await supabase
         .from('announcements')
-        .select('*, users (pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating)')
+        .select('*, users (id, pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating)')
         .order('last_bumped_at', { ascending: false })
       setAnnouncements(updated ?? [])
     } else {
@@ -66,11 +69,30 @@ export default function CodesPage() {
       setAvisOpen(null)
       setRating(5)
       setComment('')
-      alert('Avis publié ! +20 XP pour le parrain')
+      alert('Avis publié !')
     } else {
       alert(data.error)
     }
     setAvisLoading(false)
+  }
+
+  async function handleMessage(announcementId: string, receiverId: string) {
+    if (!user) { window.location.href = '/login'; return }
+    setMsgLoading(true)
+    const res = await fetch('/api/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ announcementId, receiverId, content: msgContent }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setMsgOpen(null)
+      setMsgContent('')
+      alert('Message envoyé !')
+    } else {
+      alert(data.error)
+    }
+    setMsgLoading(false)
   }
 
   function getAvgRating(reviews: any[]) {
@@ -89,9 +111,8 @@ export default function CodesPage() {
           <div className="flex gap-3">
             {user ? (
               <div className="flex gap-3">
-                <a href="/profil" className="text-sm text-gray-600 px-4 py-2">
-                  Mon profil
-                </a>
+                <a href="/messages" className="text-sm text-gray-600 px-4 py-2">Messages</a>
+                <a href="/profil" className="text-sm text-gray-600 px-4 py-2">Mon profil</a>
                 <a href="/publier" className="text-sm bg-violet-600 text-white px-4 py-2 rounded-full">
                   Publier mon code
                 </a>
@@ -118,7 +139,8 @@ export default function CodesPage() {
             {announcements.map((ann: any) => {
               const avgRating = getAvgRating(ann.reviews)
               const isOwner = user && user.id === ann.user_id
-              const isOpen = avisOpen === ann.id
+              const isAvisOpen = avisOpen === ann.id
+              const isMsgOpen = msgOpen === ann.id
 
               return (
                 <div key={ann.id} className="bg-white border border-gray-100 rounded-2xl p-5">
@@ -128,7 +150,9 @@ export default function CodesPage() {
                         {ann.companies?.name?.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-medium text-gray-900">{ann.companies?.name}</div>
+                        <a href={"/code-parrainage/" + ann.companies?.slug} className="font-medium text-gray-900 hover:text-violet-600">
+                          {ann.companies?.name}
+                        </a>
                         <div className="text-xs text-gray-500">{ann.companies?.referral_bonus_description}</div>
                       </div>
                     </div>
@@ -158,19 +182,25 @@ export default function CodesPage() {
                         {ann.users?.level}
                       </span>
                       {avgRating && (
-                        <span className="text-xs text-yellow-500">
-                          ★ {avgRating} ({ann.reviews.length})
-                        </span>
+                        <span className="text-xs text-yellow-500">★ {avgRating} ({ann.reviews.length})</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
                       {!isOwner && user && (
-                        <button
-                          onClick={() => setAvisOpen(isOpen ? null : ann.id)}
-                          className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:border-yellow-400 hover:text-yellow-600"
-                        >
-                          ★ Laisser un avis
-                        </button>
+                        <>
+                          <button
+                            onClick={() => { setMsgOpen(isMsgOpen ? null : ann.id); setAvisOpen(null) }}
+                            className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:border-blue-400 hover:text-blue-600"
+                          >
+                            💬 Contacter
+                          </button>
+                          <button
+                            onClick={() => { setAvisOpen(isAvisOpen ? null : ann.id); setMsgOpen(null) }}
+                            className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:border-yellow-400 hover:text-yellow-600"
+                          >
+                            ★ Avis
+                          </button>
+                        </>
                       )}
                       {isOwner && (
                         <button
@@ -184,7 +214,29 @@ export default function CodesPage() {
                     </div>
                   </div>
 
-                  {isOpen && (
+                  {isMsgOpen && (
+                    <div className="border-t border-gray-100 pt-4 mt-2">
+                      <div className="text-sm font-medium text-gray-700 mb-3">
+                        Envoyer un message à {ann.users?.pseudo}
+                      </div>
+                      <textarea
+                        value={msgContent}
+                        onChange={(e) => setMsgContent(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-400 resize-none mb-3"
+                        placeholder="Votre message..."
+                        rows={3}
+                      />
+                      <button
+                        onClick={() => handleMessage(ann.id, ann.users?.id)}
+                        disabled={msgLoading}
+                        className="bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50"
+                      >
+                        {msgLoading ? 'Envoi...' : 'Envoyer'}
+                      </button>
+                    </div>
+                  )}
+
+                  {isAvisOpen && (
                     <div className="border-t border-gray-100 pt-4 mt-2">
                       <div className="text-sm font-medium text-gray-700 mb-3">Votre avis</div>
                       <div className="flex gap-2 mb-3">
