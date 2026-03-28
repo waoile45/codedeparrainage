@@ -8,6 +8,10 @@ export default function CodesPage() {
   const [user, setUser] = useState<any>(null)
   const [bumping, setBumping] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
+  const [avisOpen, setAvisOpen] = useState<string | null>(null)
+  const [rating, setRating] = useState(5)
+  const [comment, setComment] = useState('')
+  const [avisLoading, setAvisLoading] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -16,7 +20,7 @@ export default function CodesPage() {
       setUser(user)
       const { data } = await supabase
         .from('announcements')
-        .select(`*, users (pseudo, xp, level), companies (name, slug, category, referral_bonus_description)`)
+        .select('*, users (pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating)')
         .order('last_bumped_at', { ascending: false })
       setAnnouncements(data ?? [])
     }
@@ -35,7 +39,7 @@ export default function CodesPage() {
     if (res.ok) {
       const { data: updated } = await supabase
         .from('announcements')
-        .select(`*, users (pseudo, xp, level), companies (name, slug, category, referral_bonus_description)`)
+        .select('*, users (pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating)')
         .order('last_bumped_at', { ascending: false })
       setAnnouncements(updated ?? [])
     } else {
@@ -50,6 +54,31 @@ export default function CodesPage() {
     setTimeout(() => setCopied(null), 2000)
   }
 
+  async function handleAvis(announcementId: string) {
+    setAvisLoading(true)
+    const res = await fetch('/api/avis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ announcementId, rating, comment }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setAvisOpen(null)
+      setRating(5)
+      setComment('')
+      alert('Avis publié ! +20 XP pour le parrain')
+    } else {
+      alert(data.error)
+    }
+    setAvisLoading(false)
+  }
+
+  function getAvgRating(reviews: any[]) {
+    if (!reviews || reviews.length === 0) return null
+    const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    return avg.toFixed(1)
+  }
+
   return (
     <main className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b border-gray-100 px-6 py-4">
@@ -59,9 +88,14 @@ export default function CodesPage() {
           </a>
           <div className="flex gap-3">
             {user ? (
-              <a href="/publier" className="text-sm bg-violet-600 text-white px-4 py-2 rounded-full">
-                Publier mon code
-              </a>
+              <div className="flex gap-3">
+                <a href="/profil" className="text-sm text-gray-600 px-4 py-2">
+                  Mon profil
+                </a>
+                <a href="/publier" className="text-sm bg-violet-600 text-white px-4 py-2 rounded-full">
+                  Publier mon code
+                </a>
+              </div>
             ) : (
               <a href="/login" className="text-sm bg-violet-600 text-white px-4 py-2 rounded-full">
                 Connexion
@@ -81,64 +115,108 @@ export default function CodesPage() {
 
         {announcements.length > 0 ? (
           <div className="flex flex-col gap-4">
-            {announcements.map((ann: any) => (
-              <div key={ann.id} className="bg-white border border-gray-100 rounded-2xl p-5">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-sm font-medium text-violet-600">
-                      {ann.companies?.name?.slice(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900">{ann.companies?.name}</div>
-                      <div className="text-xs text-gray-500">{ann.companies?.referral_bonus_description}</div>
-                    </div>
-                  </div>
-                  <span className="text-xs bg-violet-50 text-violet-600 px-3 py-1 rounded-full">
-                    {ann.companies?.category}
-                  </span>
-                </div>
+            {announcements.map((ann: any) => {
+              const avgRating = getAvgRating(ann.reviews)
+              const isOwner = user && user.id === ann.user_id
+              const isOpen = avisOpen === ann.id
 
-                <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-center justify-between mb-3">
-                  <span className="font-mono text-sm font-medium text-gray-900">{ann.code}</span>
-                  <button
-                    onClick={() => handleCopy(ann.code, ann.id)}
-                    className="text-xs text-violet-600 font-medium"
-                  >
-                    {copied === ann.id ? '✓ Copié !' : 'Copier'}
-                  </button>
-                </div>
-
-                {ann.description && (
-                  <p className="text-sm text-gray-600 mb-3">{ann.description}</p>
-                )}
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center text-xs font-medium text-violet-600">
-                      {ann.users?.pseudo?.slice(0, 1).toUpperCase()}
+              return (
+                <div key={ann.id} className="bg-white border border-gray-100 rounded-2xl p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-sm font-medium text-violet-600">
+                        {ann.companies?.name?.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">{ann.companies?.name}</div>
+                        <div className="text-xs text-gray-500">{ann.companies?.referral_bonus_description}</div>
+                      </div>
                     </div>
-                    <span className="text-xs text-gray-500">{ann.users?.pseudo}</span>
-                    <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">
-                      {ann.users?.level}
+                    <span className="text-xs bg-violet-50 text-violet-600 px-3 py-1 rounded-full">
+                      {ann.companies?.category}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-400">
-                      {new Date(ann.last_bumped_at).toLocaleDateString('fr-FR')}
-                    </span>
-                    {user && user.id === ann.user_id && (
+
+                  <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-center justify-between mb-3">
+                    <span className="font-mono text-sm font-medium text-gray-900">{ann.code}</span>
+                    <button onClick={() => handleCopy(ann.code, ann.id)} className="text-xs text-violet-600 font-medium">
+                      {copied === ann.id ? '✓ Copié !' : 'Copier'}
+                    </button>
+                  </div>
+
+                  {ann.description && (
+                    <p className="text-sm text-gray-600 mb-3">{ann.description}</p>
+                  )}
+
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center text-xs font-medium text-violet-600">
+                        {ann.users?.pseudo?.slice(0, 1).toUpperCase()}
+                      </div>
+                      <span className="text-xs text-gray-500">{ann.users?.pseudo}</span>
+                      <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">
+                        {ann.users?.level}
+                      </span>
+                      {avgRating && (
+                        <span className="text-xs text-yellow-500">
+                          ★ {avgRating} ({ann.reviews.length})
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {!isOwner && user && (
+                        <button
+                          onClick={() => setAvisOpen(isOpen ? null : ann.id)}
+                          className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:border-yellow-400 hover:text-yellow-600"
+                        >
+                          ★ Laisser un avis
+                        </button>
+                      )}
+                      {isOwner && (
+                        <button
+                          onClick={() => handleBump(ann.id)}
+                          disabled={bumping === ann.id}
+                          className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:border-violet-400 hover:text-violet-600 disabled:opacity-50"
+                        >
+                          {bumping === ann.id ? '...' : '▲ Remonter'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {isOpen && (
+                    <div className="border-t border-gray-100 pt-4 mt-2">
+                      <div className="text-sm font-medium text-gray-700 mb-3">Votre avis</div>
+                      <div className="flex gap-2 mb-3">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            onClick={() => setRating(star)}
+                            className={"text-2xl " + (star <= rating ? 'text-yellow-400' : 'text-gray-200')}
+                          >
+                            ★
+                          </button>
+                        ))}
+                      </div>
+                      <textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-400 resize-none mb-3"
+                        placeholder="Décrivez votre expérience..."
+                        rows={2}
+                      />
                       <button
-                        onClick={() => handleBump(ann.id)}
-                        disabled={bumping === ann.id}
-                        className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:border-violet-400 hover:text-violet-600 disabled:opacity-50"
+                        onClick={() => handleAvis(ann.id)}
+                        disabled={avisLoading}
+                        className="bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50"
                       >
-                        {bumping === ann.id ? '...' : '▲ Remonter'}
+                        {avisLoading ? 'Envoi...' : 'Publier mon avis'}
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
           <div className="text-center py-20">
