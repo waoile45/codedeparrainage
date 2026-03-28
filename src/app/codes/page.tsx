@@ -1,28 +1,73 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 
-export default async function CodesPage() {
+export default function CodesPage() {
+  const [announcements, setAnnouncements] = useState<any[]>([])
+  const [user, setUser] = useState<any>(null)
+  const [bumping, setBumping] = useState<string | null>(null)
+  const [copied, setCopied] = useState<string | null>(null)
   const supabase = createClient()
 
-  const { data: announcements } = await supabase
-    .from('announcements')
-    .select(`
-      *,
-      users (pseudo, xp, level),
-      companies (name, slug, category, referral_bonus_description)
-    `)
-    .order('last_bumped_at', { ascending: false })
+  useEffect(() => {
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      const { data } = await supabase
+        .from('announcements')
+        .select(`*, users (pseudo, xp, level), companies (name, slug, category, referral_bonus_description)`)
+        .order('last_bumped_at', { ascending: false })
+      setAnnouncements(data ?? [])
+    }
+    load()
+  }, [])
+
+  async function handleBump(announcementId: string) {
+    if (!user) { window.location.href = '/login'; return }
+    setBumping(announcementId)
+    const res = await fetch('/api/bump', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ announcementId }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      const { data: updated } = await supabase
+        .from('announcements')
+        .select(`*, users (pseudo, xp, level), companies (name, slug, category, referral_bonus_description)`)
+        .order('last_bumped_at', { ascending: false })
+      setAnnouncements(updated ?? [])
+    } else {
+      alert(data.error)
+    }
+    setBumping(null)
+  }
+
+  async function handleCopy(code: string, id: string) {
+    await navigator.clipboard.writeText(code)
+    setCopied(id)
+    setTimeout(() => setCopied(null), 2000)
+  }
 
   return (
     <main className="min-h-screen bg-gray-50">
-
       <nav className="bg-white border-b border-gray-100 px-6 py-4">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <a href="/" className="text-lg font-medium">
             code<span className="text-violet-600">deparrainage</span>.fr
           </a>
-          <a href="/register" className="text-sm bg-violet-600 text-white px-4 py-2 rounded-full">
-            Publier mon code
-          </a>
+          <div className="flex gap-3">
+            {user ? (
+              <a href="/publier" className="text-sm bg-violet-600 text-white px-4 py-2 rounded-full">
+                Publier mon code
+              </a>
+            ) : (
+              <a href="/login" className="text-sm bg-violet-600 text-white px-4 py-2 rounded-full">
+                Connexion
+              </a>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -31,10 +76,10 @@ export default async function CodesPage() {
           Codes de parrainage disponibles
         </h1>
         <p className="text-gray-500 text-sm mb-8">
-          {announcements?.length ?? 0} codes disponibles — mis à jour en temps réel
+          {announcements.length} codes disponibles — mis à jour en temps réel
         </p>
 
-        {announcements && announcements.length > 0 ? (
+        {announcements.length > 0 ? (
           <div className="flex flex-col gap-4">
             {announcements.map((ann: any) => (
               <div key={ann.id} className="bg-white border border-gray-100 rounded-2xl p-5">
@@ -55,7 +100,12 @@ export default async function CodesPage() {
 
                 <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-center justify-between mb-3">
                   <span className="font-mono text-sm font-medium text-gray-900">{ann.code}</span>
-                  <button className="text-xs text-violet-600 font-medium">Copier</button>
+                  <button
+                    onClick={() => handleCopy(ann.code, ann.id)}
+                    className="text-xs text-violet-600 font-medium"
+                  >
+                    {copied === ann.id ? '✓ Copié !' : 'Copier'}
+                  </button>
                 </div>
 
                 {ann.description && (
@@ -72,24 +122,34 @@ export default async function CodesPage() {
                       {ann.users?.level}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-400">
-                    {new Date(ann.last_bumped_at).toLocaleDateString('fr-FR')}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-gray-400">
+                      {new Date(ann.last_bumped_at).toLocaleDateString('fr-FR')}
+                    </span>
+                    {user && user.id === ann.user_id && (
+                      <button
+                        onClick={() => handleBump(ann.id)}
+                        disabled={bumping === ann.id}
+                        className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:border-violet-400 hover:text-violet-600 disabled:opacity-50"
+                      >
+                        {bumping === ann.id ? '...' : '▲ Remonter'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
-          </div>    
+          </div>
         ) : (
           <div className="text-center py-20">
             <div className="text-4xl mb-4">🎯</div>
             <div className="text-gray-500 mb-4">Aucune annonce pour l'instant</div>
-            <a href="/register" className="bg-violet-600 text-white px-6 py-3 rounded-xl text-sm font-medium">
+            <a href="/publier" className="bg-violet-600 text-white px-6 py-3 rounded-xl text-sm font-medium">
               Soyez le premier à publier !
             </a>
           </div>
         )}
       </div>
-
     </main>
   )
 }
