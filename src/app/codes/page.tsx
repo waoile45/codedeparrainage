@@ -17,6 +17,7 @@ export default function CodesPage() {
   const [msgLoading, setMsgLoading] = useState(false)
   const [search, setSearch] = useState('')
   const supabase = createClient()
+  const [bumpsLeft, setBumpsLeft] = useState<Record<string, number>>({})
 
   useEffect(() => {
     async function load() {
@@ -31,7 +32,7 @@ export default function CodesPage() {
     load()
   }, [])
 
-  async function handleBump(announcementId: string) {
+  async function handleBump(announcementId: string, bumpsToday: number) {
     if (!user) { window.location.href = '/login'; return }
     setBumping(announcementId)
     const res = await fetch('/api/bump', {
@@ -41,6 +42,7 @@ export default function CodesPage() {
     })
     const data = await res.json()
     if (res.ok) {
+      setBumpsLeft(prev => ({ ...prev, [announcementId]: data.bumpsLeft }))
       const { data: updated } = await supabase
         .from('announcements')
         .select('*, users (id, pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating)')
@@ -257,15 +259,32 @@ export default function CodesPage() {
                           </button>
                         </>
                       )}
-                      {isOwner && (
-                        <button
-                          onClick={() => handleBump(ann.id)}
-                          disabled={bumping === ann.id}
-                          className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:border-violet-400 hover:text-violet-600 disabled:opacity-50"
-                        >
-                          {bumping === ann.id ? '...' : '▲ Remonter'}
-                        </button>
-                      )}
+                      {isOwner && (() => {
+                        const left = bumpsLeft[ann.id] ?? (5 - (ann.bumps_today ?? 0))
+                        const isExhausted = left <= 0
+                        return (
+                          <button
+                            onClick={() => handleBump(ann.id, ann.bumps_today)}
+                            disabled={bumping === ann.id || isExhausted}
+                            className={
+                              "text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors " +
+                              (isExhausted
+                                ? "border-red-200 bg-red-50 text-red-400 cursor-not-allowed"
+                                : left <= 2
+                                ? "border-orange-200 bg-orange-50 text-orange-600 hover:border-orange-400"
+                                : "border-violet-200 bg-violet-50 text-violet-600 hover:border-violet-400")
+                            }
+                          >
+                            {bumping === ann.id ? (
+                              '...'
+                            ) : isExhausted ? (
+                              '✕ Limite atteinte'
+                            ) : (
+                              '▲ Remonter · ' + left + '/5'
+                            )}
+                          </button>
+                        )
+                      })()}
                     </div>
                   </div>
 

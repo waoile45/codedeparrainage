@@ -66,6 +66,41 @@ export default function PublierPage() {
         .eq('id', user.id)
     }
 
+    const { data: existingBadge } = await supabase
+      .from('badges')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('badge_type', 'premier_pas')
+      .single()
+
+    if (!existingBadge) {
+      await supabase.from('badges').insert({
+        user_id: user.id,
+        badge_type: 'premier_pas',
+      })
+    }
+
+    const { data: annonces } = await supabase
+      .from('announcements')
+      .select('id')
+      .eq('user_id', user.id)
+
+    if (annonces && annonces.length >= 5) {
+      const { data: multiParrain } = await supabase
+        .from('badges')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('badge_type', 'multi_parrain')
+        .single()
+
+      if (!multiParrain) {
+        await supabase.from('badges').insert({
+          user_id: user.id,
+          badge_type: 'multi_parrain',
+        })
+      }
+    }
+
     router.push('/codes')
   }
 
