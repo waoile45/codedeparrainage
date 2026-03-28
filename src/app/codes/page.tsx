@@ -18,6 +18,7 @@ export default function CodesPage() {
   const [search, setSearch] = useState('')
   const supabase = createClient()
   const [bumpsLeft, setBumpsLeft] = useState<Record<string, number>>({})
+  const [categorie, setCategorie] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -104,11 +105,14 @@ export default function CodesPage() {
     return avg.toFixed(1)
   }
 
-  const filtered = announcements.filter((ann: any) =>
-    ann.companies?.name?.toLowerCase().includes(search.toLowerCase()) ||
-    ann.companies?.category?.toLowerCase().includes(search.toLowerCase()) ||
-    ann.code?.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = announcements.filter((ann: any) => {
+    const matchSearch =
+      ann.companies?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      ann.companies?.category?.toLowerCase().includes(search.toLowerCase()) ||
+      ann.code?.toLowerCase().includes(search.toLowerCase())
+    const matchCategorie = categorie === '' || ann.companies?.category === categorie
+    return matchSearch && matchCategorie
+  })
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -143,7 +147,7 @@ export default function CodesPage() {
           {announcements.length} codes disponibles — mis à jour en temps réel
         </p>
 
-        <div className="flex gap-3 mb-8">
+        <div className="flex gap-3 mb-4">
           <input
             type="text"
             value={search}
@@ -159,6 +163,18 @@ export default function CodesPage() {
               ✕
             </button>
           )}
+        </div>
+
+        <div className="flex gap-2 flex-wrap mb-6">
+          {['', 'banque', 'paris', 'cashback', 'energie', 'telephonie', 'crypto', 'assurance', 'shopping'].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCategorie(cat)}
+              className={"text-xs px-4 py-2 rounded-full border transition-colors " + (categorie === cat ? "bg-violet-600 text-white border-violet-600" : "bg-white text-gray-600 border-gray-200 hover:border-violet-400")}
+            >
+              {cat === '' ? 'Tout' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </button>
+          ))}
         </div>
 
         {filtered.length > 0 ? (
