@@ -15,6 +15,7 @@ export default function CodesPage() {
   const [msgContent, setMsgContent] = useState('')
   const [avisLoading, setAvisLoading] = useState(false)
   const [msgLoading, setMsgLoading] = useState(false)
+  const [search, setSearch] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
@@ -101,6 +102,12 @@ export default function CodesPage() {
     return avg.toFixed(1)
   }
 
+  const filtered = announcements.filter((ann: any) =>
+    ann.companies?.name?.toLowerCase().includes(search.toLowerCase()) ||
+    ann.companies?.category?.toLowerCase().includes(search.toLowerCase()) ||
+    ann.code?.toLowerCase().includes(search.toLowerCase())
+  )
+
   return (
     <main className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b border-gray-100 px-6 py-4">
@@ -130,13 +137,31 @@ export default function CodesPage() {
         <h1 className="text-2xl font-medium text-gray-900 mb-2">
           Codes de parrainage disponibles
         </h1>
-        <p className="text-gray-500 text-sm mb-8">
+        <p className="text-gray-500 text-sm mb-4">
           {announcements.length} codes disponibles — mis à jour en temps réel
         </p>
 
-        {announcements.length > 0 ? (
+        <div className="flex gap-3 mb-8">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher... (ex: Boursobank, Winamax, crypto)"
+            className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-400 bg-white"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-500 hover:text-gray-900"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {filtered.length > 0 ? (
           <div className="flex flex-col gap-4">
-            {announcements.map((ann: any) => {
+            {filtered.map((ann: any) => {
               const avgRating = getAvgRating(ann.reviews)
               const isOwner = user && user.id === ann.user_id
               const isAvisOpen = avisOpen === ann.id
@@ -272,11 +297,19 @@ export default function CodesPage() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <div className="text-4xl mb-4">🎯</div>
-            <div className="text-gray-500 mb-4">Aucune annonce pour l'instant</div>
-            <a href="/publier" className="bg-violet-600 text-white px-6 py-3 rounded-xl text-sm font-medium">
-              Soyez le premier à publier !
-            </a>
+            <div className="text-4xl mb-4">{search ? '🔍' : '🎯'}</div>
+            <div className="text-gray-500 mb-4">
+              {search ? 'Aucun résultat pour "' + search + '"' : 'Aucune annonce pour l\'instant'}
+            </div>
+            {search ? (
+              <button onClick={() => setSearch('')} className="text-violet-600 text-sm">
+                Effacer la recherche
+              </button>
+            ) : (
+              <a href="/publier" className="bg-violet-600 text-white px-6 py-3 rounded-xl text-sm font-medium">
+                Soyez le premier à publier !
+              </a>
+            )}
           </div>
         )}
       </div>
