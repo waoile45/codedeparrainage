@@ -42,9 +42,31 @@ export default function PublierPage() {
     if (error) {
       setError('Erreur : ' + error.message)
       setLoading(false)
-    } else {
-      router.push('/codes')
+      return
     }
+
+    const { data: profile } = await supabase
+      .from('users')
+      .select('xp, level')
+      .eq('id', user.id)
+      .single()
+
+    if (profile) {
+      const newXp = profile.xp + 10
+      const newLevel =
+        newXp >= 10000 ? 'Parrain Légendaire' :
+        newXp >= 5000 ? 'Super Parrain' :
+        newXp >= 2000 ? 'Parrain Or' :
+        newXp >= 500 ? 'Parrain Argent' :
+        newXp >= 100 ? 'Parrain Bronze' : 'Débutant'
+
+      await supabase
+        .from('users')
+        .update({ xp: newXp, level: newLevel })
+        .eq('id', user.id)
+    }
+
+    router.push('/codes')
   }
 
   return (
