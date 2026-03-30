@@ -80,7 +80,7 @@ export default async function CompanyPage({ params }: Props) {
       <nav className="bg-white border-b border-gray-100 px-6 py-4">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <a href="/" className="text-lg font-medium">
-            code<span className="text-violet-600">deparrainage</span>.fr
+            code<span className="text-violet-600">deparrainage</span>.com
           </a>
           <a href="/publier" className="text-sm bg-violet-600 text-white px-4 py-2 rounded-full">
             Publier mon code

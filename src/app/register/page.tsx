@@ -50,7 +50,7 @@ export default function RegisterPage() {
 
         <div className="text-center mb-8">
           <div className="text-xl font-medium mb-1">
-            code<span className="text-violet-600">deparrainage</span>.fr
+            code<span className="text-violet-600">deparrainage</span>.com
           </div>
           <div className="text-gray-500 text-sm">Créez votre compte gratuit</div>
         </div>

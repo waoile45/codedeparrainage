@@ -110,7 +110,7 @@ export default function PublierPage() {
 
         <div className="mb-8">
           <a href="/" className="text-lg font-medium">
-            code<span className="text-violet-600">deparrainage</span>.fr
+            code<span className="text-violet-600">deparrainage</span>.com
           </a>
           <h1 className="text-xl font-medium text-gray-900 mt-4 mb-1">
             Publier mon code de parrainage
