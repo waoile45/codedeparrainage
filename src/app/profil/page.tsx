@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { Turnstile } from '@marsidev/react-turnstile'
 
 const LEVELS = [
   { name: 'Débutant', min: 0, color: 'bg-gray-100 text-gray-600' },
@@ -17,8 +18,8 @@ const BADGES = [
   { type: 'premier_pas', icon: '🚀', name: 'Premier pas', desc: '1ère annonce publiée' },
   { type: 'assidu', icon: '🔥', name: 'Assidu', desc: '7 jours consécutifs' },
   { type: 'populaire', icon: '⭐', name: 'Populaire', desc: '10+ avis positifs' },
-  { type: 'multi_parrain', icon: '🏆', name: 'Multi-parrain', desc: '5+ annonces actives' },
-  { type: 'veteran', icon: '💎', name: 'Vétéran', desc: 'Membre depuis 1 an' },
+  { type: 'multi_parrain', icon: '🏅', name: 'Multi-parrain', desc: '5+ annonces actives' },
+  { type: 'veteran', icon: '🎖', name: 'Vétéran', desc: 'Membre depuis 1 an' },
   { type: 'legendaire', icon: '👑', name: 'Légendaire', desc: '10 000 XP atteints' },
 ]
 
@@ -57,6 +58,9 @@ export default function ProfilPage() {
   const [editDescription, setEditDescription] = useState('')
   const [editLoading, setEditLoading] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [bumpingId, setBumpingId] = useState<string | null>(null)
+  const [bumpToken, setBumpToken] = useState('')
+  const [bumpMessage, setBumpMessage] = useState<{ text: string; ok: boolean } | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -66,15 +70,10 @@ export default function ProfilPage() {
       if (!user) { router.push('/login'); return }
 
       const { data: profile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', user.id)
-        .single()
+        .from('users').select('*').eq('id', user.id).single()
 
       const { data: badges } = await supabase
-        .from('badges')
-        .select('*')
-        .eq('user_id', user.id)
+        .from('badges').select('*').eq('user_id', user.id)
 
       const { data: announcements } = await supabase
         .from('announcements')
@@ -83,10 +82,7 @@ export default function ProfilPage() {
         .order('last_bumped_at', { ascending: false })
 
       const { data: creditsData } = await supabase
-        .from('credits')
-        .select('balance')
-        .eq('user_id', user.id)
-        .single()
+        .from('credits').select('balance').eq('user_id', user.id).single()
 
       const { data: boostsData } = await supabase
         .from('boosts')
@@ -140,6 +136,31 @@ export default function ProfilPage() {
     setEditLoading(false)
   }
 
+  async function handleBump(annId: string) {
+    if (!bumpToken) {
+      setBumpMessage({ text: 'Vérification anti-bot en cours, réessayez dans un instant.', ok: false })
+      return
+    }
+    setBumpingId(annId)
+    setBumpMessage(null)
+    const res = await fetch('/api/bump', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ announcementId: annId, turnstileToken: bumpToken }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setBumpMessage({ text: `✅ Annonce remontée ! Il vous reste ${data.bumpsLeft} remontée(s) aujourd'hui.`, ok: true })
+      setAnnouncements(prev => prev.map(a =>
+        a.id === annId ? { ...a, last_bumped_at: new Date().toISOString() } : a
+      ))
+    } else {
+      setBumpMessage({ text: `❌ ${data.error}`, ok: false })
+    }
+    setBumpingId(null)
+    setBumpToken('')
+  }
+
   if (loading) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-gray-400">Chargement...</div>
@@ -160,10 +181,7 @@ export default function ProfilPage() {
           <a href="/" className="text-lg font-medium">
             code<span className="text-violet-600">deparrainage</span>.com
           </a>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-gray-500 hover:text-gray-900"
-          >
+          <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-gray-900">
             Déconnexion
           </button>
         </div>
@@ -189,19 +207,14 @@ export default function ProfilPage() {
             </div>
           </div>
 
-          {/* BARRE XP */}
           <div className="mb-2 flex justify-between text-xs text-gray-500">
             <span>{profile.xp} XP</span>
             <span>{nextLevel ? nextLevel.name + ' à ' + nextLevel.min + ' XP' : 'Niveau maximum !'}</span>
           </div>
           <div className="h-3 bg-gray-100 rounded-full overflow-hidden mb-4">
-            <div
-              className="h-full bg-violet-600 rounded-full transition-all"
-              style={{ width: progress + '%' }}
-            />
+            <div className="h-full bg-violet-600 rounded-full transition-all" style={{ width: progress + '%' }} />
           </div>
 
-          {/* STATS */}
           <div className="grid grid-cols-4 gap-3">
             <div className="bg-gray-50 rounded-xl p-3 text-center">
               <div className="text-xl font-medium text-gray-900">{announcements.length}</div>
@@ -309,19 +322,41 @@ export default function ProfilPage() {
             <h2 className="text-lg font-medium text-gray-900">Mes annonces</h2>
             <a href="/publier" className="text-sm text-violet-600 font-medium">+ Ajouter</a>
           </div>
+
+          {/* Turnstile invisible pour le bump */}
+          <div className="hidden">
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={(token) => setBumpToken(token)}
+            />
+          </div>
+
+          {bumpMessage && (
+            <div className={`text-sm px-4 py-3 rounded-xl mb-4 ${bumpMessage.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+              {bumpMessage.text}
+            </div>
+          )}
+
           {announcements.length > 0 ? (
             <div className="flex flex-col gap-3">
               {announcements.map((ann: any) => (
                 <div key={ann.id} className="border border-gray-100 rounded-xl p-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <div className="font-medium text-sm text-gray-900">{ann.companies?.name}</div>
                       <div className="font-mono text-xs text-gray-500 mt-0.5">{ann.code}</div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs bg-violet-50 text-violet-600 px-2 py-1 rounded-full">
                         {ann.companies?.category}
                       </span>
+                      <button
+                        onClick={() => handleBump(ann.id)}
+                        disabled={bumpingId === ann.id}
+                        className="text-xs border border-green-200 text-green-600 px-3 py-1.5 rounded-lg hover:border-green-400 hover:bg-green-50 disabled:opacity-50"
+                      >
+                        {bumpingId === ann.id ? '...' : '⬆ Remonter'}
+                      </button>
                       <button
                         onClick={() => {
                           setEditingAnn(ann)
@@ -330,13 +365,13 @@ export default function ProfilPage() {
                         }}
                         className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:border-violet-400 hover:text-violet-600"
                       >
-                        ✏️ Modifier
+                        ✏ Modifier
                       </button>
                       <button
                         onClick={() => setDeletingId(ann.id)}
                         className="text-xs border border-red-100 text-red-400 px-3 py-1.5 rounded-lg hover:border-red-400 hover:text-red-600"
                       >
-                        🗑️ Supprimer
+                        🗑 Supprimer
                       </button>
                     </div>
                   </div>
@@ -345,7 +380,8 @@ export default function ProfilPage() {
             </div>
           ) : (
             <div className="text-center py-8 text-gray-400 text-sm">
-              Aucune annonce — <a href="/publier" className="text-violet-600">publiez votre premier code !</a>
+              Aucune annonce —{' '}
+              <a href="/publier" className="text-violet-600">publiez votre premier code !</a>
             </div>
           )}
         </div>
@@ -421,13 +457,9 @@ export default function ProfilPage() {
       {deletingId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm text-center">
-            <div className="text-4xl mb-4">🗑️</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Supprimer cette annonce ?
-            </h3>
-            <p className="text-sm text-gray-500 mb-6">
-              Cette action est irréversible.
-            </p>
+            <div className="text-4xl mb-4">🗑</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Supprimer cette annonce ?</h3>
+            <p className="text-sm text-gray-500 mb-6">Cette action est irréversible.</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeletingId(null)}
@@ -445,6 +477,7 @@ export default function ProfilPage() {
           </div>
         </div>
       )}
+
     </main>
   )
 }
