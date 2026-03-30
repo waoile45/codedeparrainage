@@ -20,7 +20,7 @@ export default function LoginPage() {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     console.log('data:', data)
     console.log('error:', error)
-    
+
     if (error) {
       setError('Email ou mot de passe incorrect')
       setLoading(false)
@@ -66,7 +66,7 @@ export default function LoginPage() {
       }
     }
 
-    window.location.href = '/credits'
+    router.push('/profil')
   }
 
   return (
