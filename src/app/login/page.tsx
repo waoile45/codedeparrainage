@@ -1,21 +1,40 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { Turnstile } from '@marsidev/react-turnstile'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [turnstileToken, setTurnstileToken] = useState('')
   const supabase = createClient()
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    if (!turnstileToken) {
+      setError('Vérification anti-bot échouée, réessayez.')
+      setLoading(false)
+      return
+    }
+
+    const verify = await fetch('/api/verify-turnstile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: turnstileToken }),
+    })
+    const verifyData = await verify.json()
+
+    if (!verifyData.success) {
+      setError('Vérification anti-bot échouée, réessayez.')
+      setLoading(false)
+      return
+    }
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
@@ -102,6 +121,11 @@ export default function LoginPage() {
             />
           </div>
 
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+            onSuccess={(token) => setTurnstileToken(token)}
+          />
+
           {error && (
             <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">
               {error}
@@ -110,7 +134,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !turnstileToken}
             className="bg-violet-600 text-white py-3 rounded-xl text-sm font-medium hover:bg-violet-700 disabled:opacity-50"
           >
             {loading ? 'Connexion...' : 'Se connecter'}
