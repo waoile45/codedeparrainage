@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { Turnstile } from '@marsidev/react-turnstile'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
@@ -10,7 +10,7 @@ export default function RegisterPage() {
   const [pseudo, setPseudo] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [turnstileToken, setTurnstileToken] = useState('')
   const supabase = createClient()
 
   async function handleRegister(e: React.FormEvent) {
@@ -18,13 +18,32 @@ export default function RegisterPage() {
     setLoading(true)
     setError('')
 
+    if (!turnstileToken) {
+      setError('Vérification anti-bot échouée, réessayez.')
+      setLoading(false)
+      return
+    }
+
+    const verify = await fetch('/api/verify-turnstile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: turnstileToken }),
+    })
+    const verifyData = await verify.json()
+
+    if (!verifyData.success) {
+      setError('Vérification anti-bot échouée, réessayez.')
+      setLoading(false)
+      return
+    }
+
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     })
 
     if (signUpError) {
-      setError('Erreur auth : ' + signUpError.message)
+      setError('Erreur : ' + signUpError.message)
       setLoading(false)
       return
     }
@@ -35,14 +54,14 @@ export default function RegisterPage() {
         .insert({ id: data.user.id, email, pseudo })
 
       if (profileError) {
-        setError('Erreur profil : ' + profileError.message + ' | code: ' + profileError.code)
+        setError('Erreur profil : ' + profileError.message)
         setLoading(false)
         return
       }
     }
 
-    router.push('/')
-  } 
+    window.location.href = '/profil'
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -63,7 +82,7 @@ export default function RegisterPage() {
               value={pseudo}
               onChange={(e) => setPseudo(e.target.value)}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-400"
-              placeholder="VotreSuperpseudo"
+              placeholder="VotreSuperPseudo"
               required
             />
           </div>
@@ -91,6 +110,11 @@ export default function RegisterPage() {
             />
           </div>
 
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+            onSuccess={(token) => setTurnstileToken(token)}
+          />
+
           {error && (
             <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">
               {error}
@@ -99,7 +123,7 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !turnstileToken}
             className="bg-violet-600 text-white py-3 rounded-xl text-sm font-medium hover:bg-violet-700 disabled:opacity-50"
           >
             {loading ? 'Création...' : 'Créer mon compte'}
@@ -117,4 +141,3 @@ export default function RegisterPage() {
     </main>
   )
 }
-                
