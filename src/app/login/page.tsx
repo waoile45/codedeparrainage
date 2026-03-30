@@ -64,7 +64,7 @@ export default function LoginPage() {
       }
     }
 
-    router.push('/profil')
+    window.location.href = '/profil'
   }
 
   return (
