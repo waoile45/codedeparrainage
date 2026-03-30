@@ -24,7 +24,7 @@ export default function Home() {
 
       <nav className="flex justify-between items-center px-6 py-4 max-w-6xl mx-auto">
         <div className="text-lg font-medium">
-          code<span className="text-violet-600">deparrainage</span>.fr
+          code<span className="text-violet-600">deparrainage</span>.com
         </div>
         <div className="flex gap-3">
           <a href="/login" className="text-sm text-gray-600 px-4 py-2">
@@ -90,7 +90,7 @@ export default function Home() {
           Codes populaires
         </div>
         <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
+          {tags.map((tag) => (  
             <a key={tag} href={"/code-parrainage/" + tag.toLowerCase().replace(" ", "-")} className="text-xs bg-gray-100 text-gray-600 rounded-lg px-3 py-2">
               Code parrainage {tag}
             </a>

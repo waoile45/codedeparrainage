@@ -16,9 +16,9 @@ export default function CodesPage() {
   const [avisLoading, setAvisLoading] = useState(false)
   const [msgLoading, setMsgLoading] = useState(false)
   const [search, setSearch] = useState('')
-  const supabase = createClient()
   const [bumpsLeft, setBumpsLeft] = useState<Record<string, number>>({})
   const [categorie, setCategorie] = useState('')
+  const supabase = createClient()
 
   useEffect(() => {
     async function load() {
@@ -26,12 +26,43 @@ export default function CodesPage() {
       setUser(user)
       const { data } = await supabase
         .from('announcements')
-        .select('*, users (id, pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating)')
+        .select('*, users (id, pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating), boosts (id, active, ends_at)')
         .order('last_bumped_at', { ascending: false })
-      setAnnouncements(data ?? [])
+
+      const now = new Date()
+      const sorted = (data ?? []).sort((a: any, b: any) => {
+        const aBoost = a.boosts?.some((boost: any) => boost.active && new Date(boost.ends_at) > now)
+        const bBoost = b.boosts?.some((boost: any) => boost.active && new Date(boost.ends_at) > now)
+        if (aBoost && !bBoost) return -1
+        if (!aBoost && bBoost) return 1
+        return 0
+      })
+      setAnnouncements(sorted)
     }
     load()
   }, [])
+
+  function getCompanyDomain(slug: string) {
+    const domains: Record<string, string> = {
+      'boursobank': 'boursobank.com',
+      'fortuneo': 'fortuneo.fr',
+      'hello-bank': 'hello.bank',
+      'revolut': 'revolut.com',
+      'lydia': 'lydia-app.com',
+      'winamax': 'winamax.fr',
+      'betclic': 'betclic.fr',
+      'pmu': 'pmu.fr',
+      'free': 'free.fr',
+      'sfr': 'sfr.fr',
+      'igraal': 'igraal.com',
+      'poulpeo': 'poulpeo.com',
+      'binance': 'binance.com',
+      'coinbase': 'coinbase.com',
+      'edf': 'edf.fr',
+      'engie': 'engie.fr',
+    }
+    return domains[slug] ?? slug + '.com'
+  }
 
   async function handleBump(announcementId: string, bumpsToday: number) {
     if (!user) { window.location.href = '/login'; return }
@@ -46,7 +77,7 @@ export default function CodesPage() {
       setBumpsLeft(prev => ({ ...prev, [announcementId]: data.bumpsLeft }))
       const { data: updated } = await supabase
         .from('announcements')
-        .select('*, users (id, pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating)')
+        .select('*, users (id, pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating), boosts (id, active, ends_at)')
         .order('last_bumped_at', { ascending: false })
       setAnnouncements(updated ?? [])
     } else {
@@ -119,7 +150,7 @@ export default function CodesPage() {
       <nav className="bg-white border-b border-gray-100 px-6 py-4">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <a href="/" className="text-lg font-medium">
-            code<span className="text-violet-600">deparrainage</span>.fr
+            code<span className="text-violet-600">deparrainage</span>.com
           </a>
           <div className="flex gap-3">
             {user ? (
@@ -184,31 +215,19 @@ export default function CodesPage() {
               const isOwner = user && user.id === ann.user_id
               const isAvisOpen = avisOpen === ann.id
               const isMsgOpen = msgOpen === ann.id
-
-              function getCompanyDomain(slug: string) {
-    const domains: Record<string, string> = {
-      'boursobank': 'boursobank.com',
-      'fortuneo': 'fortuneo.fr',
-      'hello-bank': 'hello.bank',
-      'revolut': 'revolut.com',
-      'lydia': 'lydia-app.com',
-      'winamax': 'winamax.fr',
-      'betclic': 'betclic.fr',
-      'pmu': 'pmu.fr',
-      'free': 'free.fr',
-      'sfr': 'sfr.fr',
-      'igraal': 'igraal.com',
-      'poulpeo': 'poulpeo.com',
-      'binance': 'binance.com',
-      'coinbase': 'coinbase.com',
-      'edf': 'edf.fr',
-      'engie': 'engie.fr',
-    }
-    return domains[slug] ?? slug + '.com'
-  }
+              const isBoosted = ann.boosts?.some((boost: any) =>
+                boost.active && new Date(boost.ends_at) > new Date()
+              )
 
               return (
-                <div key={ann.id} className="bg-white border border-gray-100 rounded-2xl p-5">
+                <div key={ann.id} className={`bg-white border rounded-2xl p-5 ${isBoosted ? 'border-violet-300 shadow-md shadow-violet-100' : 'border-gray-100'}`}>
+
+                  {isBoosted && (
+                    <div className="flex items-center gap-1 text-xs font-semibold text-violet-600 bg-violet-50 w-fit px-3 py-1 rounded-full mb-3">
+                      ⚡ Annonce boostée
+                    </div>
+                  )}
+
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center overflow-hidden">
@@ -291,13 +310,7 @@ export default function CodesPage() {
                                 : "border-violet-200 bg-violet-50 text-violet-600 hover:border-violet-400")
                             }
                           >
-                            {bumping === ann.id ? (
-                              '...'
-                            ) : isExhausted ? (
-                              '✕ Limite atteinte'
-                            ) : (
-                              '▲ Remonter · ' + left + '/5'
-                            )}
+                            {bumping === ann.id ? '...' : isExhausted ? '✕ Limite atteinte' : '▲ Remonter · ' + left + '/5'}
                           </button>
                         )
                       })()}
@@ -364,7 +377,7 @@ export default function CodesPage() {
           <div className="text-center py-20">
             <div className="text-4xl mb-4">{search ? '🔍' : '🎯'}</div>
             <div className="text-gray-500 mb-4">
-              {search ? 'Aucun résultat pour "' + search + '"' : 'Aucune annonce pour l\'instant'}
+              {search ? 'Aucun résultat pour "' + search + '"' : "Aucune annonce pour l'instant"}
             </div>
             {search ? (
               <button onClick={() => setSearch('')} className="text-violet-600 text-sm">

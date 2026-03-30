@@ -18,7 +18,9 @@ export default function LoginPage() {
     setError('')
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-
+    console.log('data:', data)
+    console.log('error:', error)
+    
     if (error) {
       setError('Email ou mot de passe incorrect')
       setLoading(false)
@@ -64,7 +66,7 @@ export default function LoginPage() {
       }
     }
 
-    router.push('/')
+    window.location.href = '/credits'
   }
 
   return (
@@ -73,7 +75,7 @@ export default function LoginPage() {
 
         <div className="text-center mb-8">
           <div className="text-xl font-medium mb-1">
-            code<span className="text-violet-600">deparrainage</span>.fr
+            code<span className="text-violet-600">deparrainage</span>.com
           </div>
           <div className="text-gray-500 text-sm">Connectez-vous à votre compte</div>
         </div>
