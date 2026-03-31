@@ -1,396 +1,868 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase'
+import { useState, useEffect, useRef } from "react";
+import Navbar from "@/components/Navbar";
 
-export default function CodesPage() {
-  const [announcements, setAnnouncements] = useState<any[]>([])
-  const [user, setUser] = useState<any>(null)
-  const [bumping, setBumping] = useState<string | null>(null)
-  const [copied, setCopied] = useState<string | null>(null)
-  const [avisOpen, setAvisOpen] = useState<string | null>(null)
-  const [msgOpen, setMsgOpen] = useState<string | null>(null)
-  const [rating, setRating] = useState(5)
-  const [comment, setComment] = useState('')
-  const [msgContent, setMsgContent] = useState('')
-  const [avisLoading, setAvisLoading] = useState(false)
-  const [msgLoading, setMsgLoading] = useState(false)
-  const [search, setSearch] = useState('')
-  const [bumpsLeft, setBumpsLeft] = useState<Record<string, number>>({})
-  const [categorie, setCategorie] = useState('')
-  const supabase = createClient()
+// ─── Types ────────────────────────────────────────────────────────────────────
+type Category =
+  | "Tout"
+  | "Banque"
+  | "Paris"
+  | "Cashback"
+  | "Energie"
+  | "Telephonie"
+  | "Crypto"
+  | "Assurance"
+  | "Shopping";
 
-  useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      const { data } = await supabase
-        .from('announcements')
-        .select('*, users (id, pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating), boosts (id, active, ends_at)')
-        .order('last_bumped_at', { ascending: false })
+interface CodeCard {
+  id: string;
+  brand: string;
+  logo: string;
+  description: string;
+  code: string;
+  category: Category;
+  parrain: string;
+  niveau: "Débutant" | "Confirmé" | "Expert" | "Légende";
+  boosted: boolean;
+  reward: string;
+}
 
-      const now = new Date()
-      const sorted = (data ?? []).sort((a: any, b: any) => {
-        const aBoost = a.boosts?.some((boost: any) => boost.active && new Date(boost.ends_at) > now)
-        const bBoost = b.boosts?.some((boost: any) => boost.active && new Date(boost.ends_at) > now)
-        if (aBoost && !bBoost) return -1
-        if (!aBoost && bBoost) return 1
-        return 0
-      })
-      setAnnouncements(sorted)
+// ─── Mock data (remplace par ton fetch Supabase) ──────────────────────────────
+const MOCK_CODES: CodeCard[] = [
+  {
+    id: "1",
+    brand: "EDF",
+    logo: "⚡",
+    description: "60€ offerts à la souscription",
+    code: "EDF-TEST2024",
+    category: "Energie",
+    parrain: "TestParrain",
+    niveau: "Débutant",
+    boosted: true,
+    reward: "+60€",
+  },
+  {
+    id: "2",
+    brand: "Binance",
+    logo: "🔶",
+    description: "10% de réduction sur les frais",
+    code: "BINANCE10",
+    category: "Crypto",
+    parrain: "CryptoKing",
+    niveau: "Expert",
+    boosted: false,
+    reward: "-10%",
+  },
+  {
+    id: "3",
+    brand: "Boursobank",
+    logo: "🏦",
+    description: "80€ offerts à l'ouverture",
+    code: "PAUL2024",
+    category: "Banque",
+    parrain: "PaulMat",
+    niveau: "Confirmé",
+    boosted: true,
+    reward: "+80€",
+  },
+  {
+    id: "4",
+    brand: "Winamax",
+    logo: "⚽",
+    description: "100€ remboursés sur votre 1er pari",
+    code: "WINA100",
+    category: "Paris",
+    parrain: "BetMaster",
+    niveau: "Légende",
+    boosted: false,
+    reward: "+100€",
+  },
+  {
+    id: "5",
+    brand: "iGraal",
+    logo: "💸",
+    description: "5€ offerts dès inscription",
+    code: "IGRAAL5",
+    category: "Cashback",
+    parrain: "SaveMore",
+    niveau: "Confirmé",
+    boosted: false,
+    reward: "+5€",
+  },
+  {
+    id: "6",
+    brand: "Free Mobile",
+    logo: "📱",
+    description: "1 mois offert sur votre forfait",
+    code: "FREE1MOIS",
+    category: "Telephonie",
+    parrain: "TechFreak",
+    niveau: "Expert",
+    boosted: false,
+    reward: "1 mois",
+  },
+];
+
+const CATEGORIES: Category[] = [
+  "Tout",
+  "Banque",
+  "Paris",
+  "Cashback",
+  "Energie",
+  "Telephonie",
+  "Crypto",
+  "Assurance",
+  "Shopping",
+];
+
+const CATEGORY_ICONS: Record<string, string> = {
+  Tout: "✦",
+  Banque: "🏦",
+  Paris: "⚽",
+  Cashback: "💸",
+  Energie: "⚡",
+  Telephonie: "📱",
+  Crypto: "₿",
+  Assurance: "🛡️",
+  Shopping: "🛍️",
+};
+
+const NIVEAU_COLORS: Record<string, string> = {
+  Débutant: "#6366f1",
+  Confirmé: "#8b5cf6",
+  Expert: "#a855f7",
+  Légende: "#f59e0b",
+};
+
+// ─── Floating particle component ─────────────────────────────────────────────
+function Particles() {
+  return (
+    <div className="particles-container" aria-hidden="true">
+      {Array.from({ length: 18 }).map((_, i) => (
+        <span
+          key={i}
+          className="particle"
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 8}s`,
+            animationDuration: `${6 + Math.random() * 8}s`,
+            opacity: 0.15 + Math.random() * 0.2,
+            width: `${2 + Math.random() * 3}px`,
+            height: `${2 + Math.random() * 3}px`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Copy button with animation ───────────────────────────────────────────────
+function CopyButton({ code }: { code: string }) {
+  const [state, setState] = useState<"idle" | "copied">("idle");
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      // fallback
     }
-    load()
-  }, [])
-
-  function getCompanyDomain(slug: string) {
-    const domains: Record<string, string> = {
-      'boursobank': 'boursobank.com',
-      'fortuneo': 'fortuneo.fr',
-      'hello-bank': 'hello.bank',
-      'revolut': 'revolut.com',
-      'lydia': 'lydia-app.com',
-      'winamax': 'winamax.fr',
-      'betclic': 'betclic.fr',
-      'pmu': 'pmu.fr',
-      'free': 'free.fr',
-      'sfr': 'sfr.fr',
-      'igraal': 'igraal.com',
-      'poulpeo': 'poulpeo.com',
-      'binance': 'binance.com',
-      'coinbase': 'coinbase.com',
-      'edf': 'edf.fr',
-      'engie': 'engie.fr',
-    }
-    return domains[slug] ?? slug + '.com'
-  }
-
-  async function handleBump(announcementId: string, bumpsToday: number) {
-    if (!user) { window.location.href = '/login'; return }
-    setBumping(announcementId)
-    const res = await fetch('/api/bump', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ announcementId }),
-    })
-    const data = await res.json()
-    if (res.ok) {
-      setBumpsLeft(prev => ({ ...prev, [announcementId]: data.bumpsLeft }))
-      const { data: updated } = await supabase
-        .from('announcements')
-        .select('*, users (id, pseudo, xp, level), companies (name, slug, category, referral_bonus_description), reviews (rating), boosts (id, active, ends_at)')
-        .order('last_bumped_at', { ascending: false })
-      setAnnouncements(updated ?? [])
-    } else {
-      alert(data.error)
-    }
-    setBumping(null)
-  }
-
-  async function handleCopy(code: string, id: string) {
-    await navigator.clipboard.writeText(code)
-    setCopied(id)
-    setTimeout(() => setCopied(null), 2000)
-  }
-
-  async function handleAvis(announcementId: string) {
-    setAvisLoading(true)
-    const res = await fetch('/api/avis', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ announcementId, rating, comment }),
-    })
-    const data = await res.json()
-    if (res.ok) {
-      setAvisOpen(null)
-      setRating(5)
-      setComment('')
-      alert('Avis publié !')
-    } else {
-      alert(data.error)
-    }
-    setAvisLoading(false)
-  }
-
-  async function handleMessage(announcementId: string, receiverId: string) {
-    if (!user) { window.location.href = '/login'; return }
-    setMsgLoading(true)
-    const res = await fetch('/api/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ announcementId, receiverId, content: msgContent }),
-    })
-    const data = await res.json()
-    if (res.ok) {
-      setMsgOpen(null)
-      setMsgContent('')
-      alert('Message envoyé !')
-    } else {
-      alert(data.error)
-    }
-    setMsgLoading(false)
-  }
-
-  function getAvgRating(reviews: any[]) {
-    if (!reviews || reviews.length === 0) return null
-    const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    return avg.toFixed(1)
-  }
-
-  const filtered = announcements.filter((ann: any) => {
-    const matchSearch =
-      ann.companies?.name?.toLowerCase().includes(search.toLowerCase()) ||
-      ann.companies?.category?.toLowerCase().includes(search.toLowerCase()) ||
-      ann.code?.toLowerCase().includes(search.toLowerCase())
-    const matchCategorie = categorie === '' || ann.companies?.category === categorie
-    return matchSearch && matchCategorie
-  })
+    setState("copied");
+    setTimeout(() => setState("idle"), 2000);
+  };
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-100 px-6 py-4">
-        <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <a href="/" className="text-lg font-medium">
-            code<span className="text-violet-600">deparrainage</span>.com
-          </a>
-          <div className="flex gap-3">
-            {user ? (
-              <div className="flex gap-3">
-                <a href="/messages" className="text-sm text-gray-600 px-4 py-2">Messages</a>
-                <a href="/profil" className="text-sm text-gray-600 px-4 py-2">Mon profil</a>
-                <a href="/publier" className="text-sm bg-violet-600 text-white px-4 py-2 rounded-full">
-                  Publier mon code
-                </a>
-              </div>
-            ) : (
-              <a href="/login" className="text-sm bg-violet-600 text-white px-4 py-2 rounded-full">
-                Connexion
-              </a>
-            )}
-          </div>
+    <button
+      onClick={handleCopy}
+      className={`copy-btn ${state === "copied" ? "copied" : ""}`}
+      aria-label="Copier le code"
+    >
+      {state === "copied" ? (
+        <>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Copié !
+        </>
+      ) : (
+        <>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          Copier
+        </>
+      )}
+    </button>
+  );
+}
+
+// ─── Single code card ─────────────────────────────────────────────────────────
+function CodeCard({ card, index }: { card: CodeCard; index: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => setVisible(true), index * 60);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [index]);
+
+  return (
+    <div
+      ref={ref}
+      className={`code-card ${card.boosted ? "boosted" : ""} ${visible ? "visible" : ""}`}
+    >
+      {card.boosted && (
+        <div className="boost-badge">
+          <span className="boost-lightning">⚡</span>
+          <span>Annonce boostée</span>
         </div>
-      </nav>
+      )}
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-medium text-gray-900 mb-2">
-          Codes de parrainage disponibles
-        </h1>
-        <p className="text-gray-500 text-sm mb-4">
-          {announcements.length} codes disponibles — mis à jour en temps réel
-        </p>
+      <div className="card-top">
+        <div className="brand-row">
+          <div className="brand-logo">{card.logo}</div>
+          <div className="brand-info">
+            <h3 className="brand-name">{card.brand}</h3>
+            <p className="brand-desc">{card.description}</p>
+          </div>
+          <div className="reward-pill">{card.reward}</div>
+        </div>
 
-        <div className="flex gap-3 mb-4">
+        <div className="category-badge">{card.category}</div>
+      </div>
+
+      <div className="code-row">
+        <div className="code-display">
+          <span className="code-dot" />
+          <code className="code-text">{card.code}</code>
+        </div>
+        <CopyButton code={card.code} />
+      </div>
+
+      <div className="card-footer">
+        <div className="parrain-info">
+          <div
+            className="parrain-avatar"
+            style={{ background: NIVEAU_COLORS[card.niveau] + "33", borderColor: NIVEAU_COLORS[card.niveau] + "66" }}
+          >
+            {card.parrain[0].toUpperCase()}
+          </div>
+          <span className="parrain-name">{card.parrain}</span>
+          <span
+            className="niveau-badge"
+            style={{ color: NIVEAU_COLORS[card.niveau], borderColor: NIVEAU_COLORS[card.niveau] + "44", background: NIVEAU_COLORS[card.niveau] + "11" }}
+          >
+            {card.niveau}
+          </span>
+        </div>
+
+        <div className="card-actions">
+          <button className="action-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            Contacter
+          </button>
+          <button className="action-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            Avis
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main page component ──────────────────────────────────────────────────────
+export default function CodesPage() {
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState<Category>("Tout");
+  const [sort, setSort] = useState<"popular" | "recent">("popular");
+  const [count, setCount] = useState(0);
+
+  // Animate counter on mount
+  useEffect(() => {
+    const target = MOCK_CODES.length;
+    let current = 0;
+    const step = Math.ceil(target / 20);
+    const timer = setInterval(() => {
+      current = Math.min(current + step, target);
+      setCount(current);
+      if (current >= target) clearInterval(timer);
+    }, 40);
+    return () => clearInterval(timer);
+  }, []);
+
+  const filtered = MOCK_CODES.filter((c) => {
+    const matchCat = activeCategory === "Tout" || c.category === activeCategory;
+    const matchSearch =
+      search === "" ||
+      c.brand.toLowerCase().includes(search.toLowerCase()) ||
+      c.code.toLowerCase().includes(search.toLowerCase()) ||
+      c.description.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  }).sort((a, b) => {
+    if (a.boosted && !b.boosted) return -1;
+    if (!a.boosted && b.boosted) return 1;
+    return 0;
+  });
+
+  return (
+    <>
+      <style>{`
+        /* ── Reset & base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+          background: #0A0A0F;
+          color: #e2e8f0;
+          font-family: 'DM Sans', sans-serif;
+          min-height: 100vh;
+          overflow-x: hidden;
+        }
+
+        /* ── Particles ── */
+        .particles-container {
+          position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+        }
+        .particle {
+          position: absolute;
+          bottom: -10px;
+          border-radius: 50%;
+          background: #7c3aed;
+          animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+          0% { transform: translateY(0) scale(1); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 0.5; }
+          100% { transform: translateY(-100vh) scale(0.3); opacity: 0; }
+        }
+
+        /* ── Navbar ── */
+        .navbar {
+          position: sticky; top: 0; z-index: 100;
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 0 2rem;
+          height: 64px;
+          background: rgba(10,10,15,0.85);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(124,58,237,0.15);
+        }
+        .nav-logo {
+          font-family: 'Syne', sans-serif;
+          font-weight: 800;
+          font-size: 1.1rem;
+          color: #fff;
+          text-decoration: none;
+          letter-spacing: -0.02em;
+        }
+        .nav-logo span { color: #7c3aed; }
+        .nav-links {
+          display: flex; align-items: center; gap: 0.25rem;
+        }
+        .nav-link {
+          color: rgba(255,255,255,0.6);
+          text-decoration: none;
+          font-size: 0.875rem;
+          padding: 0.4rem 0.875rem;
+          border-radius: 8px;
+          transition: all 0.2s;
+        }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.06); }
+        .nav-link.active { color: #fff; }
+        .nav-cta {
+          background: #7c3aed;
+          color: #fff;
+          border: none;
+          padding: 0.5rem 1.125rem;
+          border-radius: 10px;
+          font-size: 0.875rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          margin-left: 0.5rem;
+          text-decoration: none;
+          display: inline-flex; align-items: center; gap: 6px;
+        }
+        .nav-cta:hover { background: #6d28d9; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(124,58,237,0.4); }
+
+        /* ── Page layout ── */
+        .page-wrapper {
+          position: relative; z-index: 1;
+          max-width: 860px;
+          margin: 0 auto;
+          padding: 3rem 1.5rem 6rem;
+        }
+
+        /* ── Header ── */
+        .page-header { margin-bottom: 2.5rem; }
+        .header-label {
+          display: inline-flex; align-items: center; gap: 6px;
+          font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: #7c3aed;
+          margin-bottom: 0.75rem;
+        }
+        .header-label::before {
+          content: '';
+          display: block; width: 18px; height: 1px;
+          background: #7c3aed;
+        }
+        .page-title {
+          font-family: 'Syne', sans-serif;
+          font-weight: 800;
+          font-size: clamp(1.75rem, 4vw, 2.5rem);
+          line-height: 1.1;
+          color: #fff;
+          letter-spacing: -0.03em;
+          margin-bottom: 0.5rem;
+        }
+        .page-subtitle {
+          color: rgba(255,255,255,0.4);
+          font-size: 0.9rem;
+          display: flex; align-items: center; gap: 8px;
+        }
+        .live-dot {
+          width: 7px; height: 7px; border-radius: 50%;
+          background: #22c55e;
+          box-shadow: 0 0 8px #22c55e;
+          animation: pulse 2s ease-in-out infinite;
+          flex-shrink: 0;
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.6; transform: scale(0.8); }
+        }
+        .count-num {
+          color: #fff;
+          font-weight: 700;
+          font-variant-numeric: tabular-nums;
+        }
+
+        /* ── Search ── */
+        .search-wrap {
+          position: relative; margin-bottom: 1.25rem;
+        }
+        .search-icon {
+          position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+          color: rgba(255,255,255,0.3);
+          pointer-events: none;
+        }
+        .search-input {
+          width: 100%;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 14px;
+          padding: 0.875rem 1rem 0.875rem 2.75rem;
+          color: #fff;
+          font-size: 0.9rem;
+          font-family: 'DM Sans', sans-serif;
+          outline: none;
+          transition: all 0.2s;
+        }
+        .search-input::placeholder { color: rgba(255,255,255,0.3); }
+        .search-input:focus {
+          border-color: rgba(124,58,237,0.5);
+          background: rgba(124,58,237,0.05);
+          box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+        }
+
+        /* ── Sort tabs ── */
+        .sort-row {
+          display: flex; align-items: center; gap: 8px;
+          margin-bottom: 1.25rem;
+        }
+        .sort-tab {
+          display: flex; align-items: center; gap: 6px;
+          padding: 0.4rem 0.875rem;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 10px;
+          color: rgba(255,255,255,0.5);
+          font-size: 0.8rem; font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-family: 'DM Sans', sans-serif;
+        }
+        .sort-tab:hover { color: #fff; border-color: rgba(255,255,255,0.15); }
+        .sort-tab.active {
+          background: rgba(124,58,237,0.15);
+          border-color: rgba(124,58,237,0.4);
+          color: #a78bfa;
+        }
+
+        /* ── Category pills ── */
+        .cats-row {
+          display: flex; flex-wrap: wrap; gap: 8px;
+          margin-bottom: 2.5rem;
+        }
+        .cat-pill {
+          display: inline-flex; align-items: center; gap: 5px;
+          padding: 0.4rem 0.875rem;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 100px;
+          color: rgba(255,255,255,0.55);
+          font-size: 0.8rem; font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-family: 'DM Sans', sans-serif;
+        }
+        .cat-pill:hover {
+          color: #fff;
+          border-color: rgba(124,58,237,0.3);
+          background: rgba(124,58,237,0.08);
+        }
+        .cat-pill.active {
+          background: #7c3aed;
+          border-color: #7c3aed;
+          color: #fff;
+          box-shadow: 0 0 16px rgba(124,58,237,0.35);
+        }
+
+        /* ── Cards ── */
+        .cards-list {
+          display: flex; flex-direction: column; gap: 1rem;
+        }
+
+        .code-card {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 20px;
+          padding: 1.5rem;
+          opacity: 0;
+          transform: translateY(16px);
+          transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s, box-shadow 0.2s;
+          position: relative;
+          overflow: hidden;
+        }
+        .code-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(124,58,237,0.04), transparent 50%);
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.3s;
+          border-radius: inherit;
+        }
+        .code-card:hover::before { opacity: 1; }
+        .code-card:hover {
+          border-color: rgba(124,58,237,0.25);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .code-card.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .code-card.boosted {
+          border-color: rgba(124,58,237,0.3);
+          background: rgba(124,58,237,0.04);
+        }
+        .code-card.boosted::after {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, #7c3aed, transparent);
+        }
+
+        /* ── Boost badge ── */
+        .boost-badge {
+          display: inline-flex; align-items: center; gap: 5px;
+          padding: 0.25rem 0.625rem;
+          background: rgba(124,58,237,0.15);
+          border: 1px solid rgba(124,58,237,0.3);
+          border-radius: 100px;
+          font-size: 0.72rem; font-weight: 600;
+          color: #a78bfa;
+          margin-bottom: 1rem;
+          letter-spacing: 0.02em;
+        }
+        .boost-lightning {
+          animation: flicker 1.5s ease-in-out infinite;
+        }
+        @keyframes flicker {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.6; }
+        }
+
+        /* ── Card top ── */
+        .card-top {
+          display: flex; align-items: flex-start; justify-content: space-between;
+          margin-bottom: 1.25rem;
+        }
+        .brand-row {
+          display: flex; align-items: center; gap: 12px;
+          flex: 1;
+        }
+        .brand-logo {
+          width: 44px; height: 44px;
+          border-radius: 12px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.08);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 1.25rem;
+          flex-shrink: 0;
+        }
+        .brand-info { flex: 1; }
+        .brand-name {
+          font-family: 'Syne', sans-serif;
+          font-weight: 700;
+          font-size: 1rem;
+          color: #fff;
+          margin-bottom: 2px;
+        }
+        .brand-desc {
+          color: rgba(255,255,255,0.45);
+          font-size: 0.8rem;
+        }
+        .reward-pill {
+          padding: 0.3rem 0.625rem;
+          background: rgba(34,197,94,0.12);
+          border: 1px solid rgba(34,197,94,0.25);
+          border-radius: 8px;
+          color: #4ade80;
+          font-size: 0.8rem; font-weight: 700;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .category-badge {
+          display: none; /* shown via card-top flex workaround */
+        }
+
+        /* ── Code row ── */
+        .code-row {
+          display: flex; align-items: center; justify-content: space-between;
+          background: rgba(0,0,0,0.25);
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 12px;
+          padding: 0.75rem 0.875rem;
+          margin-bottom: 1.25rem;
+        }
+        .code-display {
+          display: flex; align-items: center; gap: 8px;
+        }
+        .code-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: #7c3aed;
+          box-shadow: 0 0 6px #7c3aed;
+          flex-shrink: 0;
+        }
+        .code-text {
+          font-family: 'Courier New', monospace;
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: #e2e8f0;
+          letter-spacing: 0.08em;
+        }
+
+        /* ── Copy button ── */
+        .copy-btn {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 0.4rem 0.875rem;
+          background: rgba(124,58,237,0.15);
+          border: 1px solid rgba(124,58,237,0.35);
+          border-radius: 8px;
+          color: #a78bfa;
+          font-size: 0.8rem; font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-family: 'DM Sans', sans-serif;
+          white-space: nowrap;
+        }
+        .copy-btn:hover {
+          background: rgba(124,58,237,0.25);
+          border-color: rgba(124,58,237,0.5);
+          color: #fff;
+          transform: scale(1.03);
+        }
+        .copy-btn.copied {
+          background: rgba(34,197,94,0.15);
+          border-color: rgba(34,197,94,0.35);
+          color: #4ade80;
+        }
+
+        /* ── Card footer ── */
+        .card-footer {
+          display: flex; align-items: center; justify-content: space-between;
+          flex-wrap: wrap; gap: 0.75rem;
+        }
+        .parrain-info {
+          display: flex; align-items: center; gap: 8px;
+        }
+        .parrain-avatar {
+          width: 26px; height: 26px;
+          border-radius: 50%;
+          border: 1px solid;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.7rem; font-weight: 700;
+          color: #fff;
+          flex-shrink: 0;
+        }
+        .parrain-name {
+          font-size: 0.82rem; font-weight: 500;
+          color: rgba(255,255,255,0.6);
+        }
+        .niveau-badge {
+          font-size: 0.72rem; font-weight: 600;
+          padding: 0.15rem 0.5rem;
+          border: 1px solid;
+          border-radius: 100px;
+          letter-spacing: 0.02em;
+        }
+        .card-actions {
+          display: flex; gap: 6px;
+        }
+        .action-btn {
+          display: inline-flex; align-items: center; gap: 5px;
+          padding: 0.35rem 0.75rem;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 8px;
+          color: rgba(255,255,255,0.5);
+          font-size: 0.78rem; font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-family: 'DM Sans', sans-serif;
+        }
+        .action-btn:hover {
+          color: #fff;
+          border-color: rgba(255,255,255,0.18);
+          background: rgba(255,255,255,0.07);
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+          text-align: center;
+          padding: 4rem 2rem;
+          color: rgba(255,255,255,0.3);
+        }
+        .empty-state .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .empty-state p { font-size: 0.9rem; }
+
+        /* ── Results count ── */
+        .results-meta {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 1rem;
+        }
+        .results-count {
+          font-size: 0.8rem;
+          color: rgba(255,255,255,0.3);
+        }
+        .results-count strong { color: rgba(255,255,255,0.6); }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+          .navbar { padding: 0 1rem; }
+          .page-wrapper { padding: 2rem 1rem 4rem; }
+          .card-footer { flex-direction: column; align-items: flex-start; }
+          .nav-links { gap: 0; }
+        }
+      `}</style>
+
+      <Particles />
+
+      {/* Navbar */}
+      <Navbar activePage="codes" isLoggedIn={true} pseudo="Test3" />
+
+      <main className="page-wrapper">
+        {/* Header */}
+        <header className="page-header">
+          <div className="header-label">Annuaire</div>
+          <h1 className="page-title">Codes de parrainage</h1>
+          <p className="page-subtitle">
+            <span className="live-dot" />
+            <span className="count-num">{count}</span>&nbsp;codes disponibles — mis à jour en temps réel
+          </p>
+        </header>
+
+        {/* Search */}
+        <div className="search-wrap">
+          <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
           <input
             type="text"
+            className="search-input"
+            placeholder="Rechercher... (ex: Boursobank, Winamax, crypto)"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher... (ex: Boursobank, Winamax, crypto)"
-            className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-400 bg-white"
           />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-500 hover:text-gray-900"
-            >
-              ✕
-            </button>
-          )}
         </div>
 
-        <div className="flex gap-2 flex-wrap mb-6">
-          {['', 'banque', 'paris', 'cashback', 'energie', 'telephonie', 'crypto', 'assurance', 'shopping'].map((cat) => (
+        {/* Sort */}
+        <div className="sort-row">
+          <button
+            className={`sort-tab ${sort === "popular" ? "active" : ""}`}
+            onClick={() => setSort("popular")}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            Populaires
+          </button>
+          <button
+            className={`sort-tab ${sort === "recent" ? "active" : ""}`}
+            onClick={() => setSort("recent")}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+            </svg>
+            Récentes
+          </button>
+        </div>
+
+        {/* Categories */}
+        <div className="cats-row">
+          {CATEGORIES.map((cat) => (
             <button
               key={cat}
-              onClick={() => setCategorie(cat)}
-              className={"text-xs px-4 py-2 rounded-full border transition-colors " + (categorie === cat ? "bg-violet-600 text-white border-violet-600" : "bg-white text-gray-600 border-gray-200 hover:border-violet-400")}
+              className={`cat-pill ${activeCategory === cat ? "active" : ""}`}
+              onClick={() => setActiveCategory(cat)}
             >
-              {cat === '' ? 'Tout' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+              <span>{CATEGORY_ICONS[cat]}</span>
+              {cat}
             </button>
           ))}
         </div>
 
+        {/* Results meta */}
+        <div className="results-meta">
+          <p className="results-count">
+            <strong>{filtered.length}</strong> résultat{filtered.length !== 1 ? "s" : ""}
+            {activeCategory !== "Tout" && <> · {activeCategory}</>}
+            {search && <> pour « {search} »</>}
+          </p>
+        </div>
+
+        {/* Cards */}
         {filtered.length > 0 ? (
-          <div className="flex flex-col gap-4">
-            {filtered.map((ann: any) => {
-              const avgRating = getAvgRating(ann.reviews)
-              const isOwner = user && user.id === ann.user_id
-              const isAvisOpen = avisOpen === ann.id
-              const isMsgOpen = msgOpen === ann.id
-              const isBoosted = ann.boosts?.some((boost: any) =>
-                boost.active && new Date(boost.ends_at) > new Date()
-              )
-
-              return (
-                <div key={ann.id} className={`bg-white border rounded-2xl p-5 ${isBoosted ? 'border-violet-300 shadow-md shadow-violet-100' : 'border-gray-100'}`}>
-
-                  {isBoosted && (
-                    <div className="flex items-center gap-1 text-xs font-semibold text-violet-600 bg-violet-50 w-fit px-3 py-1 rounded-full mb-3">
-                      ⚡ Annonce boostée
-                    </div>
-                  )}
-
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center overflow-hidden">
-                        <img
-                          src={"https://www.google.com/s2/favicons?domain=" + getCompanyDomain(ann.companies?.slug) + "&sz=64"}
-                          alt={ann.companies?.name}
-                          className="w-8 h-8 object-contain"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none'
-                            e.currentTarget.parentElement!.innerHTML = '<span class="text-xs font-medium text-violet-600">' + ann.companies?.name?.slice(0, 2).toUpperCase() + '</span>'
-                          }}
-                        />
-                      </div>
-                      <div>
-                        <a href={"/code-parrainage/" + ann.companies?.slug} className="font-medium text-gray-900 hover:text-violet-600">
-                          {ann.companies?.name}
-                        </a>
-                        <div className="text-xs text-gray-500">{ann.companies?.referral_bonus_description}</div>
-                      </div>
-                    </div>
-                    <span className="text-xs bg-violet-50 text-violet-600 px-3 py-1 rounded-full">
-                      {ann.companies?.category}
-                    </span>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-center justify-between mb-3">
-                    <span className="font-mono text-sm font-medium text-gray-900">{ann.code}</span>
-                    <button onClick={() => handleCopy(ann.code, ann.id)} className="text-xs text-violet-600 font-medium">
-                      {copied === ann.id ? '✓ Copié !' : 'Copier'}
-                    </button>
-                  </div>
-
-                  {ann.description && (
-                    <p className="text-sm text-gray-600 mb-3">{ann.description}</p>
-                  )}
-
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center text-xs font-medium text-violet-600">
-                        {ann.users?.pseudo?.slice(0, 1).toUpperCase()}
-                      </div>
-                      <span className="text-xs text-gray-500">{ann.users?.pseudo}</span>
-                      <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">
-                        {ann.users?.level}
-                      </span>
-                      {avgRating && (
-                        <span className="text-xs text-yellow-500">★ {avgRating} ({ann.reviews.length})</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {!isOwner && user && (
-                        <>
-                          <button
-                            onClick={() => { setMsgOpen(isMsgOpen ? null : ann.id); setAvisOpen(null) }}
-                            className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:border-blue-400 hover:text-blue-600"
-                          >
-                            💬 Contacter
-                          </button>
-                          <button
-                            onClick={() => { setAvisOpen(isAvisOpen ? null : ann.id); setMsgOpen(null) }}
-                            className="text-xs border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:border-yellow-400 hover:text-yellow-600"
-                          >
-                            ★ Avis
-                          </button>
-                        </>
-                      )}
-                      {isOwner && (() => {
-                        const left = bumpsLeft[ann.id] ?? (5 - (ann.bumps_today ?? 0))
-                        const isExhausted = left <= 0
-                        return (
-                          <button
-                            onClick={() => handleBump(ann.id, ann.bumps_today)}
-                            disabled={bumping === ann.id || isExhausted}
-                            className={
-                              "text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors " +
-                              (isExhausted
-                                ? "border-red-200 bg-red-50 text-red-400 cursor-not-allowed"
-                                : left <= 2
-                                ? "border-orange-200 bg-orange-50 text-orange-600 hover:border-orange-400"
-                                : "border-violet-200 bg-violet-50 text-violet-600 hover:border-violet-400")
-                            }
-                          >
-                            {bumping === ann.id ? '...' : isExhausted ? '✕ Limite atteinte' : '▲ Remonter · ' + left + '/5'}
-                          </button>
-                        )
-                      })()}
-                    </div>
-                  </div>
-
-                  {isMsgOpen && (
-                    <div className="border-t border-gray-100 pt-4 mt-2">
-                      <div className="text-sm font-medium text-gray-700 mb-3">
-                        Envoyer un message à {ann.users?.pseudo}
-                      </div>
-                      <textarea
-                        value={msgContent}
-                        onChange={(e) => setMsgContent(e.target.value)}
-                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-400 resize-none mb-3"
-                        placeholder="Votre message..."
-                        rows={3}
-                      />
-                      <button
-                        onClick={() => handleMessage(ann.id, ann.users?.id)}
-                        disabled={msgLoading}
-                        className="bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50"
-                      >
-                        {msgLoading ? 'Envoi...' : 'Envoyer'}
-                      </button>
-                    </div>
-                  )}
-
-                  {isAvisOpen && (
-                    <div className="border-t border-gray-100 pt-4 mt-2">
-                      <div className="text-sm font-medium text-gray-700 mb-3">Votre avis</div>
-                      <div className="flex gap-2 mb-3">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            onClick={() => setRating(star)}
-                            className={"text-2xl " + (star <= rating ? 'text-yellow-400' : 'text-gray-200')}
-                          >
-                            ★
-                          </button>
-                        ))}
-                      </div>
-                      <textarea
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-400 resize-none mb-3"
-                        placeholder="Décrivez votre expérience..."
-                        rows={2}
-                      />
-                      <button
-                        onClick={() => handleAvis(ann.id)}
-                        disabled={avisLoading}
-                        className="bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50"
-                      >
-                        {avisLoading ? 'Envoi...' : 'Publier mon avis'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+          <div className="cards-list">
+            {filtered.map((card, i) => (
+              <CodeCard key={card.id} card={card} index={i} />
+            ))}
           </div>
         ) : (
-          <div className="text-center py-20">
-            <div className="text-4xl mb-4">{search ? '🔍' : '🎯'}</div>
-            <div className="text-gray-500 mb-4">
-              {search ? 'Aucun résultat pour "' + search + '"' : "Aucune annonce pour l'instant"}
-            </div>
-            {search ? (
-              <button onClick={() => setSearch('')} className="text-violet-600 text-sm">
-                Effacer la recherche
-              </button>
-            ) : (
-              <a href="/publier" className="bg-violet-600 text-white px-6 py-3 rounded-xl text-sm font-medium">
-                Soyez le premier à publier !
-              </a>
-            )}
+          <div className="empty-state">
+            <div className="icon">🔍</div>
+            <p>Aucun code trouvé pour cette recherche.</p>
           </div>
         )}
-      </div>
-    </main>
-  )
+      </main>
+    </>
+  );
 }
