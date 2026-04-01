@@ -1,311 +1,302 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState } from "react";
+import Navbar from "@/components/Navbar";
 
-// ── Data ──────────────────────────────────────────────────────────────────────
+// ── Types ──────────────────────────────────────────────────────────────────────
+interface Avis {
+  id: string;
+  reviewer: string;
+  company: string;
+  rating: number;
+  comment: string;
+  date: string;
+  xpGained?: number;
+}
 
-const CATEGORIES = [
-  { label: "Banque",       slug: "banque",    icon: "🏦", count: 124, color: "#3b82f6" },
-  { label: "Crypto",       slug: "crypto",    icon: "₿",  count: 89,  color: "#f59e0b" },
-  { label: "Sport & Paris",slug: "sport",     icon: "⚽", count: 97,  color: "#10b981" },
-  { label: "Bourse",       slug: "bourse",    icon: "📈", count: 56,  color: "#6366f1" },
-  { label: "Énergie",      slug: "energie",   icon: "⚡", count: 43,  color: "#ec4899" },
-  { label: "Mobile",       slug: "mobile",    icon: "📱", count: 38,  color: "#8b5cf6" },
-  { label: "E-commerce",   slug: "ecommerce", icon: "🛍️", count: 71,  color: "#14b8a6" },
-  { label: "Assurance",    slug: "assurance", icon: "🛡️", count: 29,  color: "#f97316" },
+// ── Mock data — remplace par fetch Supabase ───────────────────────────────────
+const MOCK_AVIS: Avis[] = [
+  { id:"1", reviewer:"Manou",      company:"Winamax",    rating:5, comment:"Parrainage validé rapidement, très réactif. Je recommande !", date:"26 mars 2026", xpGained:20 },
+  { id:"2", reviewer:"AlexCrypto", company:"Binance",    rating:4, comment:"Tout s'est bien passé, code fonctionnel.", date:"20 mars 2026", xpGained:20 },
+  { id:"3", reviewer:"LucaF",      company:"Boursobank", rating:3, comment:"Correct mais un peu long à répondre.", date:"15 mars 2026" },
 ];
 
-const POPULAR_TAGS = [
-  { label: "Boursobank",     slug: "boursobank"     },
-  { label: "Winamax",        slug: "winamax"        },
-  { label: "Revolut",        slug: "revolut"        },
-  { label: "Binance",        slug: "binance"        },
-  { label: "Fortuneo",       slug: "fortuneo"       },
-  { label: "Trade Republic", slug: "trade-republic" },
-  { label: "Free Mobile",    slug: "free-mobile"    },
-  { label: "BlaBlaCar",      slug: "blablacar"      },
-  { label: "Lydia",          slug: "lydia"          },
-  { label: "Coinbase",       slug: "coinbase"       },
-  { label: "Betclic",        slug: "betclic"        },
-  { label: "Swile",          slug: "swile"          },
-];
+const MOCK_STATS = {
+  moyenne: 4.0,
+  total: 3,
+  distribution: { 5:1, 4:1, 3:1, 2:0, 1:0 },
+};
 
-const AVIS = [
-  {
-    pseudo: "Alexandre M.", level: "Super Parrain", avatar: "A", color: "#7c3aed", stars: 5,
-    company: "Boursobank",
-    text: "J'ai gagné 240€ en 3 mois grâce à mes codes Boursobank et Winamax. La plateforme est super simple et les XP motivent vraiment à publier régulièrement.",
-    date: "Il y a 2 jours",
-  },
-  {
-    pseudo: "Sarah L.", level: "Parrain Or", avatar: "S", color: "#f59e0b", stars: 5,
-    company: "Revolut",
-    text: "Top ! J'avais essayé d'autres sites mais ici la vérification des codes est vraiment sérieuse. Plus de codes expirés, que des vraies offres.",
-    date: "Il y a 5 jours",
-  },
-  {
-    pseudo: "Romain D.", level: "Parrain Argent", avatar: "R", color: "#6366f1", stars: 5,
-    company: "Winamax",
-    text: "Le système de boost est efficace, mon code Revolut a été copié 18 fois en une semaine après l'avoir mis en avant. Je recommande.",
-    date: "Il y a 1 semaine",
-  },
-  {
-    pseudo: "Camille B.", level: "Parrain Bronze", avatar: "C", color: "#10b981", stars: 4,
-    company: "Binance",
-    text: "Très bonne expérience. L'interface est agréable et le classement donne envie de s'améliorer. Hâte de passer niveau Parrain Or !",
-    date: "Il y a 2 semaines",
-  },
-];
+// ── Star rating ───────────────────────────────────────────────────────────────
+function Stars({ rating, interactive=false, onChange }: { rating:number; interactive?:boolean; onChange?:(v:number)=>void }) {
+  const [hover, setHover] = useState(0);
+  return (
+    <div style={{ display:"flex", gap:2 }}>
+      {[1,2,3,4,5].map(n => {
+        const filled = interactive ? (hover||rating) >= n : rating >= n;
+        return (
+          <span
+            key={n}
+            onClick={()=>interactive && onChange?.(n)}
+            onMouseEnter={()=>interactive && setHover(n)}
+            onMouseLeave={()=>interactive && setHover(0)}
+            style={{ fontSize: interactive?"1.4rem":"1rem", cursor:interactive?"pointer":"default", transition:"transform .15s", display:"inline-block", transform: interactive && (hover||rating)>=n ? "scale(1.15)" : "scale(1)" }}
+          >
+            {filled ? "⭐" : "☆"}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
-const FLOATING_CARDS = [
-  {
-    id: "boost", top: "6%", right: "2%",
-    content: (
-      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-        <span style={{ fontSize:22 }}>⚡</span>
-        <div>
-          <div style={{ fontWeight:700, fontSize:"0.85rem", color:"#fff" }}>Boost activé</div>
-          <div style={{ fontSize:"0.72rem", color:"rgba(255,255,255,0.45)" }}>Ton annonce est en tête</div>
-        </div>
+// ── Rating distribution bar ───────────────────────────────────────────────────
+function DistBar({ stars, count, total }: { stars:number; count:number; total:number }) {
+  const pct = total > 0 ? (count/total)*100 : 0;
+  const [w, setW] = useState(0);
+  useState(() => { setTimeout(()=>setW(pct), 300); });
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+      <span style={{ fontSize:".72rem", color:"rgba(255,255,255,.4)", width:12, textAlign:"right", flexShrink:0 }}>{stars}</span>
+      <span style={{ fontSize:".75rem" }}>⭐</span>
+      <div style={{ flex:1, height:5, background:"rgba(255,255,255,.06)", borderRadius:100, overflow:"hidden" }}>
+        <div style={{ height:"100%", width:`${pct}%`, background:"linear-gradient(90deg,#7c3aed,#a855f7)", borderRadius:100, transition:"width 1s ease" }} />
       </div>
-    ),
-  },
-  {
-    id: "top", top: "36%", right: "18%",
-    content: (
-      <div>
-        <div style={{ fontSize:"0.68rem", color:"rgba(255,255,255,0.35)", marginBottom:6, letterSpacing:"0.06em" }}>🏆 TOP PARRAIN</div>
-        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          <div style={{ width:32, height:32, borderRadius:"50%", background:"linear-gradient(135deg,#7c3aed,#a78bfa)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:"0.75rem", color:"#fff" }}>A</div>
+      <span style={{ fontSize:".72rem", color:"rgba(255,255,255,.3)", width:16, textAlign:"right", flexShrink:0 }}>{count}</span>
+    </div>
+  );
+}
+
+// ── Avis card ─────────────────────────────────────────────────────────────────
+function AvisCard({ avis, index }: { avis:Avis; index:number }) {
+  const colors = ["#7c3aed","#4f46e5","#0891b2","#059669","#d97706"];
+  const color  = colors[avis.reviewer.charCodeAt(0) % colors.length];
+  return (
+    <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:16, padding:"1.25rem", display:"flex", flexDirection:"column", gap:"0.75rem", animation:`fadeIn .3s ease ${index*0.06}s both` }}>
+      <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:10 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ width:36, height:36, borderRadius:"50%", background:`linear-gradient(135deg,${color},${color}99)`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+            <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:".9rem", color:"#fff" }}>{avis.reviewer[0].toUpperCase()}</span>
+          </div>
           <div>
-            <div style={{ fontWeight:700, fontSize:"0.82rem", color:"#fff" }}>Alexandre M.</div>
-            <div style={{ fontSize:"0.68rem", color:"rgba(255,255,255,0.4)" }}>Super Parrain</div>
+            <p style={{ fontWeight:700, fontSize:".875rem", color:"#fff" }}>{avis.reviewer}</p>
+            <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.3)" }}>{avis.date}</p>
           </div>
         </div>
-        <div style={{ marginTop:8, height:4, borderRadius:9999, background:"rgba(255,255,255,0.08)" }}>
-          <div style={{ height:"100%", width:"65%", borderRadius:9999, background:"linear-gradient(90deg,#7c3aed,#a78bfa)" }} />
-        </div>
-        <div style={{ fontSize:"0.65rem", color:"rgba(255,255,255,0.3)", marginTop:3 }}>65 / 100 XP</div>
-      </div>
-    ),
-  },
-  {
-    id: "badge", top: "54%", right: "3%",
-    content: (
-      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-        <span style={{ fontSize:20 }}>🥉</span>
-        <div>
-          <div style={{ fontSize:"0.65rem", color:"rgba(255,255,255,0.35)" }}>Nouveau badge !</div>
-          <div style={{ fontWeight:700, fontSize:"0.82rem", color:"#fff" }}>Parrain Bronze</div>
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:4 }}>
+          <Stars rating={avis.rating} />
+          <span style={{ fontSize:".68rem", background:"rgba(124,58,237,.12)", border:"1px solid rgba(124,58,237,.25)", color:"#a78bfa", padding:"1px 7px", borderRadius:100 }}>{avis.company}</span>
         </div>
       </div>
-    ),
-  },
-  {
-    id: "copy", top: "72%", right: "19%",
-    content: (
-      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-        <div style={{ width:36, height:36, borderRadius:10, background:"rgba(16,185,129,0.15)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16 }}>🏦</div>
-        <div>
-          <div style={{ fontSize:"0.65rem", color:"rgba(255,255,255,0.35)" }}>✓ Code copié</div>
-          <div style={{ fontWeight:700, fontSize:"0.82rem", color:"#fff" }}>Boursobank</div>
-          <div style={{ fontSize:"0.72rem", color:"#a78bfa", fontWeight:600 }}>PAUL2024</div>
+      {avis.comment && (
+        <p style={{ fontSize:".82rem", color:"rgba(255,255,255,.6)", lineHeight:1.6, borderLeft:"2px solid rgba(124,58,237,.3)", paddingLeft:"0.75rem" }}>
+          "{avis.comment}"
+        </p>
+      )}
+      {avis.xpGained && (
+        <div style={{ display:"flex", alignItems:"center", gap:5, fontSize:".72rem", color:"#4ade80" }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          +{avis.xpGained} XP gagnés grâce à cet avis
         </div>
-        <div style={{ marginLeft:4, background:"rgba(16,185,129,0.15)", border:"1px solid rgba(16,185,129,0.3)", borderRadius:8, padding:"3px 8px", fontSize:"0.72rem", color:"#34d399", fontWeight:700 }}>+80€</div>
-      </div>
-    ),
-  },
-];
+      )}
+    </div>
+  );
+}
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Main ──────────────────────────────────────────────────────────────────────
+export default function AvisPage() {
+  const [tab, setTab]       = useState<"recus"|"laisser">("recus");
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [codeId, setCodeId]   = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted]   = useState(false);
 
-export default function HomePage() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  const handleSubmit = async () => {
+    if (!rating || !codeId) return;
+    setSubmitting(true);
+    try {
+      await fetch("/api/reviews", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ announcementId:codeId, rating, comment }),
+      });
+      setSubmitted(true);
+    } catch {}
+    setSubmitting(false);
+  };
 
   return (
-    <main style={{ background:"#0A0A0F", minHeight:"100vh", fontFamily:"var(--font-dm-sans),'DM Sans',sans-serif", color:"#fff", overflowX:"hidden" }}>
-
-      {/* Grid bg */}
-      <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, backgroundImage:"linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px)", backgroundSize:"60px 60px" }} />
-      {/* Glow */}
-      <div style={{ position:"fixed", top:-200, left:"50%", transform:"translateX(-50%)", width:700, height:700, borderRadius:"50%", background:"radial-gradient(circle,rgba(124,58,237,0.13) 0%,transparent 65%)", pointerEvents:"none", zIndex:0 }} />
-
-      {/* ══ NAVBAR ══════════════════════════════════════════════════════════ */}
-      <nav style={{ position:"relative", zIndex:10, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"1.25rem 2rem", maxWidth:1200, margin:"0 auto" }}>
-        <Link href="/" style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.1rem", color:"#fff", textDecoration:"none", letterSpacing:"-0.02em" }}>
-          code<span style={{ color:"#7c3aed" }}>de</span>parrainage.com
-        </Link>
-        <div style={{ display:"flex", alignItems:"center", gap:"0.25rem" }}>
-          {[{ label:"Codes", href:"/codes" },{ label:"Classement", href:"/classement" },{ label:"Connexion", href:"/login" }].map(item => (
-            <Link key={item.href} href={item.href}
-              style={{ color:"rgba(255,255,255,0.55)", fontSize:"0.875rem", fontWeight:500, textDecoration:"none", padding:"0.5rem 0.875rem", borderRadius:10, transition:"color 0.18s" }}
-              onMouseEnter={e=>(e.currentTarget.style.color="#fff")}
-              onMouseLeave={e=>(e.currentTarget.style.color="rgba(255,255,255,0.55)")}
-            >{item.label}</Link>
-          ))}
-          <Link href="/register"
-            style={{ background:"#7c3aed", color:"#fff", fontWeight:700, fontSize:"0.875rem", padding:"0.55rem 1.25rem", borderRadius:12, textDecoration:"none", boxShadow:"0 0 20px rgba(124,58,237,0.35)", transition:"all 0.2s" }}
-            onMouseEnter={e=>{ e.currentTarget.style.background="#6d28d9"; e.currentTarget.style.transform="translateY(-1px)"; }}
-            onMouseLeave={e=>{ e.currentTarget.style.background="#7c3aed"; e.currentTarget.style.transform="translateY(0)"; }}
-          >S&apos;inscrire</Link>
-        </div>
-      </nav>
-
-      {/* ══ HERO ════════════════════════════════════════════════════════════ */}
-      <section style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"3rem 2rem 5rem", display:"grid", gridTemplateColumns:"1fr 1fr", gap:"2rem", alignItems:"center" }}>
-
-        {/* Left */}
-        <div style={{ animation: mounted ? "fadeInUp 0.6s ease both" : "none" }}>
-          <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:999, padding:"0.35rem 0.875rem", marginBottom:"1.75rem", fontSize:"0.78rem", color:"rgba(255,255,255,0.55)" }}>
-            <span style={{ width:7, height:7, borderRadius:"50%", background:"#10b981", boxShadow:"0 0 6px #10b981", display:"inline-block" }} />
-            +4 200 codes actifs en ce moment
-          </div>
-          <h1 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"clamp(2.8rem,5vw,4.5rem)", lineHeight:1.05, letterSpacing:"-0.03em", margin:0, marginBottom:"1.5rem" }}>
-            Parraine,<br /><span style={{ color:"#7c3aed" }}>gagne</span> des<br />récompenses.
-          </h1>
-          <p style={{ color:"rgba(255,255,255,0.5)", fontSize:"1rem", lineHeight:1.7, maxWidth:460, marginBottom:"2rem" }}>
-            La plateforme de parrainage gamifiée. Publie ton code, monte de niveau, débloque des badges et rejoins 850+ parrains vérifiés.
-          </p>
-          <div style={{ display:"flex", gap:"0.875rem", flexWrap:"wrap" }}>
-            <Link href="/codes"
-              style={{ background:"#7c3aed", color:"#fff", fontWeight:700, padding:"0.9rem 1.75rem", borderRadius:14, textDecoration:"none", fontSize:"0.95rem", boxShadow:"0 8px 32px rgba(124,58,237,0.4)", transition:"all 0.2s" }}
-              onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 12px 40px rgba(124,58,237,0.5)"; }}
-              onMouseLeave={e=>{ e.currentTarget.style.transform="none"; e.currentTarget.style.boxShadow="0 8px 32px rgba(124,58,237,0.4)"; }}
-            >Trouver un code gratuit</Link>
-            <Link href="/publier"
-              style={{ background:"rgba(255,255,255,0.05)", color:"#fff", fontWeight:600, padding:"0.9rem 1.75rem", borderRadius:14, textDecoration:"none", fontSize:"0.95rem", border:"1px solid rgba(255,255,255,0.1)", transition:"all 0.2s" }}
-              onMouseEnter={e=>{ e.currentTarget.style.background="rgba(255,255,255,0.09)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.2)"; }}
-              onMouseLeave={e=>{ e.currentTarget.style.background="rgba(255,255,255,0.05)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.1)"; }}
-            >Publier mon code →</Link>
-          </div>
-          <div style={{ display:"flex", gap:"2rem", marginTop:"2.5rem" }}>
-            {[{ n:"4 200+", l:"Codes actifs" },{ n:"850+", l:"Parrains vérifiés" },{ n:"97%", l:"Avis positifs" }].map(s=>(
-              <div key={s.l}>
-                <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.5rem", color:"#fff" }}>{s.n}</div>
-                <div style={{ fontSize:"0.75rem", color:"rgba(255,255,255,0.35)", marginTop:2 }}>{s.l}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right — floating cards */}
-        <div style={{ position:"relative", height:480 }}>
-          <div style={{ position:"absolute", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(124,58,237,0.18) 0%,transparent 70%)", top:"50%", left:"50%", transform:"translate(-50%,-50%)", pointerEvents:"none" }} />
-          {FLOATING_CARDS.map((card,i)=>(
-            <div key={card.id} style={{ position:"absolute", top:card.top, right:card.right, background:"rgba(255,255,255,0.04)", backdropFilter:"blur(16px)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:16, padding:"0.875rem 1rem", minWidth:200, animation: mounted ? `floatCard${i%2} ${3+i*0.5}s ease-in-out infinite` : "none", animationDelay:`${i*0.4}s`, boxShadow:"0 8px 32px rgba(0,0,0,0.4)" }}>
-              {card.content}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══ CATEGORIES ══════════════════════════════════════════════════════ */}
-      <section style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"2rem 2rem 4rem" }}>
-        <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:"1.5rem" }}>
-          <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:0 }}>Parcourir par catégorie</h2>
-          <Link href="/codes" style={{ fontSize:"0.82rem", color:"#a78bfa", textDecoration:"none", fontWeight:600 }}>Voir tout →</Link>
-        </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:"0.875rem" }}>
-          {CATEGORIES.map(cat=>(
-            <Link key={cat.slug} href={`/codes?categorie=${cat.slug}`} style={{ textDecoration:"none" }}>
-              <div
-                style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:16, padding:"1.125rem 1.25rem", display:"flex", alignItems:"center", justifyContent:"space-between", transition:"all 0.2s", cursor:"pointer", position:"relative", overflow:"hidden" }}
-                onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.background="rgba(255,255,255,0.055)"; el.style.borderColor=`${cat.color}40`; el.style.transform="translateY(-2px)"; }}
-                onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.background="rgba(255,255,255,0.03)"; el.style.borderColor="rgba(255,255,255,0.07)"; el.style.transform="none"; }}
-              >
-                <div style={{ position:"absolute", bottom:0, left:0, right:0, height:2, background:cat.color, opacity:0.5 }} />
-                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <span style={{ fontSize:20 }}>{cat.icon}</span>
-                  <span style={{ fontWeight:600, fontSize:"0.875rem", color:"#fff" }}>{cat.label}</span>
-                </div>
-                <span style={{ fontSize:"0.7rem", fontWeight:700, color:cat.color, background:`${cat.color}18`, border:`1px solid ${cat.color}30`, borderRadius:8, padding:"2px 8px" }}>{cat.count}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ══ COMMENT ÇA MARCHE ═══════════════════════════════════════════════ */}
-      <section style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"2rem 2rem 4rem" }}>
-        <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:"0 0 2rem", textAlign:"center" }}>Comment ça marche ?</h2>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1.25rem" }}>
-          {[
-            { num:"01", title:"Trouve un code",   desc:"Parcours des milliers de codes vérifiés par catégorie ou marque.", icon:"🔍" },
-            { num:"02", title:"Parraine & gagne",  desc:"Utilise le code, valide le parrainage et accumule des XP.",       icon:"🎁" },
-            { num:"03", title:"Monte de niveau",   desc:"Débloque des badges, grimpe au classement, booste ta visibilité.", icon:"🏆" },
-          ].map(step=>(
-            <div key={step.num} style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:20, padding:"1.75rem", position:"relative", overflow:"hidden" }}>
-              <div style={{ position:"absolute", top:16, right:20, fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"3rem", color:"rgba(124,58,237,0.12)", lineHeight:1 }}>{step.num}</div>
-              <div style={{ fontSize:28, marginBottom:12 }}>{step.icon}</div>
-              <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1rem", marginBottom:8 }}>{step.title}</div>
-              <div style={{ fontSize:"0.85rem", color:"rgba(255,255,255,0.45)", lineHeight:1.6 }}>{step.desc}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══ AVIS ════════════════════════════════════════════════════════════ */}
-      <section style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"2rem 2rem 4rem" }}>
-        <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:"1.5rem" }}>
-          <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:0 }}>Ce qu&apos;ils en pensent</h2>
-          <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-            <span style={{ color:"#fbbf24", fontSize:"0.9rem" }}>★★★★★</span>
-            <span style={{ fontSize:"0.78rem", color:"rgba(255,255,255,0.35)" }}>4.9 / 5 · 850+ avis</span>
-          </div>
-        </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:"1rem" }}>
-          {AVIS.map(avis=>(
-            <div key={avis.pseudo}
-              style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:18, padding:"1.25rem 1.375rem", display:"flex", flexDirection:"column", gap:12, transition:"all 0.2s" }}
-              onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.background="rgba(255,255,255,0.05)"; el.style.borderColor="rgba(255,255,255,0.12)"; }}
-              onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.background="rgba(255,255,255,0.03)"; el.style.borderColor="rgba(255,255,255,0.07)"; }}
-            >
-              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                <div style={{ width:38, height:38, borderRadius:"50%", background:`linear-gradient(135deg,${avis.color},${avis.color}99)`, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:"0.9rem", color:"#fff", flexShrink:0 }}>
-                  {avis.avatar}
-                </div>
-                <div style={{ flex:1 }}>
-                  <div style={{ fontWeight:700, fontSize:"0.875rem", color:"#fff" }}>{avis.pseudo}</div>
-                  <div style={{ fontSize:"0.68rem", color:avis.color, fontWeight:600 }}>{avis.level}</div>
-                </div>
-                <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:4 }}>
-                  <span style={{ color:"#fbbf24", fontSize:"0.8rem" }}>{"★".repeat(avis.stars)}</span>
-                  <span style={{ fontSize:"0.65rem", color:"rgba(255,255,255,0.25)" }}>{avis.date}</span>
-                </div>
-              </div>
-              <span style={{ fontSize:"0.68rem", background:"rgba(124,58,237,0.12)", border:"1px solid rgba(124,58,237,0.25)", color:"#a78bfa", padding:"2px 8px", borderRadius:100, alignSelf:"flex-start" }}>{avis.company}</span>
-              <p style={{ fontSize:"0.82rem", color:"rgba(255,255,255,0.5)", lineHeight:1.65, margin:0, borderLeft:"2px solid rgba(124,58,237,0.3)", paddingLeft:"0.75rem" }}>
-                &ldquo;{avis.text}&rdquo;
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══ TAGS POPULAIRES ═════════════════════════════════════════════════ */}
-      <section style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"1rem 2rem 6rem" }}>
-        <div style={{ fontSize:"0.72rem", fontWeight:700, letterSpacing:"0.08em", color:"rgba(255,255,255,0.2)", marginBottom:"1rem", fontFamily:"var(--font-syne),Syne,sans-serif", textTransform:"uppercase" }}>
-          Codes populaires
-        </div>
-        <div style={{ display:"flex", flexWrap:"wrap", gap:"0.5rem" }}>
-          {POPULAR_TAGS.map(tag=>(
-            <Link key={tag.slug} href={`/code-parrainage/${tag.slug}`}
-              style={{ textDecoration:"none", fontSize:"0.8rem", padding:"0.45rem 0.875rem", borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"rgba(255,255,255,0.38)", transition:"all 0.18s" }}
-              onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.background="rgba(124,58,237,0.12)"; el.style.borderColor="rgba(124,58,237,0.3)"; el.style.color="#a78bfa"; }}
-              onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.background="rgba(255,255,255,0.04)"; el.style.borderColor="rgba(255,255,255,0.07)"; el.style.color="rgba(255,255,255,0.38)"; }}
-            >{tag.label}</Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Keyframes */}
+    <>
       <style>{`
-        @keyframes fadeInUp   { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes floatCard0 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        @keyframes floatCard1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+        @keyframes spin   { to{transform:rotate(360deg)} }
+        *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+        body { background:#0A0A0F; color:#e2e8f0; font-family:'DM Sans',sans-serif; min-height:100vh; }
+        .page { max-width:700px; margin:0 auto; padding:3rem 1.5rem 6rem; }
+
+        .page-header { margin-bottom:2rem; }
+        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#7c3aed; margin-bottom:.75rem; }
+        .header-label::before { content:''; width:18px; height:1px; background:#7c3aed; display:block; }
+        .page-title { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(1.5rem,3.5vw,2rem); color:#fff; letter-spacing:-.03em; margin-bottom:.35rem; }
+        .page-sub { color:rgba(255,255,255,.35); font-size:.875rem; }
+
+        /* Tabs */
+        .tabs { display:flex; gap:4px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:4px; margin-bottom:2rem; }
+        .tab { flex:1; padding:.55rem 1rem; border-radius:10px; border:none; background:transparent; color:rgba(255,255,255,.45); font-size:.855rem; font-weight:500; cursor:pointer; transition:all .18s; font-family:'DM Sans',sans-serif; }
+        .tab:hover { color:rgba(255,255,255,.75); }
+        .tab.active { background:rgba(124,58,237,.18); border:1px solid rgba(124,58,237,.3); color:#fff; font-weight:600; }
+
+        /* Stats card */
+        .stats-card { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:20px; padding:1.5rem; display:flex; gap:2rem; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; }
+        .stats-left { display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; }
+        .stats-avg { font-family:'Syne',sans-serif; font-weight:800; font-size:3rem; color:#fff; line-height:1; }
+        .stats-total { font-size:.75rem; color:rgba(255,255,255,.3); }
+        .stats-right { flex:1; display:flex; flex-direction:column; gap:5px; min-width:160px; }
+
+        /* Form */
+        .form-card { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:20px; padding:1.75rem; display:flex; flex-direction:column; gap:1.25rem; }
+        .form-group { display:flex; flex-direction:column; gap:7px; }
+        .form-label { font-size:.78rem; font-weight:600; color:rgba(255,255,255,.45); letter-spacing:.04em; }
+        .form-input { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:.75rem 1rem; color:#fff; font-size:.9rem; font-family:'DM Sans',sans-serif; outline:none; transition:all .2s; width:100%; }
+        .form-input:focus { border-color:rgba(124,58,237,.4); background:rgba(124,58,237,.05); box-shadow:0 0 0 3px rgba(124,58,237,.1); }
+        .form-input::placeholder { color:rgba(255,255,255,.25); }
+        .form-textarea { resize:vertical; min-height:100px; }
+        .form-hint { font-size:.7rem; color:rgba(255,255,255,.22); }
+
+        .submit-btn { display:flex; align-items:center; justify-content:center; gap:7px; width:100%; background:#7c3aed; color:#fff; border:none; border-radius:13px; padding:.875rem; font-size:.9rem; font-weight:700; cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif; }
+        .submit-btn:hover:not(:disabled) { background:#6d28d9; transform:translateY(-1px); box-shadow:0 6px 20px rgba(124,58,237,.4); }
+        .submit-btn:disabled { opacity:.4; cursor:not-allowed; }
+
+        /* Success */
+        .success-wrap { text-align:center; padding:2.5rem 1rem; }
+        .success-icon { font-size:3rem; display:inline-block; margin-bottom:1rem; animation:bounce .5s ease; }
+        @keyframes bounce { 0%{transform:scale(.5)}60%{transform:scale(1.2)}100%{transform:scale(1)} }
+
+        /* Empty */
+        .empty { text-align:center; padding:3rem; color:rgba(255,255,255,.25); }
+        .empty-icon { font-size:2.5rem; margin-bottom:.75rem; }
+
+        @media(max-width:600px) {
+          .page { padding:2rem 1rem 5rem; }
+          .stats-card { flex-direction:column; align-items:flex-start; gap:1rem; }
+        }
       `}</style>
-    </main>
+
+      <Navbar activePage="profil" isLoggedIn={true} pseudo="Test3" />
+
+      <main className="page">
+
+        {/* Header */}
+        <div className="page-header">
+          <div className="header-label">Réputation</div>
+          <h1 className="page-title">Avis ⭐</h1>
+          <p className="page-sub">Consulte les avis reçus et laisse un avis sur un parrain</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="tabs">
+          <button className={`tab ${tab==="recus"?"active":""}`}   onClick={()=>setTab("recus")}>
+            Avis reçus {MOCK_AVIS.length > 0 && `(${MOCK_AVIS.length})`}
+          </button>
+          <button className={`tab ${tab==="laisser"?"active":""}`} onClick={()=>setTab("laisser")}>
+            Laisser un avis
+          </button>
+        </div>
+
+        {/* ── Tab: Avis reçus ── */}
+        {tab === "recus" && (
+          <>
+            {MOCK_AVIS.length > 0 ? (
+              <>
+                {/* Stats */}
+                <div className="stats-card">
+                  <div className="stats-left">
+                    <span className="stats-avg">{MOCK_STATS.moyenne.toFixed(1)}</span>
+                    <Stars rating={Math.round(MOCK_STATS.moyenne)} />
+                    <span className="stats-total">{MOCK_STATS.total} avis</span>
+                  </div>
+                  <div className="stats-right">
+                    {[5,4,3,2,1].map(n => (
+                      <DistBar key={n} stars={n} count={MOCK_STATS.distribution[n as keyof typeof MOCK_STATS.distribution]} total={MOCK_STATS.total} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* List */}
+                <div style={{ display:"flex", flexDirection:"column", gap:".75rem" }}>
+                  {MOCK_AVIS.map((avis,i) => <AvisCard key={avis.id} avis={avis} index={i} />)}
+                </div>
+              </>
+            ) : (
+              <div className="empty">
+                <div className="empty-icon">⭐</div>
+                <p style={{ fontSize:".875rem", marginBottom:".5rem" }}>Aucun avis reçu pour l'instant</p>
+                <p style={{ fontSize:".78rem" }}>Les avis apparaîtront ici après tes premiers parrainages.</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── Tab: Laisser un avis ── */}
+        {tab === "laisser" && (
+          <div className="form-card">
+            {submitted ? (
+              <div className="success-wrap">
+                <div className="success-icon">🎉</div>
+                <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.25rem", color:"#fff", marginBottom:".5rem" }}>Avis envoyé !</h2>
+                <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem", marginBottom:"1.5rem" }}>Merci pour ton retour. Le parrain a été notifié.</p>
+                <button onClick={()=>{ setSubmitted(false); setRating(0); setComment(""); setCodeId(""); }}
+                  style={{ background:"rgba(124,58,237,.15)", border:"1px solid rgba(124,58,237,.3)", borderRadius:10, padding:".5rem 1.25rem", color:"#a78bfa", fontSize:".82rem", fontWeight:600, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
+                  Laisser un autre avis
+                </button>
+              </div>
+            ) : (
+              <>
+                <div style={{ background:"rgba(251,191,36,.07)", border:"1px solid rgba(251,191,36,.2)", borderRadius:12, padding:".75rem 1rem", display:"flex", alignItems:"flex-start", gap:8 }}>
+                  <span style={{ flexShrink:0 }}>💡</span>
+                  <p style={{ fontSize:".78rem", color:"rgba(255,255,255,.5)", lineHeight:1.5 }}>
+                    Tu peux laisser un avis après avoir utilisé un code de parrainage. Un avis ≥ 4⭐ rapporte <strong style={{ color:"#fbbf24" }}>+20 XP</strong> au parrain.
+                  </p>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">ID de l'annonce</label>
+                  <input className="form-input" placeholder="Ex : 12345" value={codeId} onChange={e=>setCodeId(e.target.value)} />
+                  <p className="form-hint">Visible sur la page de l'annonce ou dans tes messages</p>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Ta note</label>
+                  <Stars rating={rating} interactive onChange={setRating} />
+                  {rating > 0 && (
+                    <p style={{ fontSize:".75rem", color:"rgba(255,255,255,.35)", marginTop:4 }}>
+                      {["","Très décevant","Décevant","Correct","Bien","Excellent !"][rating]}
+                    </p>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    Commentaire
+                    <span style={{ fontSize:".7rem", color:"rgba(255,255,255,.2)", fontWeight:400, marginLeft:6 }}>optionnel</span>
+                  </label>
+                  <textarea className="form-input form-textarea" placeholder="Décris ton expérience avec ce parrain..." value={comment} onChange={e=>setComment(e.target.value)} maxLength={400} />
+                  <p className="form-hint">{comment.length}/400 caractères</p>
+                </div>
+
+                <button className="submit-btn" disabled={!rating || !codeId || submitting} onClick={handleSubmit}>
+                  {submitting
+                    ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    : "Envoyer mon avis"
+                  }
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+      </main>
+    </>
   );
 }
