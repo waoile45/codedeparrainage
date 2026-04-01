@@ -1,63 +1,30 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Navbar from "@/components/Navbar";
-import { ENTREPRISES } from "@/data/entreprises";
+import { createClient } from "@/lib/supabase";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
-type Category = "Banque" | "Crypto" | "Energie" | "Cashback" | "Telephonie" | "Paris" | "Assurance" | "Shopping";
-
 interface Company {
+  id: string;
   name: string;
-  category: Category;
-  reward: string;
-  domain: string;
+  slug: string;
+  category: string;
+  referral_bonus_description: string;
 }
 
-// ── Catégories connues pour les entreprises phares ─────────────────────────────
-const CATEGORY_MAP: Record<string, Category> = {
-  boursobank: "Banque", fortuneo: "Banque", "hello bank": "Banque", n26: "Banque",
-  revolut: "Banque", lydia: "Banque", qonto: "Banque", pumpkin: "Banque",
-  floa: "Banque", bforbank: "Banque", "compte nickel": "Banque", monabanq: "Banque",
-  binance: "Crypto", coinbase: "Crypto", kraken: "Crypto", bitpanda: "Crypto",
-  bybit: "Crypto", swissborg: "Crypto", "trade republic": "Bourse" as Category,
-  degiro: "Bourse" as Category, "trading 212": "Bourse" as Category,
-  edf: "Energie", "totalenergies": "Energie", engie: "Energie", vattenfall: "Energie",
-  igraal: "Cashback", widilo: "Cashback", rakuten: "Cashback", swagbucks: "Cashback",
-  "free mobile": "Telephonie", sosh: "Telephonie", bouygues: "Telephonie", sfr: "Telephonie",
-  winamax: "Paris", betclic: "Paris", unibet: "Paris", zebet: "Paris", bwin: "Paris",
-  "direct assurance": "Assurance", alan: "Assurance", maif: "Assurance", macif: "Assurance",
-  zalando: "Shopping", asos: "Shopping", veepee: "Shopping", shein: "Shopping",
-};
-
-const DEFAULT_REWARDS: Record<string, string> = {
-  boursobank: "80€ offerts", fortuneo: "130€ offerts", revolut: "Carte gratuite",
-  binance: "10% de réduction", coinbase: "10$ en BTC", winamax: "100€ remboursés",
-  betclic: "100€ remboursés", "free mobile": "1 mois offert", alan: "1 mois offert",
-};
-
-// Convertir ENTREPRISES en Company[]
-const ALL_COMPANIES: Company[] = ENTREPRISES.map(e => ({
-  name: e.nom,
-  domain: e.domain,
-  category: CATEGORY_MAP[e.nom.toLowerCase()] ?? "Shopping",
-  reward: DEFAULT_REWARDS[e.nom.toLowerCase()] ?? "Offre de bienvenue",
-}));
-
-const CATEGORIES: Category[] = ["Banque","Crypto","Energie","Cashback","Telephonie","Paris","Assurance","Shopping"];
-const CAT_ICONS: Record<string, string> = {
-  Banque:"🏦", Crypto:"₿", Energie:"⚡", Cashback:"💸",
-  Telephonie:"📱", Paris:"⚽", Assurance:"🛡️", Shopping:"🛍️",
-};
-
+const CATEGORIES = ["banque","crypto","energie","cashback","telephonie","paris","assurance","shopping"];
+const CAT_LABELS: Record<string,string> = { banque:"Banque", crypto:"Crypto", energie:"Énergie", cashback:"Cashback", telephonie:"Téléphonie", paris:"Paris", assurance:"Assurance", shopping:"Shopping" };
+const CAT_ICONS: Record<string,string> = { banque:"🏦", crypto:"₿", energie:"⚡", cashback:"💸", telephonie:"📱", paris:"⚽", assurance:"🛡️", shopping:"🛍️" };
 const XP_GAIN = 10;
 
 // ── Logo avec fallback ─────────────────────────────────────────────────────────
-function CompanyLogo({ domain, name, size = 34 }: { domain: string; name: string; size?: number }) {
+function CompanyLogo({ slug, name, size = 34 }: { slug: string; name: string; size?: number }) {
   const [error, setError] = useState(false);
+  const domain = slug.includes(".") ? slug : `${slug}.com`;
   if (error) {
     return (
-      <div style={{ width: size, height: size, borderRadius: size * 0.28, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.45, flexShrink: 0, color: "#a78bfa", fontWeight: 800, fontFamily: "'Syne',sans-serif" }}>
+      <div style={{ width:size, height:size, borderRadius:size*0.28, background:"rgba(124,58,237,0.15)", border:"1px solid rgba(124,58,237,0.2)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:size*0.45, flexShrink:0, color:"#a78bfa", fontWeight:800, fontFamily:"'Syne',sans-serif" }}>
         {name[0].toUpperCase()}
       </div>
     );
@@ -67,31 +34,31 @@ function CompanyLogo({ domain, name, size = 34 }: { domain: string; name: string
       src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
       alt={name}
       onError={() => setError(true)}
-      style={{ width: size, height: size, borderRadius: size * 0.28, objectFit: "contain", background: "#fff", border: "1px solid rgba(255,255,255,0.08)", flexShrink: 0, padding: 2 }}
+      style={{ width:size, height:size, borderRadius:size*0.28, objectFit:"contain", background:"#fff", border:"1px solid rgba(255,255,255,0.08)", flexShrink:0, padding:2 }}
     />
   );
 }
 
 // ── Step indicator ─────────────────────────────────────────────────────────────
-function Steps({ current }: { current: 1 | 2 | 3 }) {
-  const steps = [{ n: 1, label: "Entreprise" }, { n: 2, label: "Ton code" }, { n: 3, label: "Confirmation" }];
+function Steps({ current }: { current: 1|2|3 }) {
+  const steps = [{ n:1, label:"Entreprise" }, { n:2, label:"Ton code" }, { n:3, label:"Confirmation" }];
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: "2.5rem" }}>
+    <div style={{ display:"flex", alignItems:"center", gap:0, marginBottom:"2.5rem" }}>
       {steps.map((s, i) => {
         const done = current > s.n;
         const active = current === s.n;
         return (
-          <div key={s.n} style={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : "none" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: done ? "#7c3aed" : active ? "rgba(124,58,237,.2)" : "rgba(255,255,255,.06)", border: `2px solid ${done || active ? "#7c3aed" : "rgba(255,255,255,.1)"}`, transition: "all .3s", flexShrink: 0 }}>
+          <div key={s.n} style={{ display:"flex", alignItems:"center", flex: i < steps.length-1 ? 1 : "none" }}>
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:5 }}>
+              <div style={{ width:32, height:32, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", background: done?"#7c3aed": active?"rgba(124,58,237,.2)":"rgba(255,255,255,.06)", border:`2px solid ${done||active?"#7c3aed":"rgba(255,255,255,.1)"}`, transition:"all .3s", flexShrink:0 }}>
                 {done
-                  ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
-                  : <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: "0.78rem", color: active ? "#a78bfa" : "rgba(255,255,255,.3)" }}>{s.n}</span>
+                  ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  : <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.78rem", color:active?"#a78bfa":"rgba(255,255,255,.3)" }}>{s.n}</span>
                 }
               </div>
-              <span style={{ fontSize: "0.68rem", fontWeight: 600, color: active ? "#fff" : done ? "rgba(255,255,255,.5)" : "rgba(255,255,255,.25)", whiteSpace: "nowrap" }}>{s.label}</span>
+              <span style={{ fontSize:"0.68rem", fontWeight:600, color:active?"#fff":done?"rgba(255,255,255,.5)":"rgba(255,255,255,.25)", whiteSpace:"nowrap" }}>{s.label}</span>
             </div>
-            {i < steps.length - 1 && <div style={{ flex: 1, height: 1, background: done ? "#7c3aed" : "rgba(255,255,255,.08)", margin: "0 8px", marginBottom: 20, transition: "background .3s" }} />}
+            {i < steps.length-1 && <div style={{ flex:1, height:1, background:done?"#7c3aed":"rgba(255,255,255,.08)", margin:"0 8px", marginBottom:20, transition:"background .3s" }} />}
           </div>
         );
       })}
@@ -101,26 +68,92 @@ function Steps({ current }: { current: 1 | 2 | 3 }) {
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function PublierPage() {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [filterCat, setFilterCat] = useState<Category | "Tout">("Tout");
-  const [search, setSearch] = useState("");
-  const [code, setCode] = useState("");
-  const [desc, setDesc] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const supabase = createClient();
+
+  const [step, setStep]                   = useState<1|2|3>(1);
+  const [companies, setCompanies]         = useState<Company[]>([]);
+  const [loadingCompanies, setLoadingCompanies] = useState(true);
+  const [selectedCompany, setSelectedCompany]   = useState<Company|null>(null);
+  const [filterCat, setFilterCat]         = useState<string>("Tout");
+  const [search, setSearch]               = useState("");
+  const [code, setCode]                   = useState("");
+  const [desc, setDesc]                   = useState("");
+  const [submitting, setSubmitting]       = useState(false);
+  const [error, setError]                 = useState("");
+
+  // ── Charger les entreprises depuis Supabase ──
+  useEffect(() => {
+    async function fetchCompanies() {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, name, slug, category, referral_bonus_description")
+        .order("name", { ascending: true });
+      if (!error && data) setCompanies(data);
+      setLoadingCompanies(false);
+    }
+    fetchCompanies();
+  }, []);
 
   const filtered = useMemo(() => {
-    return ALL_COMPANIES.filter(c => {
-      const matchCat = filterCat === "Tout" || c.category === filterCat;
+    return companies.filter(c => {
+      const matchCat    = filterCat === "Tout" || c.category === filterCat;
       const matchSearch = search === "" || c.name.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
-    }).slice(0, 80); // limiter à 80 résultats pour les perfs
-  }, [filterCat, search]);
+    });
+  }, [companies, filterCat, search]);
 
+  // ── Publier le code dans Supabase ──
   const handleSubmit = async () => {
     if (!code.trim() || !selectedCompany) return;
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 900));
+    setError("");
+
+    // Récupérer l'utilisateur connecté
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setError("Tu dois être connecté pour publier un code.");
+      setSubmitting(false);
+      return;
+    }
+
+    // Insérer l'annonce
+    const { error: insertError } = await supabase
+      .from("announcements")
+      .insert({
+        user_id:    user.id,
+        company_id: selectedCompany.id,
+        code:       code.trim(),
+        description: desc.trim() || null,
+      });
+
+    if (insertError) {
+      setError("Erreur lors de la publication : " + insertError.message);
+      setSubmitting(false);
+      return;
+    }
+
+    // Mettre à jour les XP de l'utilisateur
+    const { data: profile } = await supabase
+      .from("users")
+      .select("xp")
+      .eq("id", user.id)
+      .single();
+
+    if (profile) {
+      const newXp = (profile.xp ?? 0) + XP_GAIN;
+      const newLevel =
+        newXp >= 10000 ? "Parrain Légendaire" :
+        newXp >= 5000  ? "Super Parrain" :
+        newXp >= 2000  ? "Parrain Or" :
+        newXp >= 500   ? "Parrain Argent" :
+        newXp >= 100   ? "Parrain Bronze" : "Débutant";
+
+      await supabase
+        .from("users")
+        .update({ xp: newXp, level: newLevel })
+        .eq("id", user.id);
+    }
+
     setStep(3);
     setSubmitting(false);
   };
@@ -131,6 +164,7 @@ export default function PublierPage() {
         @keyframes spin   { to { transform:rotate(360deg); } }
         @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
         @keyframes pop    { 0%{transform:scale(.8);opacity:0} 60%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+        @keyframes shimmer{ 0%,100%{opacity:.5} 50%{opacity:1} }
         *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
         body { background:#0A0A0F; color:#e2e8f0; font-family:'DM Sans',sans-serif; min-height:100vh; }
 
@@ -168,6 +202,8 @@ export default function PublierPage() {
         .company-reward { font-size:.7rem; color:rgba(255,255,255,.35); margin-top:1px; }
         .company-check { width:18px; height:18px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-left:auto; }
 
+        .skeleton { background:rgba(255,255,255,.06); border-radius:8px; animation:shimmer 1.5s ease-in-out infinite; }
+
         .form-group { display:flex; flex-direction:column; gap:7px; }
         .form-label { font-size:.78rem; font-weight:600; color:rgba(255,255,255,.45); letter-spacing:.04em; display:flex; align-items:center; gap:8px; }
         .form-label-opt { font-size:.7rem; color:rgba(255,255,255,.2); font-weight:400; }
@@ -176,6 +212,8 @@ export default function PublierPage() {
         .form-input::placeholder { color:rgba(255,255,255,.25); }
         .form-textarea { resize:vertical; min-height:100px; }
         .form-hint { font-size:.7rem; color:rgba(255,255,255,.22); }
+
+        .form-error { display:flex; align-items:center; gap:8px; background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.25); border-radius:10px; padding:.7rem .875rem; font-size:.8rem; color:#f87171; margin-bottom:1rem; }
 
         .selected-display { display:flex; align-items:center; gap:12px; background:rgba(124,58,237,.1); border:1px solid rgba(124,58,237,.3); border-radius:12px; padding:.75rem 1rem; margin-bottom:1.5rem; }
         .selected-change { margin-left:auto; background:none; border:1px solid rgba(255,255,255,.1); border-radius:8px; color:rgba(255,255,255,.4); font-size:.75rem; padding:.3rem .625rem; cursor:pointer; transition:all .18s; font-family:'DM Sans',sans-serif; }
@@ -224,45 +262,59 @@ export default function PublierPage() {
 
         <div className="form-card">
 
-          {/* ── Step 1 ── */}
+          {/* ── Step 1 : choisir l'entreprise ── */}
           {step === 1 && (
             <div>
               <div className="search-wrap">
                 <svg className="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input className="search-input" placeholder="Rechercher parmi 2700+ entreprises..." value={search} onChange={e => setSearch(e.target.value)} />
+                <input className="search-input" placeholder="Rechercher une entreprise..." value={search} onChange={e => setSearch(e.target.value)} />
               </div>
+
               <div className="cats">
-                {(["Tout", ...CATEGORIES] as (Category | "Tout")[]).map(c => (
+                {(["Tout", ...CATEGORIES]).map(c => (
                   <button key={c} className={`cat-pill ${filterCat === c ? "active" : ""}`} onClick={() => setFilterCat(c)}>
-                    {c !== "Tout" ? CAT_ICONS[c] + " " : ""}{c}
+                    {c !== "Tout" ? CAT_ICONS[c] + " " : ""}{c !== "Tout" ? CAT_LABELS[c] : "Tout"}
                   </button>
                 ))}
               </div>
+
               <p className="results-hint">
-                {filtered.length >= 80 ? "80+" : filtered.length} résultats
-                {search ? ` pour "${search}"` : ""} — affinez avec la recherche
+                {loadingCompanies ? "Chargement..." : `${filtered.length} entreprise${filtered.length > 1 ? "s" : ""}${search ? ` pour "${search}"` : ""}`}
               </p>
+
               <div className="company-grid">
-                {filtered.map(c => (
-                  <div key={c.name} className={`company-card ${selectedCompany?.name === c.name ? "selected" : ""}`} onClick={() => setSelectedCompany(c)}>
-                    <CompanyLogo domain={c.domain} name={c.name} size={34} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p className="company-name">{c.name}</p>
-                      <p className="company-reward">{c.reward}</p>
+                {loadingCompanies ? (
+                  // Skeleton loading
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} style={{ display:"flex", alignItems:"center", gap:10, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:12, padding:".75rem 1rem" }}>
+                      <div className="skeleton" style={{ width:34, height:34, borderRadius:10, flexShrink:0 }} />
+                      <div style={{ flex:1 }}>
+                        <div className="skeleton" style={{ width:"60%", height:12, marginBottom:6 }} />
+                        <div className="skeleton" style={{ width:"40%", height:10 }} />
+                      </div>
                     </div>
-                    {selectedCompany?.name === c.name && (
+                  ))
+                ) : filtered.map(c => (
+                  <div key={c.id} className={`company-card ${selectedCompany?.id === c.id ? "selected" : ""}`} onClick={() => setSelectedCompany(c)}>
+                    <CompanyLogo slug={c.slug} name={c.name} size={34} />
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <p className="company-name">{c.name}</p>
+                      <p className="company-reward">{c.referral_bonus_description || "Offre de bienvenue"}</p>
+                    </div>
+                    {selectedCompany?.id === c.id && (
                       <div className="company-check">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
                       </div>
                     )}
                   </div>
                 ))}
-                {filtered.length === 0 && (
-                  <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "2rem", color: "rgba(255,255,255,.25)", fontSize: ".875rem" }}>
+                {!loadingCompanies && filtered.length === 0 && (
+                  <div style={{ gridColumn:"1/-1", textAlign:"center", padding:"2rem", color:"rgba(255,255,255,.25)", fontSize:".875rem" }}>
                     Aucune entreprise trouvée
                   </div>
                 )}
               </div>
+
               <button className="btn-next" disabled={!selectedCompany} onClick={() => setStep(2)}>
                 Continuer
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -270,7 +322,7 @@ export default function PublierPage() {
             </div>
           )}
 
-          {/* ── Step 2 ── */}
+          {/* ── Step 2 : saisir le code ── */}
           {step === 2 && (
             <div>
               <button className="btn-back" onClick={() => setStep(1)}>
@@ -280,26 +332,41 @@ export default function PublierPage() {
 
               {selectedCompany && (
                 <div className="selected-display">
-                  <CompanyLogo domain={selectedCompany.domain} name={selectedCompany.name} size={38} />
+                  <CompanyLogo slug={selectedCompany.slug} name={selectedCompany.name} size={38} />
                   <div>
-                    <p style={{ fontWeight: 700, color: "#fff", fontSize: ".9rem" }}>{selectedCompany.name}</p>
-                    <p style={{ fontSize: ".72rem", color: "rgba(255,255,255,.4)" }}>{selectedCompany.reward} · {selectedCompany.category}</p>
+                    <p style={{ fontWeight:700, color:"#fff", fontSize:".9rem" }}>{selectedCompany.name}</p>
+                    <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.4)" }}>
+                      {selectedCompany.referral_bonus_description || "Offre de bienvenue"} · {CAT_LABELS[selectedCompany.category] ?? selectedCompany.category}
+                    </p>
                   </div>
                   <button className="selected-change" onClick={() => setStep(1)}>Changer</button>
                 </div>
               )}
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+              {error && (
+                <div className="form-error">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  {error}
+                </div>
+              )}
+
+              <div style={{ display:"flex", flexDirection:"column", gap:"1.25rem" }}>
                 <div className="form-group">
                   <label className="form-label">
                     Votre code de parrainage
-                    <span style={{ fontSize: ".7rem", color: "rgba(255,255,255,.3)", fontWeight: 400 }}>obligatoire</span>
+                    <span style={{ fontSize:".7rem", color:"rgba(255,255,255,.3)", fontWeight:400 }}>obligatoire</span>
                   </label>
-                  <input className="form-input code-input" placeholder="Ex : PAUL2024" value={code} onChange={e => setCode(e.target.value.toUpperCase())} maxLength={32} />
+                  <input
+                    className="form-input code-input"
+                    placeholder="Ex : PAUL2024"
+                    value={code}
+                    onChange={e => setCode(e.target.value.toUpperCase())}
+                    maxLength={32}
+                  />
                   {code && (
                     <div className="code-preview">
                       <span className="code-dot" />
-                      <code style={{ fontFamily: "'Courier New',monospace", fontWeight: 700, fontSize: ".9rem", color: "#e2e8f0", letterSpacing: ".08em" }}>{code}</code>
+                      <code style={{ fontFamily:"'Courier New',monospace", fontWeight:700, fontSize:".9rem", color:"#e2e8f0", letterSpacing:".08em" }}>{code}</code>
                     </div>
                   )}
                   <p className="form-hint">Tel qu'il apparaîtra sur la page des codes</p>
@@ -310,7 +377,13 @@ export default function PublierPage() {
                     Description
                     <span className="form-label-opt">optionnel</span>
                   </label>
-                  <textarea className="form-input form-textarea" placeholder="Ex : Profite de 80€ offerts à l'ouverture de ton compte..." value={desc} onChange={e => setDesc(e.target.value)} maxLength={280} />
+                  <textarea
+                    className="form-input form-textarea"
+                    placeholder="Ex : Profite de 80€ offerts à l'ouverture de ton compte..."
+                    value={desc}
+                    onChange={e => setDesc(e.target.value)}
+                    maxLength={280}
+                  />
                   <p className="form-hint">{desc.length}/280 caractères</p>
                 </div>
               </div>
@@ -318,20 +391,20 @@ export default function PublierPage() {
               <button className="btn-next" disabled={!code.trim() || submitting} onClick={handleSubmit}>
                 {submitting ? (
                   <>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                     Publication...
                   </>
                 ) : (
                   <>
                     Publier mon annonce
-                    <span style={{ background: "rgba(255,255,255,.2)", borderRadius: 100, padding: "1px 8px", fontSize: ".75rem" }}>+{XP_GAIN} XP</span>
+                    <span style={{ background:"rgba(255,255,255,.2)", borderRadius:100, padding:"1px 8px", fontSize:".75rem" }}>+{XP_GAIN} XP</span>
                   </>
                 )}
               </button>
             </div>
           )}
 
-          {/* ── Step 3 ── */}
+          {/* ── Step 3 : succès ── */}
           {step === 3 && (
             <div className="success-wrap">
               <div className="success-icon">🎉</div>
@@ -340,20 +413,21 @@ export default function PublierPage() {
               <div className="success-xp">+{XP_GAIN} XP gagnés ⚡</div>
               <div className="success-actions">
                 <a href="/codes" className="btn-success-primary">Voir les codes</a>
-                <button className="btn-success-ghost" onClick={() => { setStep(1); setSelectedCompany(null); setCode(""); setDesc(""); }}>
+                <button className="btn-success-ghost" onClick={() => { setStep(1); setSelectedCompany(null); setCode(""); setDesc(""); setError(""); }}>
                   Publier un autre code
                 </button>
                 <a href="/profil" className="btn-success-ghost">Mon profil</a>
               </div>
             </div>
           )}
+
         </div>
 
         {step < 3 && (
-          <div style={{ marginTop: "1.25rem", background: "rgba(255,255,255,.02)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <span style={{ fontSize: "1rem", flexShrink: 0 }}>💡</span>
-            <p style={{ fontSize: ".78rem", color: "rgba(255,255,255,.35)", lineHeight: 1.6 }}>
-              Les annonces avec une description claire reçoivent <strong style={{ color: "rgba(255,255,255,.6)" }}>2× plus de clics</strong>.
+          <div style={{ marginTop:"1.25rem", background:"rgba(255,255,255,.02)", border:"1px solid rgba(255,255,255,.06)", borderRadius:14, padding:"1rem 1.25rem", display:"flex", alignItems:"flex-start", gap:10 }}>
+            <span style={{ fontSize:"1rem", flexShrink:0 }}>💡</span>
+            <p style={{ fontSize:".78rem", color:"rgba(255,255,255,.35)", lineHeight:1.6 }}>
+              Les annonces avec une description claire reçoivent <strong style={{ color:"rgba(255,255,255,.6)" }}>2× plus de clics</strong>.
               Précise le montant offert et les conditions pour maximiser tes parrainages.
             </p>
           </div>
