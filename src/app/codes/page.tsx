@@ -46,7 +46,7 @@ function BrandLogo({ domain, brand }: { domain: string; brand: string }) {
   return (
     <div className="brand-logo">
       <img
-        src={`https://logo.clearbit.com/${domain}`}
+        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
         alt={brand}
         onError={() => setError(true)}
         style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 8, padding: 3 }}
