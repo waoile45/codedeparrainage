@@ -1,2 +1,2 @@
 import { Confidentialite } from "@/components/legal-pages";
-export default Confidentialite;
+export default function Page() { return <Confidentialite />; }
