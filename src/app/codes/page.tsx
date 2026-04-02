@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 
@@ -103,10 +104,14 @@ function CodeCardItem({ card, index }: { card: CodeCard; index: number }) {
 }
 
 export default function CodesPage() {
+  const searchParams = useSearchParams();
   const [codes, setCodes]           = useState<CodeCard[]>([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState("");
-  const [activeCategory, setActiveCategory] = useState<Category>("Tout");
+  const [activeCategory, setActiveCategory] = useState<Category>(() => {
+    const cat = searchParams.get("categorie");
+    return (cat && CATEGORIES.includes(cat)) ? cat as Category : "Tout";
+  });
   const [sort, setSort]             = useState<"popular"|"recent">("popular");
   const [count, setCount]           = useState(0);
   const supabase = createClient();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 
@@ -323,9 +324,9 @@ function SectionAnnonces({ annonces, onDelete }: { annonces:Annonce[]; onDelete:
 }
 
 // ── Section Badges ─────────────────────────────────────────────────────────────
-function SectionBadges({ xp }: { xp:number }) {
+function SectionBadges({ xp, annoncesCount }: { xp:number; annoncesCount:number }) {
   const badges: Badge[] = [
-    { id:"1", label:"Première annonce", icon:"🚀", unlocked:true,     desc:"Tu as publié ton premier code" },
+    { id:"1", label:"Première annonce", icon:"🚀", unlocked:annoncesCount > 0, desc:"Tu as publié ton premier code" },
     { id:"2", label:"Parrain Bronze",   icon:"🥉", unlocked:xp>=100,  desc:"Atteins 100 XP" },
     { id:"3", label:"Streak x7",        icon:"🔥", unlocked:false,    desc:"Connecte-toi 7 jours de suite" },
     { id:"4", label:"Premier boost",    icon:"⚡", unlocked:false,    desc:"Booste une annonce" },
@@ -469,9 +470,15 @@ function Skeleton() {
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
+const VALID_TABS: NavSection[] = ["profil","annonces","messages","badges","quetes","credits","parametres"];
+
 export default function ProfilPage() {
   const supabase = createClient();
-  const [active, setActive]     = useState<NavSection>("profil");
+  const searchParams = useSearchParams();
+  const [active, setActive]     = useState<NavSection>(() => {
+    const tab = searchParams.get("tab") as NavSection | null;
+    return (tab && VALID_TABS.includes(tab)) ? tab : "profil";
+  });
   const [user, setUser]         = useState<UserProfile | null>(null);
   const [annonces, setAnnonces] = useState<Annonce[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -517,7 +524,7 @@ export default function ProfilPage() {
       case "profil":     return <SectionProfil user={user} annonces={annonces} onPseudoSave={handlePseudoSave} onAvatarUpload={handleAvatarUpload} />;
       case "annonces":   return <SectionAnnonces annonces={annonces} onDelete={handleDeleteAnnonce} />;
       case "messages":   return <SectionMessages />;
-      case "badges":     return <SectionBadges xp={user.xp} />;
+      case "badges":     return <SectionBadges xp={user.xp} annoncesCount={annonces.length} />;
       case "quetes":     return <SectionQuetes user={user} annonces={annonces} />;
       case "credits":    return <SectionCredits />;
       case "parametres": return <SectionParametres user={user} onPseudoSave={handlePseudoSave} onAvatarUpload={handleAvatarUpload} onBioSave={handleBioSave} />;

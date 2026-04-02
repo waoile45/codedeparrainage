@@ -133,11 +133,11 @@ export default function HomePage() {
       <div style={{ position:"fixed", top:-200, left:"50%", transform:"translateX(-50%)", width:700, height:700, borderRadius:"50%", background:"radial-gradient(circle,rgba(124,58,237,0.13) 0%,transparent 65%)", pointerEvents:"none", zIndex:0 }} />
 
       {/* ══ NAVBAR ══════════════════════════════════════════════════════════ */}
-      <nav style={{ position:"relative", zIndex:10, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"1.25rem 2rem", maxWidth:1200, margin:"0 auto" }}>
+      <nav id="hp-nav" style={{ position:"relative", zIndex:10, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"1.25rem 2rem", maxWidth:1200, margin:"0 auto" }}>
         <Link href="/" style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.1rem", color:"#fff", textDecoration:"none", letterSpacing:"-0.02em" }}>
           code<span style={{ color:"#7c3aed" }}>de</span>parrainage.com
         </Link>
-        <div style={{ display:"flex", alignItems:"center", gap:"0.25rem" }}>
+        <div id="hp-nav-links" style={{ display:"flex", alignItems:"center", gap:"0.25rem" }}>
           {[{ label:"Codes", href:"/codes" },{ label:"Classement", href:"/classement" },{ label:"Connexion", href:"/login" }].map(item => (
             <Link key={item.href} href={item.href}
               style={{ color:"rgba(255,255,255,0.55)", fontSize:"0.875rem", fontWeight:500, textDecoration:"none", padding:"0.5rem 0.875rem", borderRadius:10, transition:"color 0.18s" }}
@@ -154,7 +154,7 @@ export default function HomePage() {
       </nav>
 
       {/* ══ HERO ════════════════════════════════════════════════════════════ */}
-      <section style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"3rem 2rem 5rem", display:"grid", gridTemplateColumns:"1fr 1fr", gap:"2rem", alignItems:"center" }}>
+      <section id="hp-hero" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"3rem 2rem 5rem", display:"grid", gap:"2rem", alignItems:"center" }}>
 
         {/* Left */}
         <div style={{ animation: mounted ? "fadeInUp 0.6s ease both" : "none" }}>
@@ -180,7 +180,7 @@ export default function HomePage() {
               onMouseLeave={e=>{ e.currentTarget.style.background="rgba(255,255,255,0.05)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.1)"; }}
             >Publier mon code →</Link>
           </div>
-          <div style={{ display:"flex", gap:"2rem", marginTop:"2.5rem" }}>
+          <div id="hp-hero-stats" style={{ display:"flex", gap:"2rem", marginTop:"2.5rem" }}>
             {[{ n:"4 200+", l:"Codes actifs" },{ n:"850+", l:"Parrains vérifiés" },{ n:"97%", l:"Avis positifs" }].map(s=>(
               <div key={s.l}>
                 <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.5rem", color:"#fff" }}>{s.n}</div>
@@ -191,7 +191,7 @@ export default function HomePage() {
         </div>
 
         {/* Right — floating cards */}
-        <div style={{ position:"relative", height:480 }}>
+        <div id="hp-hero-right" style={{ position:"relative", height:480 }}>
           <div style={{ position:"absolute", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(124,58,237,0.18) 0%,transparent 70%)", top:"50%", left:"50%", transform:"translate(-50%,-50%)", pointerEvents:"none" }} />
           {FLOATING_CARDS.map((card,i)=>(
             <div key={card.id} style={{ position:"absolute", top:card.top, right:card.right, background:"rgba(255,255,255,0.04)", backdropFilter:"blur(16px)", border:"1px solid rgba(255,255,255,0.09)", borderRadius:16, padding:"0.875rem 1rem", minWidth:200, animation: mounted ? `floatCard${i%2} ${3+i*0.5}s ease-in-out infinite` : "none", animationDelay:`${i*0.4}s`, boxShadow:"0 8px 32px rgba(0,0,0,0.4)" }}>
@@ -230,7 +230,7 @@ export default function HomePage() {
       {/* ══ COMMENT ÇA MARCHE ═══════════════════════════════════════════════ */}
       <section style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"2rem 2rem 4rem" }}>
         <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:"0 0 2rem", textAlign:"center" }}>Comment ça marche ?</h2>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1.25rem" }}>
+        <div id="hp-how" style={{ display:"grid", gap:"1.25rem" }}>
           {[
             { num:"01", title:"Trouve un code",   desc:"Parcours des milliers de codes vérifiés par catégorie ou marque.", icon:"🔍" },
             { num:"02", title:"Parraine & gagne",  desc:"Utilise le code, valide le parrainage et accumule des XP.",       icon:"🎁" },
@@ -300,11 +300,29 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Keyframes */}
+      {/* Keyframes + Mobile */}
       <style>{`
         @keyframes fadeInUp   { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         @keyframes floatCard0 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
         @keyframes floatCard1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+
+        #hp-hero   { grid-template-columns: 1fr 1fr; }
+        #hp-how    { grid-template-columns: repeat(3,1fr); }
+        #hp-nav    { padding: 1.25rem 2rem; }
+        #hp-hero-right { display: block; }
+
+        @media (max-width: 768px) {
+          #hp-nav { padding: 1rem 1.25rem !important; }
+          #hp-nav-links { display: none !important; }
+          #hp-hero { grid-template-columns: 1fr !important; padding: 2rem 1.25rem 3rem !important; }
+          #hp-hero-right { display: none !important; }
+          #hp-how  { grid-template-columns: 1fr !important; }
+          #hp-sections { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+        }
+        @media (max-width: 480px) {
+          #hp-hero h1 { font-size: 2.4rem !important; }
+          #hp-hero-stats { gap: 1rem !important; }
+        }
       `}</style>
     </main>
   );

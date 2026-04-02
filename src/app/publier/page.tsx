@@ -358,7 +358,7 @@ export default function PublierPage() {
                   </label>
                   <input
                     className="form-input code-input"
-                    placeholder="Ex : PAUL2024"
+                    placeholder="Ex : VOTRE CODE"
                     value={code}
                     onChange={e => setCode(e.target.value.toUpperCase())}
                     maxLength={32}
