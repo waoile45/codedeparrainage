@@ -127,6 +127,13 @@ h1, h2, h3 {
 [data-theme="light"] .nav-group-label { color: rgba(15,15,26,0.4) !important; }
 [data-theme="light"] .sc > div { background: #fff !important; border-color: rgba(124,58,237,0.1) !important; box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important; }
 
+/* ── Homepage nav & hero ────────────────────────────────────────── */
+[data-theme="light"] #hp-nav { background: rgba(238,238,248,0.95) !important; }
+[data-theme="light"] #hp-nav a { color: rgba(15,15,26,0.55) !important; }
+[data-theme="light"] #hp-nav a:hover { color: #0f0f1a !important; }
+[data-theme="light"] #hp-nav button { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.1) !important; color: rgba(15,15,26,0.6) !important; }
+[data-theme="light"] #hp-nav button:hover { background: rgba(0,0,0,0.09) !important; color: #0f0f1a !important; }
+
 /* ── Footer ─────────────────────────────────────────────────────── */
 [data-theme="light"] footer { border-top-color: rgba(0,0,0,0.08) !important; background: #e6e6f5 !important; }
 [data-theme="light"] footer p,
