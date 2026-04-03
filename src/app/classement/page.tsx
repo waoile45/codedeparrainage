@@ -235,8 +235,6 @@ export default function ClassementPage() {
         }
       `}</style>
 
-      {/* Navbar */}
-      // classement
       <Navbar activePage="classement" />
 
       <main className="page">

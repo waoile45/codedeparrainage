@@ -424,10 +424,10 @@ export default function PublierPage() {
         </div>
 
         {step < 3 && (
-          <div style={{ marginTop:"1.25rem", background:"rgba(255,255,255,.02)", border:"1px solid rgba(255,255,255,.06)", borderRadius:14, padding:"1rem 1.25rem", display:"flex", alignItems:"flex-start", gap:10 }}>
+          <div className="hint-box" style={{ marginTop:"1.25rem", background:"rgba(255,255,255,.02)", border:"1px solid rgba(255,255,255,.06)", borderRadius:14, padding:"1rem 1.25rem", display:"flex", alignItems:"flex-start", gap:10 }}>
             <span style={{ fontSize:"1rem", flexShrink:0 }}>💡</span>
-            <p style={{ fontSize:".78rem", color:"rgba(255,255,255,.35)", lineHeight:1.6 }}>
-              Les annonces avec une description claire reçoivent <strong style={{ color:"rgba(255,255,255,.6)" }}>2× plus de clics</strong>.
+            <p className="hint-text" style={{ fontSize:".78rem", color:"rgba(255,255,255,.35)", lineHeight:1.6 }}>
+              Les annonces avec une description claire reçoivent <strong className="hint-strong" style={{ color:"rgba(255,255,255,.6)" }}>2× plus de clics</strong>.
               Précise le montant offert et les conditions pour maximiser tes parrainages.
             </p>
           </div>
