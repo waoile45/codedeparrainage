@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (user) {
-      // Créer le profil s'il n'existe pas (cas email confirmation activée)
       const { data: existingProfile } = await supabase
         .from('users')
         .select('id')
@@ -37,7 +36,14 @@ export async function GET(request: NextRequest) {
         .single()
 
       if (!existingProfile) {
-        const pseudo = (user.user_metadata?.pseudo as string | undefined) ?? 'Anonyme'
+        // Pseudo : metadata.pseudo (email signup) → full_name Google → email prefix
+        const meta = user.user_metadata ?? {}
+        const pseudo =
+          (meta.pseudo as string | undefined) ??
+          (meta.full_name as string | undefined) ??
+          (meta.name as string | undefined) ??
+          (user.email?.split('@')[0] ?? 'Anonyme')
+
         await supabase.from('users').insert({
           id:    user.id,
           email: user.email,

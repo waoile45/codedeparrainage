@@ -5,12 +5,22 @@ import { createClient } from '@/lib/supabase'
 import { Turnstile } from '@marsidev/react-turnstile'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [email, setEmail]               = useState('')
+  const [password, setPassword]         = useState('')
+  const [showPwd, setShowPwd]           = useState(false)
+  const [error, setError]               = useState('')
+  const [loading, setLoading]           = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
   const supabase = createClient()
+
+  async function handleGoogleLogin() {
+    setGoogleLoading(true)
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    })
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -95,29 +105,24 @@ export default function LoginPage() {
         body { background:#0A0A0F; font-family:'DM Sans',sans-serif; min-height:100vh; }
 
         .auth-bg {
-          min-height:100vh;
-          background:#0A0A0F;
+          min-height:100vh; background:#0A0A0F;
           display:flex; align-items:center; justify-content:center;
-          padding:1.5rem;
-          position:relative; overflow:hidden;
+          padding:1.5rem; position:relative; overflow:hidden;
         }
         .auth-bg::before {
-          content:'';
-          position:fixed; top:-200px; left:50%; transform:translateX(-50%);
+          content:''; position:fixed; top:-200px; left:50%; transform:translateX(-50%);
           width:600px; height:600px;
           background:radial-gradient(circle,rgba(124,58,237,0.12),transparent 65%);
           pointer-events:none;
         }
         .auth-card {
           width:100%; max-width:420px;
-          background:rgba(255,255,255,0.03);
-          border:1px solid rgba(255,255,255,0.08);
+          background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
           border-radius:24px; padding:2.5rem 2rem;
           position:relative; animation:fadeIn 0.4s ease; overflow:hidden;
         }
         .auth-card::before {
-          content:'';
-          position:absolute; top:0; left:0; right:0; height:1px;
+          content:''; position:absolute; top:0; left:0; right:0; height:1px;
           background:linear-gradient(90deg,transparent,rgba(124,58,237,0.5),transparent);
         }
         .auth-logo {
@@ -126,70 +131,74 @@ export default function LoginPage() {
           display:block; text-align:center; margin-bottom:0.5rem;
         }
         .auth-logo span { color:#7c3aed; }
-        .auth-subtitle {
-          text-align:center; color:rgba(255,255,255,0.35);
-          font-size:0.875rem; margin-bottom:2rem;
-        }
+        .auth-subtitle { text-align:center; color:rgba(255,255,255,0.35); font-size:0.875rem; margin-bottom:1.75rem; }
         .auth-form { display:flex; flex-direction:column; gap:1rem; }
         .auth-field { display:flex; flex-direction:column; gap:6px; }
-        .auth-label {
-          font-size:0.78rem; font-weight:600;
-          color:rgba(255,255,255,0.45); letter-spacing:0.04em;
-        }
+        .auth-label { font-size:0.78rem; font-weight:600; color:rgba(255,255,255,0.45); letter-spacing:0.04em; }
+        .pwd-wrap { position:relative; }
         .auth-input {
-          background:rgba(255,255,255,0.04);
-          border:1px solid rgba(255,255,255,0.08);
+          background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
           border-radius:12px; padding:0.75rem 1rem;
-          color:#fff; font-size:0.9rem;
-          font-family:'DM Sans',sans-serif; outline:none; transition:all 0.2s; width:100%;
+          color:#fff; font-size:0.9rem; font-family:'DM Sans',sans-serif;
+          outline:none; transition:all 0.2s; width:100%;
         }
+        .auth-input.has-toggle { padding-right:2.75rem; }
         .auth-input::placeholder { color:rgba(255,255,255,0.25); }
-        .auth-input:focus {
-          border-color:rgba(124,58,237,0.45);
-          background:rgba(124,58,237,0.05);
-          box-shadow:0 0 0 3px rgba(124,58,237,0.1);
+        .auth-input:focus { border-color:rgba(124,58,237,0.45); background:rgba(124,58,237,0.05); box-shadow:0 0 0 3px rgba(124,58,237,0.1); }
+        .pwd-toggle {
+          position:absolute; right:0.875rem; top:50%; transform:translateY(-50%);
+          background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.3);
+          padding:0; display:flex; align-items:center; transition:color 0.18s;
         }
-        .auth-forgot {
-          text-align:right; font-size:0.75rem;
-          color:rgba(255,255,255,0.3); text-decoration:none;
-          transition:color 0.18s; margin-top:-2px; display:block;
-        }
+        .pwd-toggle:hover { color:rgba(255,255,255,0.7); }
+        .auth-forgot { text-align:right; font-size:0.75rem; color:rgba(255,255,255,0.3); text-decoration:none; transition:color 0.18s; margin-top:-2px; display:block; }
         .auth-forgot:hover { color:#a78bfa; }
-        .turnstile-wrap {
-          border-radius:12px; overflow:hidden;
-          border:1px solid rgba(255,255,255,0.07);
-        }
-        .auth-error {
-          display:flex; align-items:center; gap:8px;
-          background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25);
-          border-radius:10px; padding:0.7rem 0.875rem;
-          font-size:0.8rem; color:#f87171;
-        }
+        .turnstile-wrap { border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.07); }
+        .auth-error { display:flex; align-items:center; gap:8px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:0.7rem 0.875rem; font-size:0.8rem; color:#f87171; }
         .auth-btn {
           display:flex; align-items:center; justify-content:center; gap:7px;
           width:100%; background:#7c3aed; color:#fff; border:none;
           border-radius:13px; padding:0.875rem; font-size:0.9rem; font-weight:700;
           cursor:pointer; transition:all 0.2s; font-family:'DM Sans',sans-serif;
         }
-        .auth-btn:hover:not(:disabled) {
-          background:#6d28d9; transform:translateY(-1px);
-          box-shadow:0 6px 24px rgba(124,58,237,0.4);
-        }
+        .auth-btn:hover:not(:disabled) { background:#6d28d9; transform:translateY(-1px); box-shadow:0 6px 24px rgba(124,58,237,0.4); }
         .auth-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-        .auth-switch {
-          text-align:center; font-size:0.82rem;
-          color:rgba(255,255,255,0.3); margin-top:1.25rem;
+        .auth-btn-google {
+          display:flex; align-items:center; justify-content:center; gap:10px;
+          width:100%; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.85);
+          border:1px solid rgba(255,255,255,0.12); border-radius:13px; padding:0.8rem;
+          font-size:0.9rem; font-weight:600; cursor:pointer; transition:all 0.2s;
+          font-family:'DM Sans',sans-serif;
         }
+        .auth-btn-google:hover:not(:disabled) { background:rgba(255,255,255,0.09); border-color:rgba(255,255,255,0.2); }
+        .auth-btn-google:disabled { opacity:0.5; cursor:not-allowed; }
+        .auth-separator { display:flex; align-items:center; gap:10px; }
+        .auth-separator-line { flex:1; height:1px; background:rgba(255,255,255,0.07); }
+        .auth-separator-text { font-size:0.72rem; color:rgba(255,255,255,0.25); white-space:nowrap; }
+        .auth-switch { text-align:center; font-size:0.82rem; color:rgba(255,255,255,0.3); margin-top:1.25rem; }
         .auth-switch a { color:#a78bfa; text-decoration:none; font-weight:600; }
         .auth-switch a:hover { text-decoration:underline; }
       `}</style>
 
       <div className="auth-bg">
         <div className="auth-card">
-          <a href="/" className="auth-logo">
-            code<span>de</span>parrainage.com
-          </a>
+          <a href="/" className="auth-logo">code<span>de</span>parrainage.com</a>
           <p className="auth-subtitle">Connectez-vous à votre compte</p>
+
+          {/* Google */}
+          <button className="auth-btn-google" onClick={handleGoogleLogin} disabled={googleLoading} type="button">
+            {googleLoading
+              ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              : <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            }
+            Continuer avec Google
+          </button>
+
+          <div className="auth-separator" style={{ margin:"1.25rem 0" }}>
+            <div className="auth-separator-line" />
+            <span className="auth-separator-text">ou avec email</span>
+            <div className="auth-separator-line" />
+          </div>
 
           <form className="auth-form" onSubmit={handleLogin}>
 
@@ -202,53 +211,43 @@ export default function LoginPage() {
 
             <div className="auth-field">
               <label className="auth-label">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="auth-input"
-                placeholder="ton@email.com"
-                required
-              />
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="auth-input" placeholder="ton@email.com" required />
             </div>
 
             <div className="auth-field">
               <label className="auth-label">Mot de passe</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="auth-input"
-                placeholder="••••••••"
-                required
-              />
+              <div className="pwd-wrap">
+                <input
+                  type={showPwd ? "text" : "password"}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="auth-input has-toggle"
+                  placeholder="••••••••"
+                  required
+                />
+                <button type="button" className="pwd-toggle" onClick={() => setShowPwd(v => !v)} tabIndex={-1}>
+                  {showPwd
+                    ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  }
+                </button>
+              </div>
               <a href="/forgot-password" className="auth-forgot">Mot de passe oublié ?</a>
             </div>
 
             <div className="turnstile-wrap">
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                onSuccess={token => setTurnstileToken(token)}
-              />
+              <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!} onSuccess={token => setTurnstileToken(token)} />
             </div>
 
-            <button
-              type="submit"
-              className="auth-btn"
-              disabled={loading || !turnstileToken}
-            >
+            <button type="submit" className="auth-btn" disabled={loading || !turnstileToken}>
               {loading
                 ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                 : "Se connecter"
               }
             </button>
-
           </form>
 
-          <p className="auth-switch">
-            Pas encore de compte ?{' '}
-            <a href="/register">S'inscrire gratuitement</a>
-          </p>
+          <p className="auth-switch">Pas encore de compte ?{' '}<a href="/register">S&apos;inscrire gratuitement</a></p>
         </div>
       </div>
     </>

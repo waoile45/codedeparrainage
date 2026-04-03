@@ -5,6 +5,25 @@ import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import { ENTREPRISES, type Entreprise } from "@/data/entreprises";
 
+// ── Entreprises recommandées (prioritaires) ────────────────────────────────────
+const RECOMMENDED: Entreprise[] = [
+  { nom:"BoursoBank",    domain:"boursobank.com",  logo:`https://www.google.com/s2/favicons?domain=boursobank.com&sz=64` },
+  { nom:"Fortuneo",      domain:"fortuneo.fr",     logo:`https://www.google.com/s2/favicons?domain=fortuneo.fr&sz=64` },
+  { nom:"Hello bank!",   domain:"hellobank.fr",    logo:`https://www.google.com/s2/favicons?domain=hellobank.fr&sz=64` },
+  { nom:"Monabanq",      domain:"monabanq.com",    logo:`https://www.google.com/s2/favicons?domain=monabanq.com&sz=64` },
+  { nom:"Revolut",       domain:"revolut.com",     logo:`https://www.google.com/s2/favicons?domain=revolut.com&sz=64` },
+  { nom:"N26",           domain:"n26.com",         logo:`https://www.google.com/s2/favicons?domain=n26.com&sz=64` },
+  { nom:"Lydia",         domain:"lydia-app.com",   logo:`https://www.google.com/s2/favicons?domain=lydia-app.com&sz=64` },
+  { nom:"iGraal",        domain:"igraal.com",      logo:`https://www.google.com/s2/favicons?domain=igraal.com&sz=64` },
+  { nom:"Poulpeo",       domain:"poulpeo.com",     logo:`https://www.google.com/s2/favicons?domain=poulpeo.com&sz=64` },
+  { nom:"TopCashback",   domain:"topcashback.fr",  logo:`https://www.google.com/s2/favicons?domain=topcashback.fr&sz=64` },
+  { nom:"PayPal",        domain:"paypal.com",      logo:`https://www.google.com/s2/favicons?domain=paypal.com&sz=64` },
+  { nom:"Uber",          domain:"uber.com",        logo:`https://www.google.com/s2/favicons?domain=uber.com&sz=64` },
+  { nom:"Veepee",        domain:"veepee.fr",       logo:`https://www.google.com/s2/favicons?domain=veepee.fr&sz=64` },
+  { nom:"WeWard",        domain:"weward.fr",       logo:`https://www.google.com/s2/favicons?domain=weward.fr&sz=64` },
+  { nom:"Macadam",       domain:"macadam.fr",      logo:`https://www.google.com/s2/favicons?domain=macadam.fr&sz=64` },
+];
+
 // ── Constantes ─────────────────────────────────────────────────────────────────
 const CATEGORIES = ["banque","crypto","energie","cashback","telephonie","paris","assurance","shopping"];
 const CAT_LABELS: Record<string,string> = { banque:"Banque", crypto:"Crypto", energie:"Énergie", cashback:"Cashback", telephonie:"Téléphonie", paris:"Paris", assurance:"Assurance", shopping:"Shopping" };
@@ -301,6 +320,34 @@ export default function PublierPage() {
           {/* ── Step 1 : choisir l'entreprise ── */}
           {step === 1 && (
             <div>
+              {/* Recommandées */}
+              {!search.trim() && (
+                <div style={{ marginBottom:"1.25rem" }}>
+                  <p style={{ fontSize:".72rem", fontWeight:600, color:"#a78bfa", letterSpacing:".06em", textTransform:"uppercase", marginBottom:".625rem" }}>⭐ Recommandées</p>
+                  <div className="company-grid" style={{ maxHeight:"none", overflow:"visible" }}>
+                    {RECOMMENDED.map(e => (
+                      <div
+                        key={e.domain}
+                        className={`company-card ${selectedEntreprise?.domain === e.domain ? "selected" : ""}`}
+                        onClick={() => setSelectedEntreprise(e)}
+                      >
+                        <CompanyLogo domain={e.domain} name={e.nom} size={34} />
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <p className="company-name">{e.nom}</p>
+                        </div>
+                        {selectedEntreprise?.domain === e.domain && (
+                          <div style={{ width:18, height:18, borderRadius:"50%", background:"#7c3aed", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginLeft:"auto" }}>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ height:1, background:"var(--border)", margin:"1.25rem 0" }} />
+                  <p style={{ fontSize:".72rem", fontWeight:600, color:"var(--text-faint)", letterSpacing:".06em", textTransform:"uppercase", marginBottom:".625rem" }}>Toutes les entreprises</p>
+                </div>
+              )}
+
               <div className="search-wrap">
                 <svg className="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 <input className="search-input" placeholder="Rechercher une entreprise..." value={search} onChange={e => setSearch(e.target.value)} autoFocus />
@@ -485,6 +532,13 @@ export default function PublierPage() {
                   <p className="form-hint">{desc.length}/280 caractères</p>
                 </div>
               </div>
+
+              {code.trim() && !selectedCategory && (
+                <p style={{ fontSize:".75rem", color:"#f59e0b", display:"flex", alignItems:"center", gap:5, marginTop:"0.875rem" }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Sélectionne une catégorie pour continuer
+                </p>
+              )}
 
               <button className="btn-next" disabled={!code.trim() || !selectedCategory || submitting} onClick={handleSubmit}>
                 {submitting ? (
