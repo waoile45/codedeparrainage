@@ -3,10 +3,6 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-03-25.dahlia',
-})
-
 const PACKS = [
   { credits: 5,   price: 500  },  // 5€
   { credits: 20,  price: 1900 },  // 19€
@@ -16,6 +12,9 @@ const PACKS = [
 ]
 
 export async function POST(request: Request) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2026-03-25.dahlia',
+  })
   try {
     const cookieStore = await cookies()
     const supabase = createServerClient(
