@@ -43,15 +43,15 @@ function Steps({ current }: { current: 1|2|3 }) {
         return (
           <div key={s.n} style={{ display:"flex", alignItems:"center", flex: i < steps.length-1 ? 1 : "none" }}>
             <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:5 }}>
-              <div style={{ width:32, height:32, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", background: done?"#7c3aed": active?"rgba(124,58,237,.2)":"rgba(255,255,255,.06)", border:`2px solid ${done||active?"#7c3aed":"rgba(255,255,255,.1)"}`, transition:"all .3s", flexShrink:0 }}>
+              <div style={{ width:32, height:32, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", background: done?"#7c3aed": active?"rgba(124,58,237,.2)":"var(--bg-btn)", border:`2px solid ${done||active?"#7c3aed":"var(--border-lg)"}`, transition:"all .3s", flexShrink:0 }}>
                 {done
                   ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  : <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.78rem", color:active?"#a78bfa":"rgba(255,255,255,.3)" }}>{s.n}</span>
+                  : <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.78rem", color:active?"#a78bfa":"var(--text-dim)" }}>{s.n}</span>
                 }
               </div>
-              <span style={{ fontSize:"0.68rem", fontWeight:600, color:active?"#fff":done?"rgba(255,255,255,.5)":"rgba(255,255,255,.25)", whiteSpace:"nowrap" }}>{s.label}</span>
+              <span style={{ fontSize:"0.68rem", fontWeight:600, color:active?"var(--text-strong)":done?"var(--text-muted)":"var(--text-faint)", whiteSpace:"nowrap" }}>{s.label}</span>
             </div>
-            {i < steps.length-1 && <div style={{ flex:1, height:1, background:done?"#7c3aed":"rgba(255,255,255,.08)", margin:"0 8px", marginBottom:20, transition:"background .3s" }} />}
+            {i < steps.length-1 && <div style={{ flex:1, height:1, background:done?"#7c3aed":"var(--border)", margin:"0 8px", marginBottom:20, transition:"background .3s" }} />}
           </div>
         );
       })}
@@ -69,6 +69,11 @@ export default function PublierPage() {
   const [desc, setDesc]                         = useState("");
   const [submitting, setSubmitting]             = useState(false);
   const [error, setError]                       = useState("");
+  const [showProposal, setShowProposal]         = useState(false);
+  const [proposalName, setProposalName]         = useState("");
+  const [proposalNote, setProposalNote]         = useState("");
+  const [proposalSending, setProposalSending]   = useState(false);
+  const [proposalSent, setProposalSent]         = useState(false);
 
   // Filtre sur les données locales (max MAX_DISPLAY affichés)
   const filtered = useMemo(() => {
@@ -82,6 +87,27 @@ export default function PublierPage() {
     const q = search.toLowerCase();
     return ENTREPRISES.filter(e => e.nom.toLowerCase().includes(q)).length;
   }, [search]);
+
+  // ── Proposer une entreprise ──
+  const handleProposal = async () => {
+    if (!proposalName.trim()) return;
+    setProposalSending(true);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      await fetch("/api/proposer-entreprise", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nomEntreprise: proposalName.trim(),
+          note: proposalNote.trim() || undefined,
+          userEmail: user?.email,
+        }),
+      });
+    } catch { /* silencieux */ }
+    setProposalSent(true);
+    setProposalSending(false);
+  };
 
   // ── Publier le code ──
   const handleSubmit = async () => {
@@ -238,6 +264,13 @@ export default function PublierPage() {
         .success-sub { color:var(--text-muted); font-size:.875rem; margin-bottom:2rem; }
         .success-xp { display:inline-flex; align-items:center; gap:8px; background:rgba(124,58,237,.15); border:1px solid rgba(124,58,237,.3); border-radius:100px; padding:.5rem 1.25rem; color:#a78bfa; font-family:'Syne',sans-serif; font-weight:800; font-size:1.1rem; margin-bottom:2rem; }
         .success-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+
+        .proposal-box { margin-top:1.25rem; background:var(--bg-card-md); border:1px solid var(--border-md); border-radius:14px; padding:1.25rem; animation:fadeIn .25s ease; }
+        .proposal-title { font-family:'Syne',sans-serif; font-weight:700; font-size:.875rem; color:var(--text-strong); margin-bottom:.25rem; }
+        .proposal-sub { font-size:.75rem; color:var(--text-dim); margin-bottom:1rem; }
+        .proposal-sent { display:flex; align-items:center; gap:8px; font-size:.82rem; color:#4ade80; font-weight:600; }
+        .btn-propose { margin-top:.5rem; font-size:.75rem; color:var(--text-link); background:none; border:none; cursor:pointer; text-decoration:underline; font-family:'DM Sans',sans-serif; padding:0; }
+        .btn-propose:hover { color:var(--text-strong); }
         .btn-success-primary { display:inline-flex; align-items:center; gap:6px; background:#7c3aed; color:#fff; border:none; border-radius:11px; padding:.65rem 1.25rem; font-size:.875rem; font-weight:600; cursor:pointer; text-decoration:none; font-family:'DM Sans',sans-serif; transition:all .2s; }
         .btn-success-primary:hover { background:#6d28d9; }
         .btn-success-ghost { display:inline-flex; align-items:center; gap:6px; background:none; color:var(--text-muted); border:1px solid var(--border-btn-ghost); border-radius:11px; padding:.65rem 1.25rem; font-size:.875rem; font-weight:600; cursor:pointer; text-decoration:none; font-family:'DM Sans',sans-serif; transition:all .2s; }
@@ -299,7 +332,7 @@ export default function PublierPage() {
                   </div>
                 ))}
                 {filtered.length === 0 && (
-                  <div style={{ gridColumn:"1/-1", textAlign:"center", padding:"2rem", color:"rgba(255,255,255,.25)", fontSize:".875rem" }}>
+                  <div style={{ gridColumn:"1/-1", textAlign:"center", padding:"2rem", color:"var(--text-faint)", fontSize:".875rem" }}>
                     Aucune entreprise trouvée pour &ldquo;{search}&rdquo;
                   </div>
                 )}
@@ -309,6 +342,60 @@ export default function PublierPage() {
                 Continuer
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               </button>
+
+              {/* ── Proposer une entreprise ── */}
+              {search.trim() && !showProposal && !proposalSent && (
+                <div style={{ textAlign:"center", marginTop:"1rem" }}>
+                  <button className="btn-propose" onClick={() => { setShowProposal(true); setProposalName(search.trim()); }}>
+                    Vous ne trouvez pas votre entreprise ? Proposez-la →
+                  </button>
+                </div>
+              )}
+
+              {(showProposal || proposalSent) && (
+                <div className="proposal-box">
+                  {proposalSent ? (
+                    <p className="proposal-sent">✅ Merci ! Votre proposition a été envoyée à l&rsquo;équipe.</p>
+                  ) : (
+                    <>
+                      <p className="proposal-title">🏢 Proposer une entreprise</p>
+                      <p className="proposal-sub">Si l&rsquo;entreprise n&rsquo;est pas encore dans notre base, indiquez son nom et nous l&rsquo;ajouterons.</p>
+                      <div className="form-group" style={{ marginBottom:"0.75rem" }}>
+                        <label className="form-label">Nom de l&rsquo;entreprise</label>
+                        <input
+                          className="form-input"
+                          placeholder="Ex : Boursorama, Free, Binance..."
+                          value={proposalName}
+                          onChange={e => setProposalName(e.target.value)}
+                          maxLength={80}
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom:"0.875rem" }}>
+                        <label className="form-label">
+                          Informations complémentaires
+                          <span className="form-label-opt">optionnel</span>
+                        </label>
+                        <textarea
+                          className="form-input form-textarea"
+                          style={{ minHeight:70 }}
+                          placeholder="URL du programme, catégorie suggérée..."
+                          value={proposalNote}
+                          onChange={e => setProposalNote(e.target.value)}
+                          maxLength={300}
+                        />
+                      </div>
+                      <button
+                        className="btn-next"
+                        style={{ marginTop:0 }}
+                        disabled={!proposalName.trim() || proposalSending}
+                        onClick={handleProposal}
+                      >
+                        {proposalSending ? "Envoi en cours..." : "Envoyer la proposition"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -324,8 +411,8 @@ export default function PublierPage() {
                 <div className="selected-display">
                   <CompanyLogo domain={selectedEntreprise.domain} name={selectedEntreprise.nom} size={38} />
                   <div>
-                    <p style={{ fontWeight:700, color:"#fff", fontSize:".9rem" }}>{selectedEntreprise.nom}</p>
-                    <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.4)" }}>{selectedEntreprise.domain}</p>
+                    <p style={{ fontWeight:700, color:"var(--text-strong)", fontSize:".9rem" }}>{selectedEntreprise.nom}</p>
+                    <p style={{ fontSize:".72rem", color:"var(--text-dim)" }}>{selectedEntreprise.domain}</p>
                   </div>
                   <button className="selected-change" onClick={() => setStep(1)}>Changer</button>
                 </div>
@@ -344,7 +431,7 @@ export default function PublierPage() {
                 <div className="form-group">
                   <label className="form-label">
                     Catégorie
-                    <span style={{ fontSize:".7rem", color:"rgba(255,255,255,.3)", fontWeight:400 }}>obligatoire</span>
+                    <span style={{ fontSize:".7rem", color:"var(--text-faint)", fontWeight:400 }}>obligatoire</span>
                   </label>
                   <div className="cats">
                     {CATEGORIES.map(c => (
@@ -364,7 +451,7 @@ export default function PublierPage() {
                 <div className="form-group">
                   <label className="form-label">
                     Ton code de parrainage
-                    <span style={{ fontSize:".7rem", color:"rgba(255,255,255,.3)", fontWeight:400 }}>obligatoire</span>
+                    <span style={{ fontSize:".7rem", color:"var(--text-faint)", fontWeight:400 }}>obligatoire</span>
                   </label>
                   <input
                     className="form-input code-input"
@@ -435,10 +522,10 @@ export default function PublierPage() {
         </div>
 
         {step < 3 && (
-          <div style={{ marginTop:"1.25rem", background:"rgba(255,255,255,.02)", border:"1px solid rgba(255,255,255,.06)", borderRadius:14, padding:"1rem 1.25rem", display:"flex", alignItems:"flex-start", gap:10 }}>
+          <div style={{ marginTop:"1.25rem", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:14, padding:"1rem 1.25rem", display:"flex", alignItems:"flex-start", gap:10 }}>
             <span style={{ fontSize:"1rem", flexShrink:0 }}>💡</span>
-            <p style={{ fontSize:".78rem", color:"rgba(255,255,255,.35)", lineHeight:1.6 }}>
-              Les annonces avec une description claire reçoivent <strong style={{ color:"rgba(255,255,255,.6)" }}>2× plus de clics</strong>.
+            <p style={{ fontSize:".78rem", color:"var(--text-dim)", lineHeight:1.6 }}>
+              Les annonces avec une description claire reçoivent <strong style={{ color:"var(--text-muted)" }}>2× plus de clics</strong>.
               Précise le montant offert et les conditions pour maximiser tes parrainages.
             </p>
           </div>

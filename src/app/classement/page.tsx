@@ -54,7 +54,7 @@ function Avatar({ pseudo, size=44, isMe=false }: { pseudo:string; size?:number; 
   return (
     <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
       {isMe && <div style={{ position:"absolute", inset:-2, borderRadius:"50%", background:"conic-gradient(#7c3aed,#a855f7,#7c3aed)", animation:"spin 4s linear infinite" }} />}
-      <div style={{ position:"relative", width:size, height:size, borderRadius:"50%", background:`linear-gradient(135deg,${isMe?"#7c3aed,#4f46e5":"#1e1b4b,#312e81"})`, border:`2px solid ${isMe?"#7c3aed":"rgba(255,255,255,.1)"}`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <div style={{ position:"relative", width:size, height:size, borderRadius:"50%", background:`linear-gradient(135deg,${isMe?"#7c3aed,#4f46e5":"#1e1b4b,#312e81"})`, border:`2px solid ${isMe?"#7c3aed":"rgba(124,58,237,.3)"}`, display:"flex", alignItems:"center", justifyContent:"center" }}>
         <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:size*.38, color:"#fff" }}>{pseudo[0]?.toUpperCase()}</span>
       </div>
     </div>
@@ -66,7 +66,7 @@ function RankBadge({ rank }: { rank:number }) {
   if (rank === 1) return <span style={{ fontSize:"1.1rem" }}>🥇</span>;
   if (rank === 2) return <span style={{ fontSize:"1.1rem" }}>🥈</span>;
   if (rank === 3) return <span style={{ fontSize:"1.1rem" }}>🥉</span>;
-  return <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.82rem", color:"rgba(255,255,255,.3)", width:24, textAlign:"center", display:"inline-block" }}>#{rank}</span>;
+  return <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.82rem", color:"var(--text-faint)", width:24, textAlign:"center", display:"inline-block" }}>#{rank}</span>;
 }
 
 // ── Podium card ───────────────────────────────────────────────────────────────
@@ -85,18 +85,18 @@ function PodiumCard({ parrain, config }: { parrain:Parrain; config:typeof PODIUM
         <div style={{ display:"flex", justifyContent:"center", marginBottom:"0.75rem" }}>
           <Avatar pseudo={parrain.pseudo} size={52} isMe={parrain.isMe} />
         </div>
-        <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.95rem", color:"#fff", marginBottom:3, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{parrain.pseudo}</p>
+        <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.95rem", color:"var(--text-strong)", marginBottom:3, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{parrain.pseudo}</p>
         <span style={{ fontSize:"0.65rem", fontWeight:700, background:`${color}22`, color, padding:"2px 8px", borderRadius:100, border:`1px solid ${color}44`, display:"inline-block", marginBottom:"0.75rem" }}>{parrain.level}</span>
         <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.4rem", color:"#fff", lineHeight:1 }}>{parrain.xp.toLocaleString("fr-FR")}</p>
-          <p style={{ fontSize:"0.7rem", color:"rgba(255,255,255,.35)" }}>XP total</p>
+          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.4rem", color:"var(--text-strong)", lineHeight:1 }}>{parrain.xp.toLocaleString("fr-FR")}</p>
+          <p style={{ fontSize:"0.7rem", color:"var(--text-dim)" }}>XP total</p>
         </div>
-        <div style={{ display:"flex", justifyContent:"center", gap:12, marginTop:"0.75rem", paddingTop:"0.75rem", borderTop:"1px solid rgba(255,255,255,.07)" }}>
-          <span style={{ fontSize:"0.7rem", color:"rgba(255,255,255,.3)" }}>📋 {parrain.annonces}</span>
-          <span style={{ fontSize:"0.7rem", color:"rgba(255,255,255,.3)" }}>🔥 {parrain.streak}</span>
+        <div style={{ display:"flex", justifyContent:"center", gap:12, marginTop:"0.75rem", paddingTop:"0.75rem", borderTop:"1px solid var(--border)" }}>
+          <span style={{ fontSize:"0.7rem", color:"var(--text-dim)" }}>📋 {parrain.annonces}</span>
+          <span style={{ fontSize:"0.7rem", color:"var(--text-dim)" }}>🔥 {parrain.streak}</span>
         </div>
       </div>
-      <div style={{ marginTop:"0.625rem", background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.08)", borderRadius:100, padding:"3px 14px", fontSize:"0.72rem", color:"rgba(255,255,255,.45)", fontWeight:600 }}>#{config.rank}</div>
+      <div style={{ marginTop:"0.625rem", background:"var(--bg-card-md)", border:"1px solid var(--border-md)", borderRadius:100, padding:"3px 14px", fontSize:"0.72rem", color:"var(--text-muted)", fontWeight:600 }}>#{config.rank}</div>
     </div>
   );
 }
@@ -114,7 +114,7 @@ function RankRow({ parrain, rank, index }: { parrain:Parrain; rank:number; index
   const color = NIVEAU_COLOR[parrain.level] ?? "#6366f1";
 
   return (
-    <div ref={ref} style={{ display:"flex", alignItems:"center", gap:12, padding:"0.875rem 1.25rem", background:parrain.isMe?"rgba(124,58,237,.07)":"rgba(255,255,255,.02)", border:`1px solid ${parrain.isMe?"rgba(124,58,237,.3)":"rgba(255,255,255,.06)"}`, borderRadius:14, opacity:visible?1:0, transform:visible?"translateX(0)":"translateX(-12px)", transition:"all 0.35s ease", position:"relative", overflow:"hidden" }}>
+    <div ref={ref} style={{ display:"flex", alignItems:"center", gap:12, padding:"0.875rem 1.25rem", background:parrain.isMe?"rgba(124,58,237,.07)":"var(--bg-card)", border:`1px solid ${parrain.isMe?"rgba(124,58,237,.3)":"var(--border)"}`, borderRadius:14, opacity:visible?1:0, transform:visible?"translateX(0)":"translateX(-12px)", transition:"all 0.35s ease", position:"relative", overflow:"hidden" }}>
       {parrain.isMe && <div style={{ position:"absolute", top:0, left:0, bottom:0, width:2, background:"linear-gradient(180deg,#7c3aed,#a855f7)", borderRadius:"2px 0 0 2px" }} />}
       <div style={{ width:28, textAlign:"center", flexShrink:0 }}>
         <RankBadge rank={rank} />
@@ -122,23 +122,23 @@ function RankRow({ parrain, rank, index }: { parrain:Parrain; rank:number; index
       <Avatar pseudo={parrain.pseudo} size={36} isMe={parrain.isMe} />
       <div style={{ flex:1, minWidth:0 }}>
         <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-          <p style={{ fontWeight:700, color:parrain.isMe?"#fff":"rgba(255,255,255,.85)", fontSize:"0.875rem", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{parrain.pseudo}</p>
+          <p style={{ fontWeight:700, color:"var(--text-strong)", fontSize:"0.875rem", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{parrain.pseudo}</p>
           {parrain.isMe && <span style={{ fontSize:"0.62rem", fontWeight:700, background:"rgba(124,58,237,.25)", color:"#a78bfa", padding:"1px 6px", borderRadius:100, border:"1px solid rgba(124,58,237,.3)", flexShrink:0 }}>Toi</span>}
         </div>
         <span style={{ fontSize:"0.68rem", fontWeight:600, color }}>{parrain.level}</span>
       </div>
       <div style={{ display:"flex", alignItems:"center", gap:16, flexShrink:0 }}>
         <div style={{ textAlign:"center", display:"flex", flexDirection:"column", gap:1 }}>
-          <span style={{ fontSize:"0.72rem", color:"rgba(255,255,255,.25)" }}>Annonces</span>
-          <span style={{ fontWeight:700, color:"rgba(255,255,255,.6)", fontSize:"0.82rem" }}>{parrain.annonces}</span>
+          <span style={{ fontSize:"0.72rem", color:"var(--text-faint)" }}>Annonces</span>
+          <span style={{ fontWeight:700, color:"var(--text-muted)", fontSize:"0.82rem" }}>{parrain.annonces}</span>
         </div>
         <div style={{ textAlign:"center", display:"flex", flexDirection:"column", gap:1 }}>
-          <span style={{ fontSize:"0.72rem", color:"rgba(255,255,255,.25)" }}>Streak</span>
-          <span style={{ fontWeight:700, color:"rgba(255,255,255,.6)", fontSize:"0.82rem" }}>🔥 {parrain.streak}</span>
+          <span style={{ fontSize:"0.72rem", color:"var(--text-faint)" }}>Streak</span>
+          <span style={{ fontWeight:700, color:"var(--text-muted)", fontSize:"0.82rem" }}>🔥 {parrain.streak}</span>
         </div>
         <div style={{ textAlign:"right", minWidth:70 }}>
-          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:parrain.isMe?"#a78bfa":"#fff" }}>{parrain.xp.toLocaleString("fr-FR")}</p>
-          <p style={{ fontSize:"0.68rem", color:"rgba(255,255,255,.3)" }}>XP</p>
+          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:parrain.isMe?"#a78bfa":"var(--text-strong)" }}>{parrain.xp.toLocaleString("fr-FR")}</p>
+          <p style={{ fontSize:"0.68rem", color:"var(--text-faint)" }}>XP</p>
         </div>
       </div>
     </div>
@@ -148,14 +148,14 @@ function RankRow({ parrain, rank, index }: { parrain:Parrain; rank:number; index
 // ── Skeleton row ──────────────────────────────────────────────────────────────
 function SkeletonRow() {
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:12, padding:"0.875rem 1.25rem", background:"rgba(255,255,255,.02)", border:"1px solid rgba(255,255,255,.06)", borderRadius:14 }}>
-      <div style={{ width:28, height:20, background:"rgba(255,255,255,.06)", borderRadius:4 }} />
-      <div style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.06)" }} />
+    <div style={{ display:"flex", alignItems:"center", gap:12, padding:"0.875rem 1.25rem", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:14 }}>
+      <div style={{ width:28, height:20, background:"var(--border-md)", borderRadius:4 }} />
+      <div style={{ width:36, height:36, borderRadius:"50%", background:"var(--border-md)" }} />
       <div style={{ flex:1 }}>
-        <div style={{ width:"40%", height:12, background:"rgba(255,255,255,.06)", borderRadius:4, marginBottom:6 }} />
-        <div style={{ width:"25%", height:10, background:"rgba(255,255,255,.04)", borderRadius:4 }} />
+        <div style={{ width:"40%", height:12, background:"var(--border-md)", borderRadius:4, marginBottom:6 }} />
+        <div style={{ width:"25%", height:10, background:"var(--border)", borderRadius:4 }} />
       </div>
-      <div style={{ width:60, height:20, background:"rgba(255,255,255,.06)", borderRadius:4 }} />
+      <div style={{ width:60, height:20, background:"var(--border-md)", borderRadius:4 }} />
     </div>
   );
 }
@@ -299,13 +299,13 @@ export default function ClassementPage() {
         </div>
 
         {/* Rewards banner */}
-        <div style={{ position:"relative", overflow:"hidden", background:"rgba(255,255,255,.02)", border:"1px solid rgba(255,255,255,.07)", borderRadius:20, padding:"1.5rem", marginBottom:"2.5rem" }}>
+        <div style={{ position:"relative", overflow:"hidden", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:20, padding:"1.5rem", marginBottom:"2.5rem" }}>
           <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 0%,rgba(124,58,237,.1),transparent 65%)", pointerEvents:"none" }} />
           <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,rgba(124,58,237,.5),transparent)" }} />
           <div style={{ position:"relative", zIndex:1 }}>
             <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:"1.1rem" }}>
               <span style={{ fontSize:"1rem" }}>🎁</span>
-              <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.95rem", color:"#fff" }}>Récompenses du mois</p>
+              <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.95rem", color:"var(--text-strong)" }}>Récompenses du mois</p>
               <span style={{ fontSize:"0.65rem", fontWeight:700, background:"rgba(124,58,237,.2)", color:"#a78bfa", padding:"2px 8px", borderRadius:100, border:"1px solid rgba(124,58,237,.3)", marginLeft:2 }}>Remise le 1er du mois</span>
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"0.75rem" }}>
@@ -323,7 +323,7 @@ export default function ClassementPage() {
                     {r.rewards.map((rw, i) => (
                       <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:5 }}>
                         <span style={{ color:r.color, fontSize:"0.65rem", marginTop:2, flexShrink:0 }}>✦</span>
-                        <span style={{ fontSize:"0.75rem", color:"rgba(255,255,255,.6)", lineHeight:1.4 }}>{rw}</span>
+                        <span style={{ fontSize:"0.75rem", color:"var(--text-muted)", lineHeight:1.4 }}>{rw}</span>
                       </div>
                     ))}
                   </div>
@@ -337,7 +337,7 @@ export default function ClassementPage() {
         {loading ? (
           <div style={{ display:"flex", alignItems:"flex-end", gap:"1rem", marginBottom:"2.5rem" }}>
             {[2,1,3].map(r => (
-              <div key={r} style={{ flex:1, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:20, padding:"1.5rem 1rem", animation:"shimmer 1.5s ease-in-out infinite", height: r===1?180:150 }} />
+              <div key={r} style={{ flex:1, background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:20, padding:"1.5rem 1rem", animation:"shimmer 1.5s ease-in-out infinite", height: r===1?180:150 }} />
             ))}
           </div>
         ) : top3.length >= 3 ? (
@@ -352,7 +352,7 @@ export default function ClassementPage() {
         <div>
           <div className="list-header">
             <span className="list-title">Suite du classement</span>
-            <span style={{ fontSize:".75rem", color:"rgba(255,255,255,.25)" }}>Top {sorted.length}</span>
+            <span style={{ fontSize:".75rem", color:"var(--text-faint)" }}>Top {sorted.length}</span>
           </div>
           <div className="list-rows">
             {loading
@@ -374,12 +374,12 @@ export default function ClassementPage() {
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:16 }}>
               <div style={{ textAlign:"center" }}>
-                <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:"#fff" }}>{me.xp}</p>
-                <p style={{ fontSize:"0.65rem", color:"rgba(255,255,255,.3)" }}>XP</p>
+                <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:"var(--text-strong)" }}>{me.xp}</p>
+                <p style={{ fontSize:"0.65rem", color:"var(--text-faint)" }}>XP</p>
               </div>
               {meRank > 1 && sorted[meRank-2] && (
                 <div style={{ textAlign:"right" }}>
-                  <p style={{ fontSize:"0.72rem", color:"rgba(255,255,255,.35)" }}>Pour passer #{meRank-1}</p>
+                  <p style={{ fontSize:"0.72rem", color:"var(--text-dim)" }}>Pour passer #{meRank-1}</p>
                   <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:"0.875rem", color:"#a78bfa" }}>+{sorted[meRank-2].xp - me.xp + 1} XP</p>
                 </div>
               )}
