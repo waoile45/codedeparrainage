@@ -40,7 +40,7 @@ function LegalLayout({ title, lastUpdate, children }: { title:string; lastUpdate
         @media(max-width:600px) { .legal-page { padding:2rem 1rem 5rem; } }
       `}</style>
 
-      <Navbar isLoggedIn={false} />
+      <Navbar />
 
       <main className="legal-page">
         {/* Quick nav between legal pages */}
