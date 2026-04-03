@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 
@@ -474,14 +473,16 @@ const VALID_TABS: NavSection[] = ["profil","annonces","messages","badges","quete
 
 export default function ProfilPage() {
   const supabase = createClient();
-  const searchParams = useSearchParams();
-  const [active, setActive]     = useState<NavSection>(() => {
-    const tab = searchParams.get("tab") as NavSection | null;
-    return (tab && VALID_TABS.includes(tab)) ? tab : "profil";
-  });
+  const [active, setActive]     = useState<NavSection>("profil");
   const [user, setUser]         = useState<UserProfile | null>(null);
   const [annonces, setAnnonces] = useState<Annonce[]>([]);
   const [loading, setLoading]   = useState(true);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab") as NavSection | null;
+    if (tab && VALID_TABS.includes(tab)) setActive(tab);
+  }, []);
 
   const fetchData = useCallback(async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser();
