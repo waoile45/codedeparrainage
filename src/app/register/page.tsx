@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [pseudo, setPseudo] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
   const supabase = createClient()
 
@@ -37,7 +38,14 @@ export default function RegisterPage() {
       return
     }
 
-    const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { pseudo },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
 
     if (signUpError) {
       setError('Erreur : ' + signUpError.message)
@@ -45,19 +53,21 @@ export default function RegisterPage() {
       return
     }
 
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert({ id: data.user.id, email, pseudo })
-
-      if (profileError) {
-        setError('Erreur profil : ' + profileError.message)
-        setLoading(false)
-        return
+    if (data.session) {
+      // Email confirmation désactivée — session immédiate, créer le profil et rediriger
+      if (data.user) {
+        await supabase.from('users').insert({ id: data.user.id, email, pseudo })
       }
+      window.location.href = '/profil'
+      return
     }
 
-    window.location.href = '/profil'
+    if (data.user) {
+      // Email confirmation activée — afficher le message "vérifiez votre email"
+      setSuccess(true)
+    }
+
+    setLoading(false)
   }
 
   return (
@@ -170,6 +180,21 @@ export default function RegisterPage() {
           <a href="/" className="auth-logo">
             code<span>de</span>parrainage.com
           </a>
+
+          {success ? (
+            <div style={{ textAlign:"center", padding:"1rem 0" }}>
+              <div style={{ fontSize:"2.5rem", marginBottom:"1rem" }}>📬</div>
+              <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.15rem", color:"#fff", marginBottom:".5rem" }}>Vérifie ta boîte mail !</p>
+              <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem", lineHeight:1.6, marginBottom:"1.5rem" }}>
+                On t&apos;a envoyé un lien de confirmation à <strong style={{ color:"rgba(255,255,255,.7)" }}>{email}</strong>.<br/>
+                Clique dessus pour activer ton compte.
+              </p>
+              <p style={{ fontSize:".75rem", color:"rgba(255,255,255,.25)" }}>
+                Pas reçu ? Vérifie tes spams ou <a href="/register" style={{ color:"#a78bfa", textDecoration:"none" }}>réessaie</a>.
+              </p>
+            </div>
+          ) : (
+            <>
           <p className="auth-subtitle">Créez votre compte gratuit</p>
 
           <div className="auth-perks">
@@ -254,6 +279,8 @@ export default function RegisterPage() {
             Déjà un compte ?{' '}
             <a href="/login">Se connecter</a>
           </p>
+            </>
+          )}
         </div>
       </div>
     </>

@@ -2,38 +2,26 @@
 
 import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
+import { createClient } from "@/lib/supabase";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Parrain {
   id: string;
   pseudo: string;
-  niveau: "Débutant" | "Confirmé" | "Expert" | "Légende";
+  level: string;
   xp: number;
   annonces: number;
   streak: number;
   isMe?: boolean;
 }
 
-// ── Mock data — remplace par fetch Supabase ───────────────────────────────────
-const MOCK_DATA: Parrain[] = [
-  { id:"1", pseudo:"AlexCrypto",   niveau:"Légende",  xp:2840, annonces:24, streak:32 },
-  { id:"2", pseudo:"SarahBoost",   niveau:"Expert",   xp:1920, annonces:18, streak:14 },
-  { id:"3", pseudo:"MaxParrain",   niveau:"Expert",   xp:1540, annonces:15, streak:9  },
-  { id:"4", pseudo:"LucaFinance",  niveau:"Confirmé", xp:980,  annonces:11, streak:7  },
-  { id:"5", pseudo:"EmmaCash",     niveau:"Confirmé", xp:760,  annonces:8,  streak:5  },
-  { id:"6", pseudo:"ThomasXP",     niveau:"Confirmé", xp:640,  annonces:7,  streak:4  },
-  { id:"7", pseudo:"JulieCode",    niveau:"Débutant", xp:420,  annonces:5,  streak:3  },
-  { id:"8", pseudo:"PierreTop",    niveau:"Débutant", xp:310,  annonces:4,  streak:2  },
-  { id:"9", pseudo:"TestParrain",  niveau:"Débutant", xp:2,    annonces:2,  streak:2  },
-  { id:"10",pseudo:"PaulParrain",  niveau:"Débutant", xp:2,    annonces:0,  streak:0  },
-  { id:"11",pseudo:"Test3",        niveau:"Débutant", xp:2,    annonces:1,  streak:2, isMe:true },
-];
-
 const NIVEAU_COLOR: Record<string, string> = {
-  Débutant: "#6366f1",
-  Confirmé: "#8b5cf6",
-  Expert:   "#a855f7",
-  Légende:  "#f59e0b",
+  "Débutant":          "#6366f1",
+  "Parrain Bronze":    "#8b5cf6",
+  "Parrain Argent":    "#a855f7",
+  "Parrain Or":        "#f59e0b",
+  "Super Parrain":     "#f97316",
+  "Parrain Légendaire":"#ef4444",
 };
 
 const PODIUM_CONFIG = [
@@ -84,7 +72,8 @@ function RankBadge({ rank }: { rank:number }) {
 // ── Podium card ───────────────────────────────────────────────────────────────
 function PodiumCard({ parrain, config }: { parrain:Parrain; config:typeof PODIUM_CONFIG[0] }) {
   const [visible, setVisible] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setVisible(true), config.rank * 120); return () => clearTimeout(t); }, []);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), config.rank * 120); return () => clearTimeout(t); }, [config.rank]);
+  const color = NIVEAU_COLOR[parrain.level] ?? "#6366f1";
 
   return (
     <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", opacity:visible?1:0, transform:visible?"translateY(0)":"translateY(20px)", transition:"all 0.5s ease" }} className={config.top}>
@@ -97,7 +86,7 @@ function PodiumCard({ parrain, config }: { parrain:Parrain; config:typeof PODIUM
           <Avatar pseudo={parrain.pseudo} size={52} isMe={parrain.isMe} />
         </div>
         <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.95rem", color:"#fff", marginBottom:3, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{parrain.pseudo}</p>
-        <span style={{ fontSize:"0.65rem", fontWeight:700, background:`${NIVEAU_COLOR[parrain.niveau]}22`, color:NIVEAU_COLOR[parrain.niveau], padding:"2px 8px", borderRadius:100, border:`1px solid ${NIVEAU_COLOR[parrain.niveau]}44`, display:"inline-block", marginBottom:"0.75rem" }}>{parrain.niveau}</span>
+        <span style={{ fontSize:"0.65rem", fontWeight:700, background:`${color}22`, color, padding:"2px 8px", borderRadius:100, border:`1px solid ${color}44`, display:"inline-block", marginBottom:"0.75rem" }}>{parrain.level}</span>
         <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
           <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.4rem", color:"#fff", lineHeight:1 }}>{parrain.xp.toLocaleString("fr-FR")}</p>
           <p style={{ fontSize:"0.7rem", color:"rgba(255,255,255,.35)" }}>XP total</p>
@@ -122,6 +111,8 @@ function RankRow({ parrain, rank, index }: { parrain:Parrain; rank:number; index
     return () => obs.disconnect();
   }, [index]);
 
+  const color = NIVEAU_COLOR[parrain.level] ?? "#6366f1";
+
   return (
     <div ref={ref} style={{ display:"flex", alignItems:"center", gap:12, padding:"0.875rem 1.25rem", background:parrain.isMe?"rgba(124,58,237,.07)":"rgba(255,255,255,.02)", border:`1px solid ${parrain.isMe?"rgba(124,58,237,.3)":"rgba(255,255,255,.06)"}`, borderRadius:14, opacity:visible?1:0, transform:visible?"translateX(0)":"translateX(-12px)", transition:"all 0.35s ease", position:"relative", overflow:"hidden" }}>
       {parrain.isMe && <div style={{ position:"absolute", top:0, left:0, bottom:0, width:2, background:"linear-gradient(180deg,#7c3aed,#a855f7)", borderRadius:"2px 0 0 2px" }} />}
@@ -134,7 +125,7 @@ function RankRow({ parrain, rank, index }: { parrain:Parrain; rank:number; index
           <p style={{ fontWeight:700, color:parrain.isMe?"#fff":"rgba(255,255,255,.85)", fontSize:"0.875rem", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{parrain.pseudo}</p>
           {parrain.isMe && <span style={{ fontSize:"0.62rem", fontWeight:700, background:"rgba(124,58,237,.25)", color:"#a78bfa", padding:"1px 6px", borderRadius:100, border:"1px solid rgba(124,58,237,.3)", flexShrink:0 }}>Toi</span>}
         </div>
-        <span style={{ fontSize:"0.68rem", fontWeight:600, color:NIVEAU_COLOR[parrain.niveau] }}>{parrain.niveau}</span>
+        <span style={{ fontSize:"0.68rem", fontWeight:600, color }}>{parrain.level}</span>
       </div>
       <div style={{ display:"flex", alignItems:"center", gap:16, flexShrink:0 }}>
         <div style={{ textAlign:"center", display:"flex", flexDirection:"column", gap:1 }}>
@@ -154,20 +145,83 @@ function RankRow({ parrain, rank, index }: { parrain:Parrain; rank:number; index
   );
 }
 
+// ── Skeleton row ──────────────────────────────────────────────────────────────
+function SkeletonRow() {
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:12, padding:"0.875rem 1.25rem", background:"rgba(255,255,255,.02)", border:"1px solid rgba(255,255,255,.06)", borderRadius:14 }}>
+      <div style={{ width:28, height:20, background:"rgba(255,255,255,.06)", borderRadius:4 }} />
+      <div style={{ width:36, height:36, borderRadius:"50%", background:"rgba(255,255,255,.06)" }} />
+      <div style={{ flex:1 }}>
+        <div style={{ width:"40%", height:12, background:"rgba(255,255,255,.06)", borderRadius:4, marginBottom:6 }} />
+        <div style={{ width:"25%", height:10, background:"rgba(255,255,255,.04)", borderRadius:4 }} />
+      </div>
+      <div style={{ width:60, height:20, background:"rgba(255,255,255,.06)", borderRadius:4 }} />
+    </div>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function ClassementPage() {
-  const sorted = [...MOCK_DATA].sort((a,b) => b.xp - a.xp || b.annonces - a.annonces);
+  const [parrains, setParrains] = useState<Parrain[]>([]);
+  const [loading, setLoading]   = useState(true);
+
+  useEffect(() => {
+    async function fetchClassement() {
+      const supabase = createClient();
+
+      // Utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Users triés par XP
+      const { data: users } = await supabase
+        .from("users")
+        .select("id, pseudo, xp, level, streak_days")
+        .order("xp", { ascending: false })
+        .limit(50);
+
+      if (!users) { setLoading(false); return; }
+
+      // Compter les annonces par user
+      const { data: countRows } = await supabase
+        .from("announcements")
+        .select("user_id");
+
+      const annonceCount: Record<string, number> = {};
+      for (const row of countRows ?? []) {
+        annonceCount[row.user_id] = (annonceCount[row.user_id] ?? 0) + 1;
+      }
+
+      const data: Parrain[] = users.map(u => ({
+        id:      u.id,
+        pseudo:  u.pseudo ?? "Anonyme",
+        level:   u.level  ?? "Débutant",
+        xp:      u.xp     ?? 0,
+        annonces: annonceCount[u.id] ?? 0,
+        streak:  u.streak_days ?? 0,
+        isMe:    user?.id === u.id,
+      }));
+
+      setParrains(data);
+      setLoading(false);
+    }
+
+    fetchClassement();
+  }, []);
+
+  const sorted = [...parrains].sort((a,b) => b.xp - a.xp || b.annonces - a.annonces);
   const top3   = sorted.slice(0, 3);
   const rest   = sorted.slice(3);
   const meRank = sorted.findIndex(p => p.isMe) + 1;
   const me     = sorted.find(p => p.isMe);
 
-  // podium order: 2nd left, 1st center, 3rd right
   const podiumOrder = [
     { parrain: top3[1], config: PODIUM_CONFIG[0] },
     { parrain: top3[0], config: PODIUM_CONFIG[1] },
     { parrain: top3[2], config: PODIUM_CONFIG[2] },
   ];
+
+  const totalAnnonces = parrains.reduce((a,p) => a + p.annonces, 0);
+  const totalXP       = parrains.reduce((a,p) => a + p.xp, 0);
 
   return (
     <>
@@ -176,62 +230,45 @@ export default function ClassementPage() {
         @keyframes shimmer { 0%{opacity:.5} 50%{opacity:1} 100%{opacity:.5} }
         @keyframes float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
         *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-        body { background:#0A0A0F; color:#e2e8f0; font-family:'DM Sans',sans-serif; min-height:100vh; }
-
-        .navbar { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 2rem; height:64px; background:rgba(10,10,15,.88); backdrop-filter:blur(20px); border-bottom:1px solid rgba(124,58,237,.12); }
-        .nav-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.05rem; color:#fff; text-decoration:none; letter-spacing:-.02em; }
-        .nav-logo span { color:#7c3aed; }
-        .nav-links { display:flex; align-items:center; gap:.25rem; }
-        .nav-link { color:rgba(255,255,255,.5); text-decoration:none; font-size:.85rem; padding:.4rem .75rem; border-radius:8px; transition:all .2s; }
-        .nav-link:hover { color:#fff; background:rgba(255,255,255,.06); }
-        .nav-link.active { color:#fff; }
-        .nav-cta { background:#7c3aed; color:#fff; border:none; padding:.5rem 1.125rem; border-radius:10px; font-size:.875rem; font-weight:600; cursor:pointer; transition:all .2s; text-decoration:none; margin-left:.5rem; }
-        .nav-cta:hover { background:#6d28d9; transform:translateY(-1px); box-shadow:0 4px 20px rgba(124,58,237,.4); }
+        body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
 
         .page { max-width:800px; margin:0 auto; padding:3rem 1.5rem 6rem; }
 
-        /* header */
         .page-header { text-align:center; margin-bottom:3rem; }
         .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#7c3aed; margin-bottom:.75rem; }
         .header-label::before { content:''; display:block; width:18px; height:1px; background:#7c3aed; }
         .header-label::after  { content:''; display:block; width:18px; height:1px; background:#7c3aed; }
-        .page-title { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(1.75rem,4vw,2.5rem); color:#fff; letter-spacing:-.03em; margin-bottom:.5rem; }
-        .page-sub { color:rgba(255,255,255,.35); font-size:.88rem; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .page-title { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(1.75rem,4vw,2.5rem); color:var(--text-strong); letter-spacing:-.03em; margin-bottom:.5rem; }
+        .page-sub { color:var(--text-dim); font-size:.88rem; display:flex; align-items:center; justify-content:center; gap:8px; }
         .live-dot { width:7px; height:7px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e; animation:shimmer 2s ease-in-out infinite; flex-shrink:0; }
 
-        /* stats banner */
         .stats-banner { display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; margin-bottom:3rem; max-width:360px; margin-left:auto; margin-right:auto; }
-        .stat-b { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:16px; padding:1.1rem; text-align:center; }
-        .stat-b-val { font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color:#fff; }
-        .stat-b-lbl { font-size:.72rem; color:rgba(255,255,255,.35); margin-top:2px; }
+        .stat-b { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:1.1rem; text-align:center; }
+        .stat-b-val { font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color:var(--text-strong); }
+        .stat-b-lbl { font-size:.72rem; color:var(--text-dim); margin-top:2px; }
 
-        /* podium */
         .podium-wrap { display:flex; align-items:flex-end; gap:1rem; margin-bottom:2.5rem; }
 
-        /* list */
         .list-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:.875rem; }
-        .list-title { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; color:rgba(255,255,255,.7); }
+        .list-title { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; color:var(--text-muted); }
         .list-rows { display:flex; flex-direction:column; gap:.5rem; }
 
-        /* my rank sticky */
-        .my-rank-banner { position:sticky; bottom:24px; margin-top:1.5rem; background:rgba(10,10,15,.92); backdrop-filter:blur(16px); border:1px solid rgba(124,58,237,.35); border-radius:16px; padding:.875rem 1.25rem; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow:0 8px 32px rgba(124,58,237,.2); }
+        .my-rank-banner { position:sticky; bottom:24px; margin-top:1.5rem; background:var(--bg-nav); backdrop-filter:blur(16px); border:1px solid rgba(124,58,237,.35); border-radius:16px; padding:.875rem 1.25rem; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow:0 8px 32px rgba(124,58,237,.2); }
         .my-rank-left { display:flex; align-items:center; gap:10px; }
-        .my-rank-label { font-size:.78rem; color:rgba(255,255,255,.4); }
+        .my-rank-label { font-size:.78rem; color:var(--text-dim); }
         .my-rank-pos { font-family:'Syne',sans-serif; font-weight:800; font-size:1.25rem; color:#a78bfa; }
 
-        /* CTA */
         .cta-section { margin-top:3rem; position:relative; overflow:hidden; background:rgba(124,58,237,.08); border:1px solid rgba(124,58,237,.25); border-radius:24px; padding:3rem 2rem; text-align:center; }
         .cta-glow { position:absolute; top:-60px; left:50%; transform:translateX(-50%); width:300px; height:300px; background:radial-gradient(circle,rgba(124,58,237,.2),transparent 70%); pointer-events:none; }
-        .cta-title { font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color:#fff; margin-bottom:.5rem; letter-spacing:-.02em; }
-        .cta-sub { color:rgba(255,255,255,.4); font-size:.875rem; margin-bottom:1.5rem; }
+        .cta-title { font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color:var(--text-strong); margin-bottom:.5rem; letter-spacing:-.02em; }
+        .cta-sub { color:var(--text-muted); font-size:.875rem; margin-bottom:1.5rem; }
         .cta-btn { display:inline-flex; align-items:center; gap:8px; background:#7c3aed; color:#fff; border:none; padding:.75rem 1.75rem; border-radius:12px; font-size:.9rem; font-weight:700; cursor:pointer; transition:all .2s; text-decoration:none; font-family:'DM Sans',sans-serif; }
         .cta-btn:hover { background:#6d28d9; transform:translateY(-2px); box-shadow:0 6px 24px rgba(124,58,237,.4); }
 
         @media(max-width:600px) {
-          .navbar { padding:0 1rem; }
           .page { padding:2rem 1rem 5rem; }
           .podium-wrap { gap:.5rem; }
-          .stats-banner { grid-template-columns:repeat(3,1fr); }
+          .stats-banner { grid-template-columns:repeat(2,1fr); }
         }
       `}</style>
 
@@ -245,21 +282,20 @@ export default function ClassementPage() {
           <h1 className="page-title">🏆 Classement des parrains</h1>
           <p className="page-sub">
             <span className="live-dot" />
-            Les meilleurs parrains de la communauté — mis à jour en temps réel
+            Les meilleurs parrains de la communauté
           </p>
         </header>
 
         {/* Stats banner */}
         <div className="stats-banner">
-          {[
-            { val: MOCK_DATA.reduce((a,p)=>a+p.annonces,0), label: "Annonces publiées" },
-            { val: MOCK_DATA.reduce((a,p)=>a+p.xp,0), label: "XP distribués" },
-          ].map((s,i) => (
-            <div key={i} className="stat-b">
-              <div className="stat-b-val"><Counter target={s.val} /></div>
-              <div className="stat-b-lbl">{s.label}</div>
-            </div>
-          ))}
+          <div className="stat-b">
+            <div className="stat-b-val">{loading ? "—" : <Counter target={totalAnnonces} />}</div>
+            <div className="stat-b-lbl">Annonces publiées</div>
+          </div>
+          <div className="stat-b">
+            <div className="stat-b-val">{loading ? "—" : <Counter target={totalXP} />}</div>
+            <div className="stat-b-lbl">XP distribués</div>
+          </div>
         </div>
 
         {/* Rewards banner */}
@@ -298,13 +334,19 @@ export default function ClassementPage() {
         </div>
 
         {/* Podium */}
-        {top3.length >= 3 && (
+        {loading ? (
+          <div style={{ display:"flex", alignItems:"flex-end", gap:"1rem", marginBottom:"2.5rem" }}>
+            {[2,1,3].map(r => (
+              <div key={r} style={{ flex:1, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:20, padding:"1.5rem 1rem", animation:"shimmer 1.5s ease-in-out infinite", height: r===1?180:150 }} />
+            ))}
+          </div>
+        ) : top3.length >= 3 ? (
           <div className="podium-wrap">
             {podiumOrder.map(({ parrain, config }) => parrain && (
               <PodiumCard key={parrain.id} parrain={parrain} config={config} />
             ))}
           </div>
-        )}
+        ) : null}
 
         {/* Rest of list */}
         <div>
@@ -313,14 +355,15 @@ export default function ClassementPage() {
             <span style={{ fontSize:".75rem", color:"rgba(255,255,255,.25)" }}>Top {sorted.length}</span>
           </div>
           <div className="list-rows">
-            {rest.map((p, i) => (
-              <RankRow key={p.id} parrain={p} rank={i + 4} index={i} />
-            ))}
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
+              : rest.map((p, i) => <RankRow key={p.id} parrain={p} rank={i + 4} index={i} />)
+            }
           </div>
         </div>
 
         {/* My rank sticky banner (if not in top 3) */}
-        {me && meRank > 3 && (
+        {!loading && me && meRank > 3 && (
           <div className="my-rank-banner">
             <div className="my-rank-left">
               <Avatar pseudo={me.pseudo} size={32} isMe />
@@ -334,7 +377,7 @@ export default function ClassementPage() {
                 <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:"#fff" }}>{me.xp}</p>
                 <p style={{ fontSize:"0.65rem", color:"rgba(255,255,255,.3)" }}>XP</p>
               </div>
-              {meRank > 1 && (
+              {meRank > 1 && sorted[meRank-2] && (
                 <div style={{ textAlign:"right" }}>
                   <p style={{ fontSize:"0.72rem", color:"rgba(255,255,255,.35)" }}>Pour passer #{meRank-1}</p>
                   <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:"0.875rem", color:"#a78bfa" }}>+{sorted[meRank-2].xp - me.xp + 1} XP</p>
@@ -352,7 +395,7 @@ export default function ClassementPage() {
           <div className="cta-glow" />
           <p style={{ fontSize:"2rem", marginBottom:".75rem", animation:"float 3s ease-in-out infinite", display:"inline-block" }}>🚀</p>
           <h2 className="cta-title">Tu veux grimper dans le classement ?</h2>
-          <p className="cta-sub">Publie tes codes, gagne de l'XP, et décroche le top 3.</p>
+          <p className="cta-sub">Publie tes codes, gagne de l&rsquo;XP, et décroche le top 3.</p>
           <a href="/publier" className="cta-btn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Publier mon code
