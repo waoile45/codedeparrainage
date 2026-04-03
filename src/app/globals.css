@@ -19,6 +19,49 @@ h1, h2, h3 {
   color: #0f0f1a !important;
 }
 
+/* Titres et textes inline : forcer dark sur fond clair */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4 {
+  color: #0f0f1a !important;
+}
+
+[data-theme="light"] p {
+  color: rgba(15,15,26,0.65) !important;
+}
+
+/* Onglets de la sidebar profil */
+[data-theme="light"] .nav-item,
+[data-theme="light"] .nav-group-label {
+  color: rgba(15,15,26,0.55) !important;
+}
+
+[data-theme="light"] .nav-item.active,
+[data-theme="light"] .nav-item:hover {
+  color: #0f0f1a !important;
+  background: rgba(124,58,237,0.08) !important;
+}
+
+/* Textes blancs hardcodés dans les pages */
+[data-theme="light"] .page-title,
+[data-theme="light"] .success-title,
+[data-theme="light"] .st {
+  color: #0f0f1a !important;
+}
+
+/* Navbar theme toggle visible en mode clair */
+[data-theme="light"] .nav-theme-btn {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: rgba(15,15,26,0.6) !important;
+}
+
+[data-theme="light"] .nav-theme-btn:hover {
+  color: #0f0f1a !important;
+  background: rgba(0,0,0,0.08) !important;
+}
+
 [data-theme="light"] .navbar {
   background: rgba(248, 249, 252, 0.95) !important;
   border-bottom-color: rgba(124, 58, 237, 0.15) !important;

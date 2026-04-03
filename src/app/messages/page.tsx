@@ -223,7 +223,7 @@ export default function MessagesPage() {
         }
       `}</style>
 
-      <Navbar activePage="messages" isLoggedIn={true} pseudo="Test3" />
+      <Navbar activePage="messages" />
 
       <div className="page">
         <div className="split">

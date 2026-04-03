@@ -237,7 +237,7 @@ export default function ClassementPage() {
 
       {/* Navbar */}
       // classement
-      <Navbar activePage="classement" isLoggedIn={true} pseudo="Test3" />
+      <Navbar activePage="classement" />
 
       <main className="page">
 

@@ -579,7 +579,7 @@ export default function ProfilPage() {
         @media(max-width:768px){.layout{flex-direction:column;padding:1rem}.main{width:100%}}
       `}</style>
 
-      <Navbar activePage="profil" isLoggedIn={true} pseudo={user?.pseudo ?? "..."} />
+      <Navbar activePage="profil" />
 
       <div className="layout">
         <Sidebar active={active} setActive={setActive} user={user} />

@@ -291,7 +291,7 @@ export default function HomePage() {
         </div>
         <div style={{ display:"flex", flexWrap:"wrap", gap:"0.5rem" }}>
           {POPULAR_TAGS.map(tag=>(
-            <Link key={tag.slug} href={`/code-parrainage/${tag.slug}`}
+            <Link key={tag.slug} href={`/codes?search=${encodeURIComponent(tag.label)}`}
               style={{ textDecoration:"none", fontSize:"0.8rem", padding:"0.45rem 0.875rem", borderRadius:10, background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.07)", color:"rgba(255,255,255,0.38)", transition:"all 0.18s" }}
               onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.background="rgba(124,58,237,0.12)"; el.style.borderColor="rgba(124,58,237,0.3)"; el.style.color="#a78bfa"; }}
               onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.background="rgba(255,255,255,0.04)"; el.style.borderColor="rgba(255,255,255,0.07)"; el.style.color="rgba(255,255,255,0.38)"; }}

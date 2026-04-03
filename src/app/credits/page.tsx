@@ -183,7 +183,7 @@ export default function CreditsPage() {
         }
       `}</style>
 
-      <Navbar activePage="profil" isLoggedIn={true} pseudo="Test3" />
+      <Navbar activePage="profil" />
 
       <main className="page">
 

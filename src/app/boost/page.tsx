@@ -65,7 +65,7 @@ export default function BoostPage() {
   if (success) return (
     <>
       <style>{`*,*::before,*::after{box-sizing:border-box;margin:0;padding:0} body{background:#0A0A0F;color:#e2e8f0;font-family:'DM Sans',sans-serif;min-height:100vh} @keyframes pop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}`}</style>
-      <Navbar activePage="profil" isLoggedIn={true} pseudo="Test3" />
+      <Navbar activePage="profil" />
       <div style={{ maxWidth:480, margin:"6rem auto", textAlign:"center", padding:"0 1.5rem" }}>
         <div style={{ fontSize:"3.5rem", animation:"pop .5s ease forwards", display:"inline-block", marginBottom:"1rem" }}>⚡</div>
         <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.75rem", color:"#fff", marginBottom:".5rem" }}>Boost activé !</h2>
@@ -194,7 +194,7 @@ export default function BoostPage() {
         }
       `}</style>
 
-      <Navbar activePage="profil" isLoggedIn={true} pseudo="Test3" />
+      <Navbar activePage="profil" />
 
       <main className="page">
 

@@ -246,7 +246,7 @@ export default function PublierPage() {
         }
       `}</style>
 
-      <Navbar activePage="publier" isLoggedIn={true} pseudo="Test3" />
+      <Navbar activePage="publier" />
 
       <main className="page">
         <div className="page-header">

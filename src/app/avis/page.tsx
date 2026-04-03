@@ -183,7 +183,7 @@ export default function AvisPage() {
         }
       `}</style>
 
-      <Navbar activePage="profil" isLoggedIn={true} pseudo="Test3" />
+      <Navbar activePage="profil" />
 
       <main className="page">
 

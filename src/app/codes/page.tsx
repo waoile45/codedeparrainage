@@ -115,6 +115,8 @@ export default function CodesPage() {
     const params = new URLSearchParams(window.location.search);
     const cat = params.get("categorie");
     if (cat && CATEGORIES.includes(cat)) setActiveCategory(cat as Category);
+    const s = params.get("search");
+    if (s) setSearch(s);
   }, []);
 
   useEffect(() => {
@@ -233,7 +235,7 @@ export default function CodesPage() {
       `}</style>
 
       <Particles />
-      <Navbar activePage="codes" isLoggedIn={true} pseudo="Test3" />
+      <Navbar activePage="codes" />
 
       <main className="page-wrapper">
         <header className="page-header">
