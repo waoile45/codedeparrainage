@@ -143,7 +143,7 @@ export default function PublierPage() {
       return;
     }
 
-    // Trouver ou créer la company dans Supabase
+    // Trouver la company dans Supabase (pas de création automatique)
     const slug = selectedEntreprise.domain;
     let companyId: string;
 
@@ -153,21 +153,15 @@ export default function PublierPage() {
       .eq("slug", slug)
       .single();
 
-    if (existing) {
-      companyId = existing.id;
-    } else {
-      const { data: newCompany, error: insertErr } = await supabase
-        .from("companies")
-        .insert({ name: selectedEntreprise.nom, slug, category: selectedCategory })
-        .select("id")
-        .single();
-      if (insertErr || !newCompany) {
-        setError("Erreur lors de la création de l'entreprise : " + insertErr?.message);
-        setSubmitting(false);
-        return;
-      }
-      companyId = newCompany.id;
+    if (!existing) {
+      const subject = encodeURIComponent(`Demande d'ajout d'entreprise : ${selectedEntreprise.nom}`);
+      const body = encodeURIComponent(`Bonjour,\n\nJe souhaite publier un code de parrainage pour l'entreprise suivante :\n\n- Nom : ${selectedEntreprise.nom}\n- Domaine : ${selectedEntreprise.domain}\n- Catégorie : ${selectedCategory}\n\nMerci de l'ajouter à la base de données.\n\nCordialement`);
+      setError(`__NOT_FOUND__subject=${subject}&body=${body}`);
+      setSubmitting(false);
+      return;
     }
+
+    companyId = existing.id;
 
     // Insérer l'annonce
     const { error: insertError } = await supabase
@@ -466,10 +460,27 @@ export default function PublierPage() {
               )}
 
               {error && (
-                <div className="form-error">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  {error}
-                </div>
+                error.startsWith("__NOT_FOUND__") ? (
+                  <div style={{ background:"rgba(124,58,237,.1)", border:"1px solid rgba(124,58,237,.3)", borderRadius:12, padding:"1rem 1.125rem", marginBottom:"1rem" }}>
+                    <div style={{ fontWeight:700, fontSize:".875rem", color:"#a78bfa", marginBottom:6 }}>
+                      🏢 Cette entreprise n&apos;est pas encore dans notre base
+                    </div>
+                    <p style={{ fontSize:".8rem", color:"var(--text-muted)", margin:"0 0 .75rem" }}>
+                      Envoie-nous une demande et nous l&apos;ajouterons manuellement sous 24h.
+                    </p>
+                    <a
+                      href={`mailto:waoile45@gmail.com?${error.replace("__NOT_FOUND__","")}`}
+                      style={{ display:"inline-flex", alignItems:"center", gap:6, background:"#7c3aed", color:"#fff", fontWeight:700, fontSize:".8rem", padding:".45rem 1rem", borderRadius:9, textDecoration:"none" }}
+                    >
+                      ✉️ Demander l&apos;ajout par email
+                    </a>
+                  </div>
+                ) : (
+                  <div className="form-error">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    {error}
+                  </div>
+                )
               )}
 
               <div style={{ display:"flex", flexDirection:"column", gap:"1.25rem" }}>
