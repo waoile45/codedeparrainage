@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 
 // ⚠️ Remplace par ton URL Google Business / Google Maps review
-const GOOGLE_REVIEW_URL = ""; // À remplacer : Google Business Profile → "Obtenir plus d'avis" → copie le lien
+const GOOGLE_REVIEW_URL = "https://g.page/r/CWGFDaSeMPebEAE/review";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type Step = "rate" | "positive" | "negative" | "done";
