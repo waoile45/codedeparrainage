@@ -4,17 +4,58 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 
+// ── Particles ─────────────────────────────────────────────────────────────────
+
+const PARTICLES = [
+  { id: 0,  left: "3%",   size: 4, delay: "0s",    dur: "12s", opacity: 0.30 },
+  { id: 1,  left: "8%",   size: 3, delay: "1.5s",  dur: "10s", opacity: 0.22 },
+  { id: 2,  left: "15%",  size: 5, delay: "3s",    dur: "14s", opacity: 0.28 },
+  { id: 3,  left: "22%",  size: 3, delay: "0.8s",  dur: "11s", opacity: 0.20 },
+  { id: 4,  left: "30%",  size: 4, delay: "2.2s",  dur: "13s", opacity: 0.18 },
+  { id: 5,  left: "38%",  size: 3, delay: "4s",    dur: "9s",  opacity: 0.30 },
+  { id: 6,  left: "45%",  size: 5, delay: "1s",    dur: "15s", opacity: 0.22 },
+  { id: 7,  left: "52%",  size: 3, delay: "3.5s",  dur: "10s", opacity: 0.26 },
+  { id: 8,  left: "60%",  size: 4, delay: "0.5s",  dur: "12s", opacity: 0.24 },
+  { id: 9,  left: "67%",  size: 3, delay: "2.8s",  dur: "11s", opacity: 0.18 },
+  { id: 10, left: "74%",  size: 5, delay: "1.8s",  dur: "13s", opacity: 0.30 },
+  { id: 11, left: "81%",  size: 3, delay: "4.5s",  dur: "9s",  opacity: 0.22 },
+  { id: 12, left: "88%",  size: 4, delay: "0.3s",  dur: "14s", opacity: 0.26 },
+  { id: 13, left: "93%",  size: 3, delay: "3.2s",  dur: "10s", opacity: 0.24 },
+  { id: 14, left: "12%",  size: 4, delay: "6s",    dur: "11s", opacity: 0.18 },
+  { id: 15, left: "27%",  size: 3, delay: "5s",    dur: "12s", opacity: 0.30 },
+  { id: 16, left: "55%",  size: 5, delay: "7s",    dur: "10s", opacity: 0.22 },
+  { id: 17, left: "70%",  size: 3, delay: "5.5s",  dur: "13s", opacity: 0.26 },
+  { id: 18, left: "85%",  size: 4, delay: "2s",    dur: "15s", opacity: 0.24 },
+  { id: 19, left: "42%",  size: 3, delay: "6.5s",  dur: "9s",  opacity: 0.30 },
+  { id: 20, left: "18%",  size: 4, delay: "8s",    dur: "11s", opacity: 0.20 },
+  { id: 21, left: "35%",  size: 3, delay: "9s",    dur: "12s", opacity: 0.22 },
+  { id: 22, left: "63%",  size: 5, delay: "7.5s",  dur: "10s", opacity: 0.28 },
+  { id: 23, left: "78%",  size: 3, delay: "8.5s",  dur: "13s", opacity: 0.20 },
+  { id: 24, left: "96%",  size: 4, delay: "4.8s",  dur: "14s", opacity: 0.24 },
+];
+
+// ── Top Codes ─────────────────────────────────────────────────────────────────
+
+const TOP_CODES = [
+  { name: "Boursobank",     icon: "🏦", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://boursobank.com&size=128",      category: "Banque",        catColor: "#3b82f6", rating: 4.9, gain: "+240€",   gainSub: "offerts à l'ouverture", desc: "Banque en ligne, compte gratuit + prime de bienvenue.",     nbCodes: 48, slug: "boursobank"     },
+  { name: "Revolut",        icon: "💳", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://revolut.com&size=128",          category: "Banque",        catColor: "#3b82f6", rating: 4.7, gain: "+30€",    gainSub: "en cashback",           desc: "Carte internationale sans frais, virements instantanés.",    nbCodes: 31, slug: "revolut"        },
+  { name: "Winamax",        icon: "⚽", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://winamax.fr&size=128",           category: "Paris sportifs",catColor: "#10b981", rating: 4.8, gain: "+100€",   gainSub: "en freebets",           desc: "Le leader des paris sportifs en France.",                    nbCodes: 62, slug: "winamax"        },
+  { name: "Binance",        icon: "₿",  logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://binance.com&size=128",          category: "Crypto",        catColor: "#f59e0b", rating: 4.6, gain: "-20%",    gainSub: "sur les frais",         desc: "La plus grande plateforme crypto au monde.",                 nbCodes: 27, slug: "binance"        },
+  { name: "Trade Republic", icon: "📈", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://traderepublic.com&size=128",   category: "Bourse",        catColor: "#6366f1", rating: 4.8, gain: "+5€",     gainSub: "en actions",            desc: "Investissez en actions et ETF à 1€/ordre.",                  nbCodes: 19, slug: "trade-republic" },
+  { name: "Free Mobile",    icon: "📱", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://free.fr&size=128",              category: "Téléphonie",    catColor: "#8b5cf6", rating: 4.5, gain: "+20€",    gainSub: "de réduction",          desc: "Forfait mobile pas cher avec parrainage.",                   nbCodes: 22, slug: "free-mobile"    },
+];
+
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
-  { label: "Banque",       slug: "banque",     icon: "🏦", count: 124, color: "#3b82f6" },
-  { label: "Crypto",       slug: "crypto",     icon: "₿",  count: 89,  color: "#f59e0b" },
-  { label: "Paris sportifs",slug: "paris",     icon: "⚽", count: 97,  color: "#10b981" },
-  { label: "Cashback",     slug: "cashback",   icon: "💸", count: 56,  color: "#6366f1" },
-  { label: "Énergie",      slug: "energie",    icon: "⚡", count: 43,  color: "#ec4899" },
-  { label: "Téléphonie",   slug: "telephonie", icon: "📱", count: 38,  color: "#8b5cf6" },
-  { label: "Shopping",     slug: "shopping",   icon: "🛍️", count: 71,  color: "#14b8a6" },
-  { label: "Assurance",    slug: "assurance",  icon: "🛡️", count: 29,  color: "#f97316" },
+  { label: "Banque",        slug: "banque",     icon: "🏦", count: 124, color: "#3b82f6" },
+  { label: "Crypto",        slug: "crypto",     icon: "₿",  count: 89,  color: "#f59e0b" },
+  { label: "Paris sportifs",slug: "paris",      icon: "⚽", count: 97,  color: "#10b981" },
+  { label: "Cashback",      slug: "cashback",   icon: "💸", count: 56,  color: "#6366f1" },
+  { label: "Énergie",       slug: "energie",    icon: "⚡", count: 43,  color: "#ec4899" },
+  { label: "Téléphonie",    slug: "telephonie", icon: "📱", count: 38,  color: "#8b5cf6" },
+  { label: "Shopping",      slug: "shopping",   icon: "🛍️", count: 71,  color: "#14b8a6" },
+  { label: "Assurance",     slug: "assurance",  icon: "🛡️", count: 29,  color: "#f97316" },
 ];
 
 const POPULAR_TAGS = [
@@ -66,8 +107,8 @@ const FLOATING_CARDS = [
       <div style={{ display:"flex", alignItems:"center", gap:10 }}>
         <span style={{ fontSize:22 }}>⚡</span>
         <div>
-          <div style={{ fontWeight:700, fontSize:"0.85rem", color:"#fff" }}>Boost activé</div>
-          <div style={{ fontSize:"0.72rem", color:"rgba(255,255,255,0.45)" }}>Ton annonce est en tête</div>
+          <div style={{ fontWeight:700, fontSize:"0.85rem", color:"var(--text-strong)" }}>Boost activé</div>
+          <div style={{ fontSize:"0.72rem", color:"var(--text-dim)" }}>Ton annonce est en tête</div>
         </div>
       </div>
     ),
@@ -129,14 +170,36 @@ export default function HomePage() {
   return (
     <main style={{ background:"var(--bg)", minHeight:"100vh", fontFamily:"var(--font-dm-sans),'DM Sans',sans-serif", color:"var(--text-strong)", overflowX:"hidden" }}>
 
+      {/* ── Particles ─────────────────────────────────────────────────────── */}
+      {mounted && (
+        <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, overflow:"hidden" }}>
+          {PARTICLES.map(p => (
+            <div
+              key={p.id}
+              style={{
+                position:"absolute",
+                left: p.left,
+                top: "-20px",
+                width: p.size,
+                height: p.size,
+                borderRadius: "50%",
+                background: "#7c3aed",
+                opacity: p.opacity,
+                animation: `particleFall ${p.dur} linear ${p.delay} infinite`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Grid bg */}
-      <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, backgroundImage:"linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px)", backgroundSize:"60px 60px" }} />
+      <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0, backgroundImage:"linear-gradient(rgba(124,58,237,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.04) 1px,transparent 1px)", backgroundSize:"60px 60px" }} />
       {/* Glow */}
       <div style={{ position:"fixed", top:-200, left:"50%", transform:"translateX(-50%)", width:700, height:700, borderRadius:"50%", background:"radial-gradient(circle,rgba(124,58,237,0.13) 0%,transparent 65%)", pointerEvents:"none", zIndex:0 }} />
 
       {/* ══ NAVBAR ══════════════════════════════════════════════════════════ */}
       <nav id="hp-nav" style={{ position:"relative", zIndex:10, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"1.25rem 2rem", maxWidth:1200, margin:"0 auto" }}>
-        <Link href="/" style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.1rem", color:"var(--text-strong)", textDecoration:"none", letterSpacing:"-0.02em" }}>
+        <Link id="hp-nav-logo" href="/" style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.1rem", color:"var(--text-strong)", textDecoration:"none", letterSpacing:"-0.02em" }}>
           code<span style={{ color:"#7c3aed" }}>de</span>parrainage.com
         </Link>
         <div id="hp-nav-links" style={{ display:"flex", alignItems:"center", gap:"0.25rem" }}>
@@ -177,7 +240,7 @@ export default function HomePage() {
             +4 200 codes actifs en ce moment
           </div>
           <h1 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"clamp(2.8rem,5vw,4.5rem)", lineHeight:1.05, letterSpacing:"-0.03em", margin:0, marginBottom:"1.5rem", color:"var(--text-strong)" }}>
-            Parraine,<br /><span style={{ color:"#7c3aed" }}>gagne</span> des<br />récompenses.
+            Parraine et<br /><span style={{ color:"#7c3aed" }}>gagne</span> des<br />récompenses.
           </h1>
           <p style={{ color:"var(--text-muted)", fontSize:"1rem", lineHeight:1.7, maxWidth:460, marginBottom:"2rem" }}>
             La plateforme de parrainage gamifiée. Publie ton code, monte de niveau, débloque des badges et rejoins 850+ parrains vérifiés.
@@ -215,13 +278,88 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ══ COMMENT ÇA MARCHE ═══════════════════════════════════════════════ */}
+      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"2rem", paddingBottom:"4rem" }}>
+        <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:"0 0 2rem", textAlign:"center" }}>Comment ça marche ?</h2>
+        <div id="hp-how" style={{ display:"grid", gap:"1.25rem" }}>
+          {[
+            { num:"01", title:"Trouve un code",   desc:"Parcours des milliers de codes vérifiés par catégorie ou marque.", icon:"🔍" },
+            { num:"02", title:"Parraine & gagne",  desc:"Utilise le code, valide le parrainage et accumule des XP.",       icon:"🎁" },
+            { num:"03", title:"Monte de niveau",   desc:"Débloque des badges, grimpe au classement, booste ta visibilité.", icon:"🏆" },
+          ].map(step=>(
+            <div key={step.num} style={{ background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:20, padding:"1.75rem", position:"relative", overflow:"hidden" }}>
+              <div style={{ position:"absolute", top:16, right:20, fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"3rem", color:"var(--step-num)", lineHeight:1 }}>{step.num}</div>
+              <div style={{ fontSize:28, marginBottom:12 }}>{step.icon}</div>
+              <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1rem", marginBottom:8, color:"var(--text-strong)" }}>{step.title}</div>
+              <div style={{ fontSize:"0.85rem", color:"var(--text-muted)", lineHeight:1.6 }}>{step.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ══ MEILLEURS CODES ═════════════════════════════════════════════════ */}
+      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"1rem", paddingBottom:"4rem" }}>
+        <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:"1.5rem" }}>
+          <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:0 }}>
+            🔥 Codes les plus populaires
+          </h2>
+          <Link href="/codes" style={{ fontSize:"0.82rem", color:"#a78bfa", textDecoration:"none", fontWeight:600 }}>Voir tout →</Link>
+        </div>
+        <div id="hp-top-codes" style={{ display:"grid", gap:"1rem" }}>
+          {TOP_CODES.map(code => (
+            <Link key={code.slug} href={`/codes?search=${encodeURIComponent(code.name)}`} style={{ textDecoration:"none" }}>
+              <div
+                className="top-code-card"
+                style={{ background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:18, padding:"1.375rem 1.5rem", display:"flex", flexDirection:"column", gap:12, transition:"all 0.22s", cursor:"pointer" }}
+                onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.background="var(--bg-card-hover)"; el.style.borderColor=`${code.catColor}50`; el.style.transform="translateY(-3px)"; el.style.boxShadow=`0 8px 28px ${code.catColor}22`; el.style.filter="brightness(1.04)"; }}
+                onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.background="var(--bg-card)"; el.style.borderColor="var(--border)"; el.style.transform="none"; el.style.boxShadow="none"; el.style.filter="none"; }}
+              >
+                {/* Top row: icon + name + rating | gain */}
+                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                  <div style={{ width:50, height:50, borderRadius:14, background:`${code.catColor}18`, border:`1px solid ${code.catColor}35`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, flexShrink:0, overflow:"hidden" }}>
+                    <img
+                      src={code.logo}
+                      alt={code.name}
+                      width={34}
+                      height={34}
+                      style={{ objectFit:"contain", borderRadius:6 }}
+                      onError={e => { (e.currentTarget as HTMLImageElement).style.display="none"; (e.currentTarget.nextSibling as HTMLElement).style.display="flex"; }}
+                    />
+                    <span style={{ display:"none", fontSize:26 }}>{code.icon}</span>
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontWeight:800, fontSize:"1rem", color:"var(--text-strong)" }}>{code.name}</div>
+                    <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:3 }}>
+                      <span style={{ fontSize:"0.68rem", fontWeight:700, color:code.catColor, background:`${code.catColor}18`, border:`1px solid ${code.catColor}30`, borderRadius:6, padding:"1px 7px" }}>{code.category}</span>
+                      <span style={{ fontSize:"0.72rem", color:"#fbbf24" }}>★</span>
+                      <span style={{ fontSize:"0.72rem", color:"var(--text-dim)", fontWeight:600 }}>{code.rating}</span>
+                    </div>
+                  </div>
+                  <div style={{ textAlign:"right", flexShrink:0 }}>
+                    <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.35rem", color:"#34d399", lineHeight:1 }}>{code.gain}</div>
+                    <div style={{ fontSize:"0.68rem", color:"var(--text-dim)", marginTop:3 }}>{code.gainSub}</div>
+                  </div>
+                </div>
+                {/* Description */}
+                <p style={{ fontSize:"0.82rem", color:"var(--text-muted)", margin:0, lineHeight:1.55 }}>{code.desc}</p>
+                {/* Bottom row: nb codes + button */}
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                  <span style={{ fontSize:"0.75rem", color:"var(--text-dim)", fontWeight:500 }}>{code.nbCodes} codes disponibles</span>
+                  <div style={{ background:"#7c3aed", color:"#fff", fontWeight:700, fontSize:"0.78rem", padding:"0.45rem 1rem", borderRadius:10, pointerEvents:"none" }}>Voir les codes</div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* ══ CATEGORIES ══════════════════════════════════════════════════════ */}
-      <section style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"2rem 2rem 4rem" }}>
+      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"2rem", paddingBottom:"4rem" }}>
         <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:"1.5rem" }}>
           <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:0 }}>Parcourir par catégorie</h2>
           <Link href="/codes" style={{ fontSize:"0.82rem", color:"#a78bfa", textDecoration:"none", fontWeight:600 }}>Voir tout →</Link>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:"0.875rem" }}>
+        <div id="hp-cat-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:"0.875rem" }}>
           {CATEGORIES.map(cat=>(
             <Link key={cat.slug} href={`/codes?categorie=${cat.slug}`} style={{ textDecoration:"none" }}>
               <div
@@ -241,27 +379,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ══ COMMENT ÇA MARCHE ═══════════════════════════════════════════════ */}
-      <section style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"2rem 2rem 4rem" }}>
-        <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:"0 0 2rem", textAlign:"center" }}>Comment ça marche ?</h2>
-        <div id="hp-how" style={{ display:"grid", gap:"1.25rem" }}>
-          {[
-            { num:"01", title:"Trouve un code",   desc:"Parcours des milliers de codes vérifiés par catégorie ou marque.", icon:"🔍" },
-            { num:"02", title:"Parraine & gagne",  desc:"Utilise le code, valide le parrainage et accumule des XP.",       icon:"🎁" },
-            { num:"03", title:"Monte de niveau",   desc:"Débloque des badges, grimpe au classement, booste ta visibilité.", icon:"🏆" },
-          ].map(step=>(
-            <div key={step.num} style={{ background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:20, padding:"1.75rem", position:"relative", overflow:"hidden" }}>
-              <div style={{ position:"absolute", top:16, right:20, fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"3rem", color:"rgba(124,58,237,0.12)", lineHeight:1 }}>{step.num}</div>
-              <div style={{ fontSize:28, marginBottom:12 }}>{step.icon}</div>
-              <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1rem", marginBottom:8, color:"var(--text-strong)" }}>{step.title}</div>
-              <div style={{ fontSize:"0.85rem", color:"var(--text-muted)", lineHeight:1.6 }}>{step.desc}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* ══ AVIS ════════════════════════════════════════════════════════════ */}
-      <section style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"2rem 2rem 4rem" }}>
+      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"2rem", paddingBottom:"4rem" }}>
         <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:"1.5rem" }}>
           <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:0 }}>Ce qu&apos;ils en pensent</h2>
           <div style={{ display:"flex", alignItems:"center", gap:6 }}>
@@ -269,7 +388,7 @@ export default function HomePage() {
             <span style={{ fontSize:"0.78rem", color:"var(--text-dim)" }}>4.9 / 5 · 850+ avis</span>
           </div>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:"1rem" }}>
+        <div id="hp-avis-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:"1rem" }}>
           {AVIS.map(avis=>(
             <div key={avis.pseudo}
               style={{ background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:18, padding:"1.25rem 1.375rem", display:"flex", flexDirection:"column", gap:12, transition:"all 0.2s" }}
@@ -299,7 +418,7 @@ export default function HomePage() {
       </section>
 
       {/* ══ TAGS POPULAIRES ═════════════════════════════════════════════════ */}
-      <section style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"1rem 2rem 6rem" }}>
+      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"1rem", paddingBottom:"6rem" }}>
         <div style={{ fontSize:"0.72rem", fontWeight:700, letterSpacing:"0.08em", color:"var(--text-faint)", marginBottom:"1rem", fontFamily:"var(--font-syne),Syne,sans-serif", textTransform:"uppercase" }}>
           Codes populaires
         </div>
@@ -316,26 +435,40 @@ export default function HomePage() {
 
       {/* Keyframes + Mobile */}
       <style>{`
-        @keyframes fadeInUp   { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes floatCard0 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        @keyframes floatCard1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+        @keyframes fadeInUp      { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes floatCard0    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        @keyframes floatCard1    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+        @keyframes particleFall  {
+          0%   { transform: translateY(-20px); opacity: 0; }
+          8%   { opacity: 1; }
+          92%  { opacity: 1; }
+          100% { transform: translateY(105vh);  opacity: 0; }
+        }
 
         #hp-hero   { grid-template-columns: 1fr 1fr; }
         #hp-how    { grid-template-columns: repeat(3,1fr); }
+        #hp-top-codes { grid-template-columns: repeat(3,1fr); }
         #hp-nav    { padding: 1.25rem 2rem; }
         #hp-hero-right { display: block; }
 
+        .hp-section { padding-left: 2rem; padding-right: 2rem; }
+
         @media (max-width: 768px) {
-          #hp-nav { padding: 1rem 1.25rem !important; }
+          #hp-nav { padding: 0.875rem 1rem !important; }
           #hp-nav-links { display: none !important; }
-          #hp-hero { grid-template-columns: 1fr !important; padding: 2rem 1.25rem 3rem !important; }
+          #hp-hero { grid-template-columns: 1fr !important; padding: 1.75rem 1rem 2.5rem !important; }
           #hp-hero-right { display: none !important; }
           #hp-how  { grid-template-columns: 1fr !important; }
-          #hp-sections { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+          #hp-top-codes { grid-template-columns: repeat(2,1fr) !important; }
+          .hp-section { padding-left: 1rem !important; padding-right: 1rem !important; }
+          #hp-cat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          #hp-avis-grid { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 480px) {
-          #hp-hero h1 { font-size: 2.4rem !important; }
-          #hp-hero-stats { gap: 1rem !important; }
+          #hp-hero h1 { font-size: 2.2rem !important; }
+          #hp-hero-stats { gap: 1.25rem !important; flex-wrap: wrap !important; }
+          #hp-nav-logo { font-size: 0.92rem !important; }
+          #hp-top-codes { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </main>

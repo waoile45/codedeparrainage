@@ -504,8 +504,11 @@ export default function PublierPage() {
                     className="form-input code-input"
                     placeholder="Ex : VOTRE CODE"
                     value={code}
-                    onChange={e => setCode(e.target.value.toUpperCase())}
-                    maxLength={32}
+                    onChange={e => {
+                      const v = e.target.value;
+                      setCode(v.startsWith("http") ? v : v.toUpperCase());
+                    }}
+                    maxLength={500}
                   />
                   {code && (
                     <div className="code-preview">

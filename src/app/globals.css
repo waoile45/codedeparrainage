@@ -1,10 +1,12 @@
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { max-width: 100%; overflow-x: hidden; }
 
 /* ═══════════════════════════════════════════════════════════════════
    CSS VARIABLES — dark (défaut) et light
    ═══════════════════════════════════════════════════════════════════ */
 :root {
   --bg:              #0A0A0F;
+  --step-num:        rgba(124,58,237,0.12);
   --bg-card:         rgba(255,255,255,.03);
   --bg-card-md:      rgba(255,255,255,.04);
   --bg-card-hover:   rgba(255,255,255,.055);
@@ -28,26 +30,27 @@
 }
 
 [data-theme="light"] {
-  --bg:              #eeeef8;
-  --bg-card:         #fff;
-  --bg-card-md:      #f5f5ff;
-  --bg-card-hover:   #ededfc;
-  --bg-input:        #f5f5ff;
+  --bg:              #ddd4ff;
+  --step-num:        rgba(109,40,217,0.55);
+  --bg-card:         #faf8ff;
+  --bg-card-md:      #f2eeff;
+  --bg-card-hover:   #ebe4ff;
+  --bg-input:        #f2eeff;
   --bg-code:         rgba(0,0,0,.04);
-  --bg-nav:          rgba(238,238,248,.95);
-  --bg-dropdown:     #f5f5ff;
+  --bg-nav:          rgba(234,228,255,.95);
+  --bg-dropdown:     #f2eeff;
   --bg-btn:          rgba(0,0,0,.05);
-  --border:          rgba(0,0,0,.09);
-  --border-md:       rgba(0,0,0,.1);
-  --border-lg:       rgba(0,0,0,.12);
-  --text:            #0f0f1a;
-  --text-strong:     #0f0f1a;
-  --text-muted:      rgba(15,15,26,.55);
-  --text-dim:        rgba(15,15,26,.4);
-  --text-faint:      rgba(15,15,26,.3);
-  --text-link:       rgba(15,15,26,.55);
-  --text-nav:        rgba(15,15,26,.55);
-  --text-btn-ghost:  rgba(15,15,26,.6);
+  --border:          rgba(100,70,200,.12);
+  --border-md:       rgba(100,70,200,.17);
+  --border-lg:       rgba(100,70,200,.24);
+  --text:            #180a30;
+  --text-strong:     #180a30;
+  --text-muted:      rgba(24,10,48,.55);
+  --text-dim:        rgba(24,10,48,.4);
+  --text-faint:      rgba(24,10,48,.3);
+  --text-link:       rgba(24,10,48,.55);
+  --text-nav:        rgba(24,10,48,.55);
+  --text-btn-ghost:  rgba(24,10,48,.6);
   --border-btn-ghost:rgba(0,0,0,.15);
 }
 
