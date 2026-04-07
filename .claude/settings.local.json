@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(npm run:*)",
+      "Bash(grep -n \"^const.*createClient\\\\|^const.*supabase\" /c/Users/paulm/Desktop/codedeparrainage/src/app/api/reviews/route.ts /c/Users/paulm/Desktop/codedeparrainage/src/app/api/messages/route.ts /c/Users/paulm/Desktop/codedeparrainage/src/app/api/announcements/*/route.ts /c/Users/paulm/Desktop/codedeparrainage/src/app/api/stripe/checkout/route.ts /c/Users/paulm/Desktop/codedeparrainage/src/app/api/stripe/webhook/route.ts /c/Users/paulm/Desktop/codedeparrainage/src/app/api/bump/route.ts)",
+      "Bash(npx vercel:*)",
+      "Bash(npm install:*)",
+      "Bash(node -e ':*)"
+    ]
+  }
+}

@@ -17,8 +17,20 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "codedeparrainage.com — Parrainage gamifié",
-  description: "La plateforme de parrainage gamifiée. Publie ton code, monte de niveau, débloque des badges.",
+  metadataBase: new URL('https://www.codedeparrainage.com'),
+  title: {
+    default: 'codedeparrainage.com — Codes de parrainage vérifiés',
+    template: '%s | codedeparrainage.com',
+  },
+  description: 'Trouvez les meilleurs codes de parrainage français : BoursoBank, Winamax, Revolut, Betclic, Trade Republic. Codes vérifiés par la communauté, mis à jour en temps réel.',
+  openGraph: {
+    siteName: 'codedeparrainage.com',
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  alternates: {
+    canonical: 'https://www.codedeparrainage.com',
+  },
 };
 
 export default function RootLayout({
