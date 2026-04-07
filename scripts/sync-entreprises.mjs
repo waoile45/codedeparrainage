@@ -69,54 +69,37 @@ if (RESET) {
   console.log("✅  Table nettoyée (entreprises sans codes supprimées)");
 }
 
-// ── Récupérer les slugs déjà présents ─────────────────────────────────────────
+// ── Préparer toutes les entrées ───────────────────────────────────────────────
 
-console.log("🔎  Récupération des slugs existants...");
-const { data: existing, error: fetchErr } = await supabase
-  .from("companies")
-  .select("slug");
+const toUpsert = entreprises.map(e => ({
+  name:     e.nom,
+  slug:     e.domain,
+  logo_url: e.logo,
+  category: "banque",
+}));
 
-if (fetchErr) { console.error("Erreur fetch :", fetchErr.message); process.exit(1); }
+console.log(`🔄  Upsert de ${toUpsert.length} entreprises (insère + met à jour)...`);
 
-const existingSlugs = new Set((existing || []).map(r => r.slug));
-console.log(`   ${existingSlugs.size} entreprises déjà en base`);
-
-// ── Filtrer les nouvelles ─────────────────────────────────────────────────────
-
-const toInsert = entreprises
-  .filter(e => !existingSlugs.has(e.domain))
-  .map(e => ({
-    name:     e.nom,
-    slug:     e.domain,
-    logo_url: e.logo,
-    category: "banque",  // valeur par défaut — à corriger manuellement si besoin
-  }));
-
-console.log(`➕  ${toInsert.length} nouvelles entreprises à insérer`);
-
-if (toInsert.length === 0) {
-  console.log("✅  Rien à faire, tout est déjà synchronisé !");
-  process.exit(0);
-}
-
-// ── Insertion par lots ────────────────────────────────────────────────────────
+// ── Upsert par lots ───────────────────────────────────────────────────────────
 
 let inserted = 0;
 let errors   = 0;
 
-for (let i = 0; i < toInsert.length; i += BATCH_SIZE) {
-  const batch = toInsert.slice(i, i + BATCH_SIZE);
-  const { error } = await supabase.from("companies").insert(batch);
+for (let i = 0; i < toUpsert.length; i += BATCH_SIZE) {
+  const batch = toUpsert.slice(i, i + BATCH_SIZE);
+  const { error } = await supabase
+    .from("companies")
+    .upsert(batch, { onConflict: "slug", ignoreDuplicates: false });
 
   if (error) {
     console.error(`❌  Lot ${i / BATCH_SIZE + 1} échoué : ${error.message}`);
     errors += batch.length;
   } else {
     inserted += batch.length;
-    process.stdout.write(`\r   Inséré : ${inserted} / ${toInsert.length}`);
+    process.stdout.write(`\r   Traité : ${inserted} / ${toUpsert.length}`);
   }
 }
 
 console.log(`\n\n✅  Synchronisation terminée`);
-console.log(`   ✔  ${inserted} insérées`);
+console.log(`   ✔  ${inserted} entrées synchronisées`);
 if (errors) console.log(`   ✖  ${errors} erreurs`);
