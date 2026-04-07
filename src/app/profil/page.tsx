@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 
-type NavSection = "profil" | "annonces" | "messages" | "badges" | "quetes" | "credits" | "parametres";
+type NavSection = "profil" | "annonces" | "messages" | "badges" | "quetes" | "credits" | "parametres" | "avis";
 
 interface UserProfile {
   id: string;
@@ -56,6 +56,7 @@ const I = {
   target: () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
   bolt:   () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
   gear:   () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  star:   () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
   plus:   () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
   cam:    () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>,
   edit:   () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
@@ -175,7 +176,7 @@ function SidebarMini({ user }: { user: UserProfile | null }) {
 // ── Sidebar ────────────────────────────────────────────────────────────────────
 const NAV_GROUPS = [
   { label:"Mon compte",   items:[{key:"profil" as NavSection, label:"Mon profil", icon:<I.user/>},{key:"annonces" as NavSection, label:"Mes annonces", icon:<I.list/>},{key:"messages" as NavSection, label:"Messages", icon:<I.msg/>}] },
-  { label:"Progression",  items:[{key:"badges" as NavSection, label:"Badges", icon:<I.badge/>},{key:"quetes" as NavSection, label:"Quêtes", icon:<I.target/>}] },
+  { label:"Progression",  items:[{key:"badges" as NavSection, label:"Badges", icon:<I.badge/>},{key:"quetes" as NavSection, label:"Quêtes", icon:<I.target/>},{key:"avis" as NavSection, label:"Avis", icon:<I.star/>}] },
   { label:"Monétisation", items:[{key:"credits" as NavSection, label:"Crédits & Boosts", icon:<I.bolt/>},{key:"parametres" as NavSection, label:"Paramètres", icon:<I.gear/>}] },
 ];
 
@@ -427,12 +428,13 @@ function SectionBadges({ xp, annoncesCount }: { xp:number; annoncesCount:number 
 }
 
 // ── Section Quêtes ─────────────────────────────────────────────────────────────
-function SectionQuetes({ user, annonces }: { user:UserProfile; annonces:Annonce[] }) {
-  const quetes = [
-    { label:"Publier ton premier code",      xp:10, done:annonces.length>0,   progress:Math.min(annonces.length,1), total:1 },
+function SectionQuetes({ user, annonces, hasReview }: { user:UserProfile; annonces:Annonce[]; hasReview:boolean }) {
+  const quetes: { label:string; xp:number; done:boolean; progress:number; total:number; link?:string }[] = [
+    { label:"Publier ton premier code",      xp:10, done:annonces.length>0,   progress:Math.min(annonces.length,1), total:1, link:"/publier" },
     { label:"Se connecter 7 jours de suite", xp:25, done:user.streak_days>=7, progress:user.streak_days, total:7 },
     { label:"Atteindre 100 XP",              xp:20, done:user.xp>=100,        progress:user.xp, total:100 },
-    { label:"Publier 5 annonces",            xp:30, done:annonces.length>=5,  progress:annonces.length, total:5 },
+    { label:"Publier 5 annonces",            xp:30, done:annonces.length>=5,  progress:annonces.length, total:5, link:"/publier" },
+    { label:"Laisser un avis sur la plateforme", xp:15, done:hasReview, progress:hasReview?1:0, total:1, link:"/avis" },
   ];
   return (
     <div className="sc">
@@ -449,7 +451,14 @@ function SectionQuetes({ user, annonces }: { user:UserProfile; annonces:Annonce[
               </div>
             )}
           </div>
-          <span style={{ fontSize:"0.82rem", fontWeight:700, color:q.done?"#4ade80":"rgba(255,255,255,.3)", whiteSpace:"nowrap", fontFamily:"'Syne',sans-serif" }}>+{q.xp} XP</span>
+          <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+            {!q.done && q.link && (
+              <a href={q.link} style={{ fontSize:"0.75rem", fontWeight:600, color:"#a78bfa", background:"rgba(124,58,237,.15)", border:"1px solid rgba(124,58,237,.3)", borderRadius:8, padding:"3px 10px", textDecoration:"none", whiteSpace:"nowrap", transition:"all .2s" }}>
+                Faire →
+              </a>
+            )}
+            <span style={{ fontSize:"0.82rem", fontWeight:700, color:q.done?"#4ade80":"rgba(255,255,255,.3)", whiteSpace:"nowrap", fontFamily:"'Syne',sans-serif" }}>+{q.xp} XP</span>
+          </div>
         </div>
       ))}
     </div>
@@ -545,14 +554,132 @@ function Skeleton() {
   );
 }
 
+// ── Section Avis (noter le site) ──────────────────────────────────────────────
+const GOOGLE_REVIEW_URL = "https://g.page/r/CWGFDaSeMPebEAE/review";
+
+function StarsInput({ value, onChange }: { value:number; onChange:(n:number)=>void }) {
+  const [hovered, setHovered] = useState(0);
+  return (
+    <div style={{ display:"flex", gap:6, justifyContent:"center" }}>
+      {[1,2,3,4,5].map(n => (
+        <button key={n} type="button" onClick={() => onChange(n)} onMouseEnter={() => setHovered(n)} onMouseLeave={() => setHovered(0)}
+          style={{ background:"none", border:"none", cursor:"pointer", padding:2, transition:"transform .15s", transform:(hovered||value)>=n?"scale(1.2)":"scale(1)" }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill={(hovered||value)>=n?"#f59e0b":"none"} stroke={(hovered||value)>=n?"#f59e0b":"rgba(255,255,255,.2)"} strokeWidth="1.5">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SectionAvis({ userId }: { userId:string }) {
+  const supabase = createClient();
+  type AvisStep = "rate"|"positive"|"negative"|"done";
+  const [step, setStep]       = useState<AvisStep>("rate");
+  const [rating, setRating]   = useState(0);
+  const [comment, setComment] = useState("");
+  const [sending, setSending] = useState(false);
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    supabase.from("platform_reviews").select("rating").eq("user_id", userId).maybeSingle()
+      .then(({ data }) => { if (data) { setRating(data.rating); setStep("done"); } setChecked(true); });
+  }, [userId]);
+
+  const LABELS: Record<number,string> = { 1:"Très mauvais 😤", 2:"Pas terrible 😕", 3:"Correct 😐", 4:"Bien 😊", 5:"Excellent ! 🤩" };
+
+  async function submitNegative() {
+    setSending(true);
+    try { await supabase.from("platform_reviews").insert({ user_id: userId, rating, comment: comment.trim()||null }); } catch {}
+    setSending(false);
+    setStep("done");
+  }
+
+  if (!checked) return <div className="sc"><div style={{ textAlign:"center", padding:"3rem", color:"rgba(255,255,255,.25)" }}>Chargement…</div></div>;
+
+  return (
+    <div className="sc">
+      <div className="sh"><div><h2 className="st">Avis sur le site</h2><p className="ss">Ton retour nous aide à améliorer la plateforme</p></div></div>
+
+      {step === "rate" && (
+        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
+          <p style={{ fontSize:"1rem", fontWeight:700, color:"rgba(255,255,255,.85)", marginBottom:"1.5rem", fontFamily:"'Syne',sans-serif" }}>
+            Appréciez-vous codedeparrainage.com ?
+          </p>
+          <StarsInput value={rating} onChange={setRating} />
+          {rating > 0 && <p style={{ marginTop:".75rem", fontSize:".875rem", color:"#a78bfa", fontWeight:600 }}>{LABELS[rating]}</p>}
+          <div style={{ display:"flex", gap:10, marginTop:"1.5rem" }}>
+            <button type="button" style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:12, padding:".75rem", color:"#f87171", fontSize:".875rem", fontWeight:600, cursor:"pointer", fontFamily:"'DM Sans',sans-serif", transition:"all .2s" }}
+              onClick={() => { setRating(r => r||1); setStep("negative"); }}>
+              👎 Non
+            </button>
+            <button type="button" style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(34,197,94,.08)", border:"1px solid rgba(34,197,94,.25)", borderRadius:12, padding:".75rem", color:"#4ade80", fontSize:".875rem", fontWeight:600, cursor:"pointer", fontFamily:"'DM Sans',sans-serif", transition:"all .2s" }}
+              onClick={() => { setRating(r => r>=4?r:5); setStep("positive"); }}>
+              👍 Oui
+            </button>
+          </div>
+          {rating > 0 && (
+            <button onClick={() => rating >= 4 ? setStep("positive") : setStep("negative")}
+              style={{ marginTop:"1rem", width:"100%", background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
+              Continuer →
+            </button>
+          )}
+        </div>
+      )}
+
+      {step === "positive" && (
+        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
+          <div style={{ fontSize:"2.5rem", marginBottom:"1rem" }}>🎉</div>
+          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Super, merci !</p>
+          <p style={{ color:"rgba(255,255,255,.45)", fontSize:".875rem", marginBottom:"1.5rem" }}>Ça nous ferait vraiment plaisir si tu laissais un avis sur Google — ça prend 30 secondes 🙏</p>
+          <a href={GOOGLE_REVIEW_URL} target="_blank" rel="noopener noreferrer"
+            style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#4285F4", color:"#fff", textDecoration:"none", borderRadius:12, padding:".8rem 1.5rem", fontWeight:700, fontSize:".875rem", fontFamily:"'DM Sans',sans-serif" }}
+            onClick={() => setTimeout(() => setStep("done"), 400)}>
+            Laisser un avis Google
+          </a>
+          <button onClick={() => setStep("done")} style={{ display:"block", width:"100%", marginTop:".75rem", background:"none", border:"1px solid rgba(255,255,255,.1)", borderRadius:12, padding:".7rem", color:"rgba(255,255,255,.35)", fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
+            Plus tard
+          </button>
+        </div>
+      )}
+
+      {step === "negative" && (
+        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem" }}>
+          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:"1rem", color:"rgba(255,255,255,.85)", marginBottom:".5rem" }}>Désolé 😕</p>
+          <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem", marginBottom:"1.25rem" }}>Dis-nous ce que tu changerais — ton retour nous aide vraiment.</p>
+          <StarsInput value={rating} onChange={setRating} />
+          <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Ce que j'améliorerais…" maxLength={600}
+            style={{ marginTop:"1rem", width:"100%", background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.1)", borderRadius:12, padding:".75rem 1rem", color:"rgba(255,255,255,.8)", fontSize:".875rem", fontFamily:"'DM Sans',sans-serif", resize:"vertical", minHeight:100, outline:"none" }} />
+          <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.2)", marginTop:3 }}>{comment.length}/600</p>
+          <button onClick={submitNegative} disabled={sending}
+            style={{ marginTop:".875rem", width:"100%", background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif", opacity:sending?.5:1 }}>
+            {sending ? "Envoi…" : "Envoyer mon avis"}
+          </button>
+          <button onClick={() => setStep("rate")} style={{ display:"block", width:"100%", marginTop:".5rem", background:"none", border:"none", color:"rgba(255,255,255,.3)", fontSize:".8rem", cursor:"pointer" }}>← Retour</button>
+        </div>
+      )}
+
+      {step === "done" && (
+        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
+          <div style={{ fontSize:"2.5rem", marginBottom:".75rem" }}>✅</div>
+          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Merci pour ton retour !</p>
+          <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem" }}>Ton avis a bien été enregistré.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main ───────────────────────────────────────────────────────────────────────
-const VALID_TABS: NavSection[] = ["profil","annonces","messages","badges","quetes","credits","parametres"];
+const VALID_TABS: NavSection[] = ["profil","annonces","messages","badges","quetes","credits","parametres","avis"];
 
 export default function ProfilPage() {
   const supabase = createClient();
   const [active, setActive]     = useState<NavSection>("profil");
   const [user, setUser]         = useState<UserProfile | null>(null);
   const [annonces, setAnnonces] = useState<Annonce[]>([]);
+  const [hasReview, setHasReview] = useState(false);
   const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
@@ -564,12 +691,14 @@ export default function ProfilPage() {
   const fetchData = useCallback(async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) { window.location.href = "/login"; return; }
-    const [{ data: profile }, { data: userAnnonces }] = await Promise.all([
+    const [{ data: profile }, { data: userAnnonces }, { data: reviewData }] = await Promise.all([
       supabase.from("users").select("*").eq("id", authUser.id).single(),
       supabase.from("announcements").select("id, code, description, bumps_today, created_at, companies(name, category)").eq("user_id", authUser.id).order("created_at", { ascending: false }),
+      supabase.from("platform_reviews").select("id").eq("user_id", authUser.id).maybeSingle(),
     ]);
     if (profile) setUser(profile);
     if (userAnnonces) setAnnonces(userAnnonces as any);
+    setHasReview(!!reviewData);
     setLoading(false);
   }, []);
 
@@ -615,9 +744,10 @@ export default function ProfilPage() {
       case "annonces":   return <SectionAnnonces annonces={annonces} onDelete={handleDeleteAnnonce} onEdit={handleEditAnnonce} />;
       case "messages":   return <SectionMessages />;
       case "badges":     return <SectionBadges xp={user.xp} annoncesCount={annonces.length} />;
-      case "quetes":     return <SectionQuetes user={user} annonces={annonces} />;
+      case "quetes":     return <SectionQuetes user={user} annonces={annonces} hasReview={hasReview} />;
       case "credits":    return <SectionCredits />;
       case "parametres": return <SectionParametres user={user} onPseudoSave={handlePseudoSave} onAvatarUpload={handleAvatarUpload} onBioSave={handleBioSave} />;
+      case "avis":       return <SectionAvis userId={user.id} />;
     }
   };
 

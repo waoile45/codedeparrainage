@@ -1020,7 +1020,7 @@ export const ENTREPRISES: Entreprise[] = [
   { nom: "Ma French Bank", domain: "ma-french-bank.com", logo: "https://www.google.com/s2/favicons?domain=ma-french-bank.com&sz=64" },
   { nom: "ma lentille", domain: "ma-lentille.com", logo: "https://www.google.com/s2/favicons?domain=ma-lentille.com&sz=64" },
   { nom: "MAAF assurance", domain: "maaf-assurance.fr", logo: "https://www.google.com/s2/favicons?domain=maaf-assurance.fr&sz=64" },
-  { nom: "Macadam", domain: "macadam.app", logo: "https://www.google.com/s2/favicons?domain=macadam.app&sz=128" },
+  { nom: "Macadam", domain: "macadam.app", logo: "https://www.macadam.app/favicon.ico" },
   { nom: "macalyster", domain: "macalyster.com", logo: "https://www.google.com/s2/favicons?domain=macalyster.com&sz=64" },
   { nom: "MACIF", domain: "macif.fr", logo: "https://www.google.com/s2/favicons?domain=macif.fr&sz=64" },
   { nom: "Madame vacances", domain: "madame-vacances.com", logo: "https://www.google.com/s2/favicons?domain=madame-vacances.com&sz=64" },

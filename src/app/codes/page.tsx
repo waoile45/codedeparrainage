@@ -8,6 +8,7 @@ type Category = "Tout" | "banque" | "paris" | "cashback" | "energie" | "telephon
 
 interface CodeCard {
   id: string;
+  userId: string;
   brand: string;
   slug: string;
   description: string;
@@ -17,6 +18,9 @@ interface CodeCard {
   parrain: string;
   niveau: string;
   boosted: boolean;
+  avgRating: number;
+  ratingCount: number;
+  topTag: string;
 }
 
 const CATEGORIES = ["Tout","banque","paris","cashback","energie","telephonie","crypto","assurance","shopping"];
@@ -61,7 +65,172 @@ function CopyButton({ code }: { code: string }) {
   );
 }
 
-function CodeCardItem({ card, index }: { card: CodeCard; index: number }) {
+function MiniStars({ avg, count, topTag }: { avg:number; count:number; topTag?:string }) {
+  if (count === 0) return <span style={{ fontSize:".72rem", color:"rgba(255,255,255,.18)", fontStyle:"italic" }}>Pas encore noté</span>;
+  const tagInfo = topTag ? ALL_TAGS.find(t => t.key === topTag) : null;
+  return (
+    <span style={{ display:"inline-flex", alignItems:"center", gap:5, flexWrap:"wrap" }}>
+      {avg > 0 && (
+        <span style={{ display:"inline-flex", alignItems:"center", gap:2 }}>
+          {[1,2,3,4,5].map(n => (
+            <svg key={n} width="11" height="11" viewBox="0 0 24 24" fill={avg>=n?"#f59e0b":"none"} stroke="#f59e0b" strokeWidth="1.5">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          ))}
+          <span style={{ fontSize:".72rem", color:"rgba(255,255,255,.4)", marginLeft:2 }}>{avg.toFixed(1)}</span>
+        </span>
+      )}
+      {tagInfo && (
+        <span style={{ fontSize:".7rem", color:"rgba(255,255,255,.35)", background:"rgba(255,255,255,.05)", borderRadius:100, padding:"1px 7px", border:"1px solid rgba(255,255,255,.08)" }}>
+          {tagInfo.emoji} {tagInfo.label}
+        </span>
+      )}
+      <span style={{ fontSize:".7rem", color:"rgba(255,255,255,.2)" }}>({count} avis)</span>
+    </span>
+  );
+}
+
+const TAGS_POSITIVE = [
+  { key:"code_ok",       label:"Code fonctionnel", emoji:"✅" },
+  { key:"reponse_rapide",label:"Réponse rapide",   emoji:"⚡" },
+  { key:"bon_gain",      label:"Bon gain",          emoji:"🎁" },
+  { key:"sympa",         label:"Parrain sympa",     emoji:"🤝" },
+  { key:"annonce_complete", label:"Annonce complète", emoji:"📋" },
+];
+const TAGS_NEGATIVE = [
+  { key:"code_expire",   label:"Code expiré",        emoji:"⏰" },
+  { key:"code_invalide", label:"Code invalide",       emoji:"❌" },
+  { key:"desc_inexacte", label:"Description inexacte",emoji:"⚠️" },
+  { key:"inactif",       label:"Parrain inactif",     emoji:"💤" },
+];
+const ALL_TAGS = [...TAGS_POSITIVE, ...TAGS_NEGATIVE];
+
+interface RatingModalProps { card:CodeCard; onClose:()=>void; onSubmitted:(avg:number,count:number,topTag:string)=>void; }
+function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // eslint-disable-line
+  const supabase = createClient();
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [rating, setRating]   = useState(0);
+  const [hovered, setHovered] = useState(0);
+  const [comment, setComment] = useState("");
+  const [sending, setSending] = useState(false);
+  const [done, setDone]       = useState(false);
+  const [error, setError]     = useState("");
+  const [existing, setExisting] = useState<{rating:number; tags:string[]}|null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from("user_ratings").select("rating, tags").eq("rater_id", user.id).eq("announcement_id", card.id).maybeSingle();
+      if (data) { setExisting(data); setRating(data.rating ?? 0); setSelectedTags(data.tags ?? []); }
+    })();
+  }, [card.id]);
+
+  function toggleTag(key: string) {
+    setSelectedTags(prev => prev.includes(key) ? prev.filter(t => t !== key) : [...prev, key]);
+  }
+
+  async function submit() {
+    if (selectedTags.length === 0) { setError("Sélectionne au moins une étiquette."); return; }
+    setSending(true); setError("");
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setError("Tu dois être connecté pour noter."); setSending(false); return; }
+    if (user.id === card.userId) { setError("Tu ne peux pas noter ta propre annonce."); setSending(false); return; }
+    const { error: err } = await supabase.from("user_ratings").upsert(
+      { rater_id: user.id, ratee_id: card.userId, announcement_id: card.id, rating: rating||null, tags: selectedTags, comment: comment.trim()||null },
+      { onConflict: "rater_id,announcement_id" }
+    );
+    if (err) { setError("Erreur : " + err.message); setSending(false); return; }
+    const { data: rows } = await supabase.from("user_ratings").select("rating, tags").eq("announcement_id", card.id);
+    const ratings = (rows ?? []).map((r:any)=>r.rating).filter(Boolean);
+    const avg = ratings.length ? ratings.reduce((a:number,b:number)=>a+b,0)/ratings.length : 0;
+    const tagCounts: Record<string,number> = {};
+    (rows ?? []).forEach((r:any) => (r.tags??[]).forEach((t:string) => { tagCounts[t] = (tagCounts[t]??0)+1; }));
+    const topTag = Object.entries(tagCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] ?? "";
+    onSubmitted(avg, (rows ?? []).length, topTag);
+    setDone(true); setSending(false);
+  }
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", backdropFilter:"blur(4px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={onClose}>
+      <div style={{ background:"var(--bg-card)", border:"1px solid rgba(124,58,237,.3)", borderRadius:24, padding:"1.75rem", maxWidth:460, width:"100%", position:"relative", maxHeight:"90vh", overflowY:"auto" }} onClick={e=>e.stopPropagation()}>
+        <button onClick={onClose} style={{ position:"absolute", top:14, right:14, background:"none", border:"none", color:"rgba(255,255,255,.3)", cursor:"pointer", fontSize:"1.25rem", lineHeight:1 }}>×</button>
+
+        {done ? (
+          <div style={{ textAlign:"center", padding:"1rem 0" }}>
+            <div style={{ fontSize:"2.5rem", marginBottom:".75rem" }}>⭐</div>
+            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Avis envoyé !</p>
+            <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem" }}>Merci pour ton retour.</p>
+            <button onClick={onClose} style={{ marginTop:"1.25rem", background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".7rem 1.5rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>Fermer</button>
+          </div>
+        ) : (
+          <>
+            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:"rgba(255,255,255,.9)", marginBottom:".2rem" }}>
+              {existing ? "Modifier ton avis" : "Comment s'est passé le parrainage ?"}
+            </p>
+            <p style={{ color:"rgba(255,255,255,.35)", fontSize:".8rem", marginBottom:"1.5rem" }}>
+              Annonce de <strong style={{ color:"rgba(255,255,255,.65)" }}>{card.parrain}</strong> · {card.brand}
+            </p>
+
+            {/* Tags positifs */}
+            <p style={{ fontSize:".72rem", fontWeight:700, letterSpacing:".08em", textTransform:"uppercase", color:"rgba(34,197,94,.6)", marginBottom:".6rem" }}>Positif</p>
+            <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:"1.25rem" }}>
+              {TAGS_POSITIVE.map(t => {
+                const active = selectedTags.includes(t.key);
+                return (
+                  <button key={t.key} type="button" onClick={() => toggleTag(t.key)}
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", borderRadius:100, border:`1px solid ${active?"rgba(34,197,94,.5)":"rgba(255,255,255,.1)"}`, background:active?"rgba(34,197,94,.12)":"rgba(255,255,255,.03)", color:active?"#4ade80":"rgba(255,255,255,.5)", fontSize:".8rem", fontWeight:500, cursor:"pointer", transition:"all .15s", fontFamily:"'DM Sans',sans-serif" }}>
+                    <span>{t.emoji}</span>{t.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Tags négatifs */}
+            <p style={{ fontSize:".72rem", fontWeight:700, letterSpacing:".08em", textTransform:"uppercase", color:"rgba(239,68,68,.6)", marginBottom:".6rem" }}>Négatif</p>
+            <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:"1.5rem" }}>
+              {TAGS_NEGATIVE.map(t => {
+                const active = selectedTags.includes(t.key);
+                return (
+                  <button key={t.key} type="button" onClick={() => toggleTag(t.key)}
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", borderRadius:100, border:`1px solid ${active?"rgba(239,68,68,.4)":"rgba(255,255,255,.1)"}`, background:active?"rgba(239,68,68,.1)":"rgba(255,255,255,.03)", color:active?"#f87171":"rgba(255,255,255,.5)", fontSize:".8rem", fontWeight:500, cursor:"pointer", transition:"all .15s", fontFamily:"'DM Sans',sans-serif" }}>
+                    <span>{t.emoji}</span>{t.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Étoiles optionnelles */}
+            <p style={{ fontSize:".72rem", fontWeight:700, letterSpacing:".08em", textTransform:"uppercase", color:"rgba(255,255,255,.25)", marginBottom:".75rem" }}>Note globale <span style={{ fontWeight:400, textTransform:"none", letterSpacing:0 }}>(optionnel)</span></p>
+            <div style={{ display:"flex", gap:8, marginBottom:"1.25rem" }}>
+              {[1,2,3,4,5].map(n => (
+                <button key={n} type="button" onClick={() => setRating(r => r===n?0:n)} onMouseEnter={() => setHovered(n)} onMouseLeave={() => setHovered(0)}
+                  style={{ background:"none", border:"none", cursor:"pointer", padding:2, transition:"transform .15s", transform:(hovered||rating)>=n?"scale(1.2)":"scale(1)" }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill={(hovered||rating)>=n?"#f59e0b":"none"} stroke={(hovered||rating)>=n?"#f59e0b":"rgba(255,255,255,.2)"} strokeWidth="1.5">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                </button>
+              ))}
+              {rating > 0 && <button type="button" onClick={() => setRating(0)} style={{ background:"none", border:"none", color:"rgba(255,255,255,.2)", fontSize:".75rem", cursor:"pointer", padding:2 }}>✕</button>}
+            </div>
+
+            {/* Commentaire */}
+            <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Commentaire (optionnel)…" maxLength={300}
+              style={{ width:"100%", background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.08)", borderRadius:12, padding:".75rem 1rem", color:"rgba(255,255,255,.8)", fontSize:".875rem", fontFamily:"'DM Sans',sans-serif", resize:"vertical", minHeight:72, outline:"none", marginBottom:".75rem" }} />
+
+            {error && <p style={{ color:"#f87171", fontSize:".8rem", marginBottom:".75rem" }}>{error}</p>}
+            <button onClick={submit} disabled={sending}
+              style={{ width:"100%", background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif", opacity:sending?.5:1, transition:"opacity .2s" }}>
+              {sending ? "Envoi…" : "Envoyer mon avis"}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CodeCardItem({ card, index, onRate }: { card: CodeCard; index: number; onRate:(card:CodeCard)=>void }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -90,12 +259,20 @@ function CodeCardItem({ card, index }: { card: CodeCard; index: number }) {
       <div className="card-footer">
         <div className="parrain-info">
           <div className="parrain-avatar" style={{ background:niveauColor+"33", borderColor:niveauColor+"66" }}>{card.parrain[0]?.toUpperCase()}</div>
-          <span className="parrain-name">{card.parrain}</span>
-          <span className="niveau-badge" style={{ color:niveauColor, borderColor:niveauColor+"44", background:niveauColor+"11" }}>{card.niveau}</span>
+          <div>
+            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+              <span className="parrain-name">{card.parrain}</span>
+              <span className="niveau-badge" style={{ color:niveauColor, borderColor:niveauColor+"44", background:niveauColor+"11" }}>{card.niveau}</span>
+            </div>
+            <div style={{ marginTop:2 }}><MiniStars avg={card.avgRating} count={card.ratingCount} topTag={card.topTag} /></div>
+          </div>
         </div>
         <div className="card-actions">
           <button className="action-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Contacter</button>
-          <button className="action-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Avis</button>
+          <button className="action-btn" onClick={() => onRate(card)}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Avis
+          </button>
         </div>
       </div>
     </div>
@@ -109,6 +286,7 @@ export default function CodesPage() {
   const [activeCategory, setActiveCategory] = useState<Category>("Tout");
   const [sort, setSort]             = useState<"popular"|"recent">("popular");
   const [count, setCount]           = useState(0);
+  const [ratingModal, setRatingModal] = useState<CodeCard|null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -122,25 +300,52 @@ export default function CodesPage() {
   useEffect(() => {
     async function fetchCodes() {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("announcements")
-        .select(`id, code, description, bumps_today, created_at, companies(name, slug, category, referral_bonus_description), users(pseudo, level)`)
-        .order("bumps_today", { ascending: false });
+      const [{ data, error }, { data: ratingsData }] = await Promise.all([
+        supabase.from("announcements")
+          .select(`id, user_id, code, description, bumps_today, created_at, companies(name, slug, category, referral_bonus_description), users(pseudo, level)`)
+          .order("bumps_today", { ascending: false }),
+        supabase.from("user_ratings").select("announcement_id, rating, tags"),
+      ]);
 
       if (error) { console.error(error); setLoading(false); return; }
 
-      const mapped: CodeCard[] = (data ?? []).map((row: any) => ({
-        id:          row.id,
-        code:        row.code,
-        description: row.description || row.companies?.referral_bonus_description || "",
-        boosted:     (row.bumps_today ?? 0) > 0,
-        brand:       row.companies?.name ?? "Inconnu",
-        slug:        row.companies?.slug ?? "",
-        category:    row.companies?.category ?? "shopping",
-        reward:      row.companies?.referral_bonus_description ?? "Offre de bienvenue",
-        parrain:     row.users?.pseudo ?? "Anonyme",
-        niveau:      row.users?.level ?? "Débutant",
-      }));
+      // Compute avg rating + top tag per announcement
+      const ratingsByAnn: Record<string, number[]> = {};
+      const tagsByAnn: Record<string, Record<string, number>> = {};
+      (ratingsData ?? []).forEach((r: any) => {
+        if (r.rating) {
+          if (!ratingsByAnn[r.announcement_id]) ratingsByAnn[r.announcement_id] = [];
+          ratingsByAnn[r.announcement_id].push(r.rating);
+        }
+        if (r.tags?.length) {
+          if (!tagsByAnn[r.announcement_id]) tagsByAnn[r.announcement_id] = {};
+          r.tags.forEach((tag: string) => { tagsByAnn[r.announcement_id][tag] = (tagsByAnn[r.announcement_id][tag] ?? 0) + 1; });
+        }
+      });
+
+      const mapped: CodeCard[] = (data ?? []).map((row: any) => {
+        const ratings = ratingsByAnn[row.id] ?? [];
+        const avg = ratings.length ? ratings.reduce((a:number,b:number)=>a+b,0)/ratings.length : 0;
+        const tagCounts = tagsByAnn[row.id] ?? {};
+        const topTag = Object.entries(tagCounts).sort((a,b) => b[1]-a[1])[0]?.[0] ?? "";
+        const totalRatings = (ratingsData ?? []).filter((r:any) => r.announcement_id === row.id).length;
+        return {
+          id:          row.id,
+          userId:      row.user_id ?? "",
+          code:        row.code,
+          description: row.description || row.companies?.referral_bonus_description || "",
+          boosted:     (row.bumps_today ?? 0) > 0,
+          brand:       row.companies?.name ?? "Inconnu",
+          slug:        row.companies?.slug ?? "",
+          category:    row.companies?.category ?? "shopping",
+          reward:      row.companies?.referral_bonus_description ?? "Offre de bienvenue",
+          parrain:     row.users?.pseudo ?? "Anonyme",
+          niveau:      row.users?.level ?? "Débutant",
+          avgRating:   avg,
+          ratingCount: totalRatings,
+          topTag,
+        };
+      });
 
       setCodes(mapped);
       let current = 0;
@@ -297,7 +502,9 @@ export default function CodesPage() {
           </div>
         ) : filtered.length > 0 ? (
           <div className="cards-list">
-            {filtered.map((card, i) => <CodeCardItem key={card.id} card={card} index={i} />)}
+            {filtered.map((card, i) => (
+              <CodeCardItem key={card.id} card={card} index={i} onRate={setRatingModal} />
+            ))}
           </div>
         ) : (
           <div className="empty-state">
@@ -306,6 +513,17 @@ export default function CodesPage() {
           </div>
         )}
       </main>
+
+      {ratingModal && (
+        <RatingModal
+          card={ratingModal}
+          onClose={() => setRatingModal(null)}
+          onSubmitted={(avg, count, topTag) => {
+            setCodes(prev => prev.map(c => c.id === ratingModal.id ? { ...c, avgRating: avg, ratingCount: count, topTag } : c));
+            setRatingModal(null);
+          }}
+        />
+      )}
     </>
   );
 }
