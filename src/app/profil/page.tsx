@@ -119,24 +119,34 @@ function AvatarUpload({ letter, avatarUrl, size=72, onUpload }: { letter:string;
 }
 
 // ── Editable pseudo ────────────────────────────────────────────────────────────
-function EditablePseudo({ value, onSave, size="lg" }: { value:string; onSave:(v:string)=>Promise<void>; size?:"lg"|"sm" }) {
+function EditablePseudo({ value, onSave, size="lg" }: { value:string; onSave:(v:string)=>Promise<string|null>; size?:"lg"|"sm" }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
   const iRef = useRef<HTMLInputElement>(null);
   useEffect(() => { setDraft(value); }, [value]);
   useEffect(() => { if (editing) iRef.current?.focus(); }, [editing]);
-  const confirm = async () => { if (!draft.trim()) return; setSaving(true); await onSave(draft.trim()); setSaving(false); setEditing(false); };
-  const cancel  = () => { setDraft(value); setEditing(false); };
+  const confirm = async () => {
+    if (!draft.trim()) return;
+    setSaving(true); setErr("");
+    const error = await onSave(draft.trim());
+    setSaving(false);
+    if (error) { setErr(error); } else { setEditing(false); }
+  };
+  const cancel = () => { setDraft(value); setEditing(false); setErr(""); };
   const fs = size==="lg" ? "1.5rem" : "0.95rem";
   if (editing) return (
-    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-      <input ref={iRef} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter") confirm(); if(e.key==="Escape") cancel(); }}
-        style={{ background:"rgba(124,58,237,.15)", border:"1px solid rgba(124,58,237,.45)", borderRadius:8, padding:"4px 10px", color:"#fff", fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:fs, outline:"none", width:160 }} />
-      <button onClick={confirm} disabled={saving} style={{ background:"rgba(34,197,94,.15)", border:"1px solid rgba(34,197,94,.3)", borderRadius:7, padding:"5px 8px", color:"#4ade80", cursor:"pointer", display:"flex" }}>
-        {saving ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> : <I.check />}
-      </button>
-      <button onClick={cancel} style={{ background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)", borderRadius:7, padding:"5px 8px", color:"rgba(255,255,255,.4)", cursor:"pointer", fontSize:"0.8rem" }}>✕</button>
+    <div>
+      <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+        <input ref={iRef} value={draft} onChange={e=>{ setDraft(e.target.value); setErr(""); }} onKeyDown={e=>{ if(e.key==="Enter") confirm(); if(e.key==="Escape") cancel(); }}
+          style={{ background:"rgba(124,58,237,.15)", border:`1px solid ${err?"rgba(239,68,68,.5)":"rgba(124,58,237,.45)"}`, borderRadius:8, padding:"4px 10px", color:"#fff", fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:fs, outline:"none", width:160 }} />
+        <button onClick={confirm} disabled={saving} style={{ background:"rgba(34,197,94,.15)", border:"1px solid rgba(34,197,94,.3)", borderRadius:7, padding:"5px 8px", color:"#4ade80", cursor:"pointer", display:"flex" }}>
+          {saving ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> : <I.check />}
+        </button>
+        <button onClick={cancel} style={{ background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)", borderRadius:7, padding:"5px 8px", color:"rgba(255,255,255,.4)", cursor:"pointer", fontSize:"0.8rem" }}>✕</button>
+      </div>
+      {err && <p style={{ fontSize:".75rem", color:"#f87171", marginTop:4 }}>{err}</p>}
     </div>
   );
   return (
@@ -216,7 +226,7 @@ function Sidebar({ active, setActive, user }: { active:NavSection; setActive:(s:
 }
 
 // ── Section Profil ─────────────────────────────────────────────────────────────
-function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:UserProfile; annonces:Annonce[]; onPseudoSave:(v:string)=>Promise<void>; onAvatarUpload:(url:string)=>void }) {
+function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:UserProfile; annonces:Annonce[]; onPseudoSave:(v:string)=>Promise<string|null>; onAvatarUpload:(url:string)=>void }) {
   const { xpNext, xpNextLabel } = getXpInfo(user.xp);
   return (
     <div className="sc">
@@ -497,7 +507,7 @@ function SectionCredits() {
 }
 
 // ── Section Paramètres ─────────────────────────────────────────────────────────
-function SectionParametres({ user, onPseudoSave, onAvatarUpload, onBioSave }: { user:UserProfile; onPseudoSave:(v:string)=>Promise<void>; onAvatarUpload:(url:string)=>void; onBioSave:(bio:string)=>Promise<void> }) {
+function SectionParametres({ user, onPseudoSave, onAvatarUpload, onBioSave }: { user:UserProfile; onPseudoSave:(v:string)=>Promise<string|null>; onAvatarUpload:(url:string)=>void; onBioSave:(bio:string)=>Promise<void> }) {
   const [bio, setBio] = useState(user.bio ?? "");
   const [saved, setSaved] = useState(false);
   const save = async () => { await onBioSave(bio); setSaved(true); setTimeout(()=>setSaved(false), 2000); };
@@ -704,10 +714,15 @@ export default function ProfilPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handlePseudoSave = async (pseudo: string) => {
-    if (!user) return;
-    await supabase.from("users").update({ pseudo }).eq("id", user.id);
+  const handlePseudoSave = async (pseudo: string): Promise<string|null> => {
+    if (!user) return null;
+    const { error } = await supabase.from("users").update({ pseudo }).eq("id", user.id);
+    if (error) {
+      if (error.code === "23505") return "Ce pseudo est déjà utilisé.";
+      return "Erreur lors de la sauvegarde.";
+    }
     setUser(prev => prev ? { ...prev, pseudo } : null);
+    return null;
   };
 
   const handleAvatarUpload = (avatar_url: string) => {
