@@ -2,6 +2,7 @@ import { createServerSupabase, createAnonSupabase } from '@/lib/supabase-server'
 import { Metadata } from 'next'
 import Navbar from '@/components/Navbar'
 import CopyButton from '@/components/CopyButton'
+import CompanyLogo from '@/components/CompanyLogo'
 
 export const revalidate = 14400
 
@@ -70,8 +71,8 @@ export default async function CompanyPage({ params }: Props) {
 
   const autresSlug = AUTRES.filter(s => s !== slug)
   const year = new Date().getFullYear()
-  // Le domaine pour le favicon (on garde la colonne slug existante qui contient le domaine)
-  const domain = company.slug ?? slug + '.com'
+  // Le domaine pour le favicon — on nettoie au cas où la colonne slug contient un path ou sous-domaine
+  const domain = (company.slug ?? slug + '.com').replace(/^(https?:\/\/)?(www\.)?/, '')
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -99,11 +100,7 @@ export default async function CompanyPage({ params }: Props) {
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.75rem', marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: '1.25rem' }}>
             <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(124,58,237,.12)', border: '1px solid rgba(124,58,237,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
-              <img
-                src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
-                alt={company.name}
-                style={{ width: 36, height: 36, objectFit: 'contain' }}
-              />
+              <CompanyLogo domain={domain} name={company.name} />
             </div>
             <div>
               <h1 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: 'clamp(1.4rem,3vw,1.9rem)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
