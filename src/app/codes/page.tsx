@@ -230,7 +230,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
   );
 }
 
-function CodeCardItem({ card, index, onRate }: { card: CodeCard; index: number; onRate:(card:CodeCard)=>void }) {
+function CodeCardItem({ card, index, onRate, onContact, currentUserId }: { card: CodeCard; index: number; onRate:(card:CodeCard)=>void; onContact:(card:CodeCard)=>void; currentUserId:string|null }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -239,6 +239,7 @@ function CodeCardItem({ card, index, onRate }: { card: CodeCard; index: number; 
     return () => obs.disconnect();
   }, [index]);
   const niveauColor = NIVEAU_COLORS[card.niveau] ?? "#6366f1";
+  const isOwn = currentUserId !== null && currentUserId === card.userId;
   return (
     <div ref={ref} className={`code-card ${card.boosted?"boosted":""} ${visible?"visible":""}`}>
       {card.boosted && <div className="boost-badge"><span className="boost-lightning">⚡</span><span>Annonce boostée</span></div>}
@@ -261,14 +262,14 @@ function CodeCardItem({ card, index, onRate }: { card: CodeCard; index: number; 
           <div className="parrain-avatar" style={{ background:niveauColor+"33", borderColor:niveauColor+"66" }}>{card.parrain[0]?.toUpperCase()}</div>
           <div>
             <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-              <span className="parrain-name">{card.parrain}</span>
+              <a href={`/u/${encodeURIComponent(card.parrain)}`} className="parrain-name" style={{ textDecoration:"none" }} onClick={e => e.stopPropagation()}>{card.parrain}</a>
               <span className="niveau-badge" style={{ color:niveauColor, borderColor:niveauColor+"44", background:niveauColor+"11" }}>{card.niveau}</span>
             </div>
             <div style={{ marginTop:2 }}><MiniStars avg={card.avgRating} count={card.ratingCount} topTag={card.topTag} /></div>
           </div>
         </div>
         <div className="card-actions">
-          <button className="action-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Contacter</button>
+          <button className="action-btn" onClick={() => !isOwn && onContact(card)} disabled={isOwn} style={isOwn ? { opacity:0.4, cursor:"not-allowed" } : {}} title={isOwn ? "Votre propre annonce" : "Contacter le parrain"}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Contacter</button>
           <button className="action-btn" onClick={() => onRate(card)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             Avis
@@ -280,14 +281,23 @@ function CodeCardItem({ card, index, onRate }: { card: CodeCard; index: number; 
 }
 
 export default function CodesPage() {
+  const PAGE_SIZE = 20;
   const [codes, setCodes]           = useState<CodeCard[]>([]);
   const [loading, setLoading]       = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore]       = useState(false);
+  const [page, setPage]             = useState(0);
   const [search, setSearch]         = useState("");
   const [activeCategory, setActiveCategory] = useState<Category>("Tout");
   const [sort, setSort]             = useState<"popular"|"recent">("popular");
   const [count, setCount]           = useState(0);
   const [ratingModal, setRatingModal] = useState<CodeCard|null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string|null>(null);
   const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -297,73 +307,111 @@ export default function CodesPage() {
     if (s) setSearch(s);
   }, []);
 
-  useEffect(() => {
-    async function fetchCodes() {
-      setLoading(true);
-      const [{ data, error }, { data: ratingsData }] = await Promise.all([
-        supabase.from("announcements")
-          .select(`id, user_id, code, description, bumps_today, created_at, companies(name, slug, category, referral_bonus_description), users(pseudo, level)`)
-          .order("bumps_today", { ascending: false }),
-        supabase.from("user_ratings").select("announcement_id, rating, tags"),
-      ]);
+  async function doFetch(pageNum: number, reset: boolean, category: Category, sortMode: "popular"|"recent") {
+    if (reset) setLoading(true); else setLoadingMore(true);
 
-      if (error) { console.error(error); setLoading(false); return; }
-
-      // Compute avg rating + top tag per announcement
-      const ratingsByAnn: Record<string, number[]> = {};
-      const tagsByAnn: Record<string, Record<string, number>> = {};
-      (ratingsData ?? []).forEach((r: any) => {
-        if (r.rating) {
-          if (!ratingsByAnn[r.announcement_id]) ratingsByAnn[r.announcement_id] = [];
-          ratingsByAnn[r.announcement_id].push(r.rating);
-        }
-        if (r.tags?.length) {
-          if (!tagsByAnn[r.announcement_id]) tagsByAnn[r.announcement_id] = {};
-          r.tags.forEach((tag: string) => { tagsByAnn[r.announcement_id][tag] = (tagsByAnn[r.announcement_id][tag] ?? 0) + 1; });
-        }
-      });
-
-      const mapped: CodeCard[] = (data ?? []).map((row: any) => {
-        const ratings = ratingsByAnn[row.id] ?? [];
-        const avg = ratings.length ? ratings.reduce((a:number,b:number)=>a+b,0)/ratings.length : 0;
-        const tagCounts = tagsByAnn[row.id] ?? {};
-        const topTag = Object.entries(tagCounts).sort((a,b) => b[1]-a[1])[0]?.[0] ?? "";
-        const totalRatings = (ratingsData ?? []).filter((r:any) => r.announcement_id === row.id).length;
-        return {
-          id:          row.id,
-          userId:      row.user_id ?? "",
-          code:        row.code,
-          description: row.description || row.companies?.referral_bonus_description || "",
-          boosted:     (row.bumps_today ?? 0) > 0,
-          brand:       row.companies?.name ?? "Inconnu",
-          slug:        row.companies?.slug ?? "",
-          category:    row.companies?.category ?? "shopping",
-          reward:      row.companies?.referral_bonus_description ?? "Offre de bienvenue",
-          parrain:     row.users?.pseudo ?? "Anonyme",
-          niveau:      row.users?.level ?? "Débutant",
-          avgRating:   avg,
-          ratingCount: totalRatings,
-          topTag,
-        };
-      });
-
-      setCodes(mapped);
-      let current = 0;
-      const timer = setInterval(() => {
-        current = Math.min(current + Math.ceil(mapped.length / 20), mapped.length);
-        setCount(current);
-        if (current >= mapped.length) clearInterval(timer);
-      }, 40);
-      setLoading(false);
+    // Server-side category filter: get matching company IDs first
+    let companyIds: string[] | null = null;
+    if (category !== "Tout") {
+      const { data: companies } = await supabase.from("companies").select("id").eq("category", category);
+      companyIds = (companies ?? []).map((c: any) => c.id);
+      if (companyIds.length === 0) {
+        if (reset) { setCodes([]); setCount(0); setHasMore(false); setLoading(false); }
+        else setLoadingMore(false);
+        return;
+      }
     }
-    fetchCodes();
-  }, []);
 
-  const filtered = codes.filter(c => {
-    const matchCat    = activeCategory === "Tout" || c.category === activeCategory;
-    const matchSearch = search === "" || c.brand.toLowerCase().includes(search.toLowerCase()) || c.code.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  }).sort((a, b) => sort === "popular" ? (a.boosted === b.boosted ? 0 : a.boosted ? -1 : 1) : 0);
+    let annQuery = supabase.from("announcements")
+      .select(`id, user_id, code, description, bumps_today, created_at, companies(name, slug, category, referral_bonus_description), users(pseudo, level)`)
+      .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
+
+    if (sortMode === "popular") annQuery = annQuery.order("bumps_today", { ascending: false }).order("created_at", { ascending: false });
+    else annQuery = annQuery.order("created_at", { ascending: false });
+
+    if (companyIds) annQuery = annQuery.in("company_id", companyIds);
+
+    const { data, error } = await annQuery;
+    if (error) { console.error(error); if (reset) setLoading(false); else setLoadingMore(false); return; }
+
+    // Ratings only for this page's IDs
+    const ids = (data ?? []).map((row: any) => row.id);
+    const { data: ratingsData } = ids.length > 0
+      ? await supabase.from("user_ratings").select("announcement_id, rating, tags").in("announcement_id", ids)
+      : { data: [] };
+
+    const ratingsByAnn: Record<string, number[]> = {};
+    const tagsByAnn: Record<string, Record<string, number>> = {};
+    (ratingsData ?? []).forEach((r: any) => {
+      if (r.rating) {
+        if (!ratingsByAnn[r.announcement_id]) ratingsByAnn[r.announcement_id] = [];
+        ratingsByAnn[r.announcement_id].push(r.rating);
+      }
+      if (r.tags?.length) {
+        if (!tagsByAnn[r.announcement_id]) tagsByAnn[r.announcement_id] = {};
+        r.tags.forEach((tag: string) => { tagsByAnn[r.announcement_id][tag] = (tagsByAnn[r.announcement_id][tag] ?? 0) + 1; });
+      }
+    });
+
+    const mapped: CodeCard[] = (data ?? []).map((row: any) => {
+      const ratings = ratingsByAnn[row.id] ?? [];
+      const avg = ratings.length ? ratings.reduce((a:number,b:number)=>a+b,0)/ratings.length : 0;
+      const tagCounts = tagsByAnn[row.id] ?? {};
+      const topTag = Object.entries(tagCounts).sort((a,b) => b[1]-a[1])[0]?.[0] ?? "";
+      const totalRatings = (ratingsData ?? []).filter((r:any) => r.announcement_id === row.id).length;
+      return {
+        id:          row.id,
+        userId:      row.user_id ?? "",
+        code:        row.code,
+        description: row.description || row.companies?.referral_bonus_description || "",
+        boosted:     (row.bumps_today ?? 0) > 0,
+        brand:       row.companies?.name ?? "Inconnu",
+        slug:        row.companies?.slug ?? "",
+        category:    row.companies?.category ?? "shopping",
+        reward:      row.companies?.referral_bonus_description ?? "Offre de bienvenue",
+        parrain:     row.users?.pseudo ?? "Anonyme",
+        niveau:      row.users?.level ?? "Débutant",
+        avgRating:   avg,
+        ratingCount: totalRatings,
+        topTag,
+      };
+    });
+
+    setHasMore((data ?? []).length === PAGE_SIZE);
+
+    if (reset) {
+      setCodes(mapped);
+      setCount(mapped.length);
+      setLoading(false);
+    } else {
+      setCodes(prev => { const next = [...prev, ...mapped]; setCount(next.length); return next; });
+      setLoadingMore(false);
+    }
+  }
+
+  useEffect(() => {
+    setPage(0);
+    doFetch(0, true, activeCategory, sort);
+  }, [activeCategory, sort]);
+
+  function handleContact(card: CodeCard) {
+    if (!currentUserId) { window.location.href = `/login?redirect=/codes`; return; }
+    window.location.href = `/messages?to=${card.userId}&annonce=${card.id}`;
+  }
+
+  function loadMore() {
+    const next = page + 1;
+    setPage(next);
+    doFetch(next, false, activeCategory, sort);
+  }
+
+  const filtered = search === ""
+    ? codes
+    : codes.filter(c =>
+        c.brand.toLowerCase().includes(search.toLowerCase()) ||
+        c.code.toLowerCase().includes(search.toLowerCase()) ||
+        c.description.toLowerCase().includes(search.toLowerCase())
+      );
 
   return (
     <>
@@ -430,12 +478,16 @@ export default function CodesPage() {
         .results-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
         .results-count{font-size:.8rem;color:var(--text-faint)}
         .results-count strong{color:var(--text-muted)}
+        .load-more-btn{display:inline-flex;align-items:center;gap:8px;padding:.65rem 1.75rem;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);border-radius:12px;color:#a78bfa;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+        .load-more-btn:hover{background:rgba(124,58,237,.25);color:#fff}
+        .load-more-btn:disabled{opacity:.5;cursor:not-allowed}
         .empty-state{text-align:center;padding:4rem 2rem;color:var(--text-faint)}
         .empty-icon{font-size:2.5rem;margin-bottom:1rem}
         .loading-wrap{display:flex;flex-direction:column;gap:1rem}
         .loading-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:1.5rem}
         .skeleton{background:var(--border-md);border-radius:8px;animation:shimmer 1.5s ease-in-out infinite}
         @keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
+        @keyframes spin{to{transform:rotate(360deg)}}
         @media(max-width:600px){.page-wrapper{padding:2rem 1rem 4rem}.card-footer{flex-direction:column;align-items:flex-start}}
       `}</style>
 
@@ -503,7 +555,7 @@ export default function CodesPage() {
         ) : filtered.length > 0 ? (
           <div className="cards-list">
             {filtered.map((card, i) => (
-              <CodeCardItem key={card.id} card={card} index={i} onRate={setRatingModal} />
+              <CodeCardItem key={card.id} card={card} index={i} onRate={setRatingModal} onContact={handleContact} currentUserId={currentUserId} />
             ))}
           </div>
         ) : (
@@ -511,6 +563,22 @@ export default function CodesPage() {
             <div className="empty-icon">🔍</div>
             <p>Aucun code trouvé pour cette recherche.</p>
           </div>
+        )}
+
+        {hasMore && !search && (
+          <div style={{ textAlign:"center", marginTop:"2rem" }}>
+            <button className="load-more-btn" onClick={loadMore} disabled={loadingMore}>
+              {loadingMore
+                ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Chargement…</>
+                : <>Voir plus<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg></>
+              }
+            </button>
+          </div>
+        )}
+        {search && hasMore && (
+          <p style={{ textAlign:"center", marginTop:"1.5rem", fontSize:".78rem", color:"rgba(255,255,255,.25)" }}>
+            Résultats limités aux {codes.length} codes chargés — effacez la recherche pour en voir plus.
+          </p>
         )}
       </main>
 

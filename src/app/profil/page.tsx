@@ -571,6 +571,189 @@ function Skeleton() {
   );
 }
 
+// ── Section Avis reçus ────────────────────────────────────────────────────────
+const TAGS_INFO: Record<string, { label:string; emoji:string; positive:boolean }> = {
+  code_ok:         { label:"Code fonctionnel",      emoji:"✅", positive:true  },
+  reponse_rapide:  { label:"Réponse rapide",         emoji:"⚡", positive:true  },
+  bon_gain:        { label:"Bon gain",               emoji:"🎁", positive:true  },
+  sympa:           { label:"Parrain sympa",          emoji:"🤝", positive:true  },
+  annonce_complete:{ label:"Annonce complète",       emoji:"📋", positive:true  },
+  code_expire:     { label:"Code expiré",            emoji:"⏰", positive:false },
+  code_invalide:   { label:"Code invalide",          emoji:"❌", positive:false },
+  desc_inexacte:   { label:"Description inexacte",   emoji:"⚠️", positive:false },
+  inactif:         { label:"Parrain inactif",        emoji:"💤", positive:false },
+};
+
+interface ReceivedReview {
+  id: string;
+  raterPseudo: string;
+  companyName: string;
+  rating: number | null;
+  tags: string[];
+  comment: string | null;
+  createdAt: string;
+}
+
+function ReviewStars({ value }: { value:number }) {
+  return (
+    <span style={{ display:"inline-flex", gap:2 }}>
+      {[1,2,3,4,5].map(n => (
+        <svg key={n} width="13" height="13" viewBox="0 0 24 24" fill={value>=n?"#f59e0b":"none"} stroke="#f59e0b" strokeWidth="1.5">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      ))}
+    </span>
+  );
+}
+
+function SectionAvisRecus({ userId }: { userId:string }) {
+  const supabase = createClient();
+  const [reviews, setReviews] = useState<ReceivedReview[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data: rows } = await supabase
+        .from("user_ratings")
+        .select("id, rater_id, rating, tags, comment, created_at, announcement_id")
+        .eq("ratee_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (!rows || rows.length === 0) { setLoading(false); return; }
+
+      const raterIds   = [...new Set(rows.map((r: any) => r.rater_id))];
+      const annIds     = [...new Set(rows.map((r: any) => r.announcement_id))];
+
+      const [{ data: users }, { data: anns }] = await Promise.all([
+        supabase.from("users").select("id, pseudo").in("id", raterIds),
+        supabase.from("announcements").select("id, companies(name)").in("id", annIds),
+      ]);
+
+      const userMap: Record<string,string> = {};
+      (users ?? []).forEach((u:any) => { userMap[u.id] = u.pseudo; });
+      const annMap: Record<string,string> = {};
+      (anns ?? []).forEach((a:any) => { annMap[a.id] = a.companies?.name ?? ""; });
+
+      setReviews(rows.map((r:any) => ({
+        id:          r.id,
+        raterPseudo: userMap[r.rater_id] ?? "Anonyme",
+        companyName: annMap[r.announcement_id] ?? "",
+        rating:      r.rating ?? null,
+        tags:        r.tags ?? [],
+        comment:     r.comment ?? null,
+        createdAt:   r.created_at,
+      })));
+      setLoading(false);
+    })();
+  }, [userId]);
+
+  const withRating   = reviews.filter(r => r.rating !== null);
+  const avgRating    = withRating.length
+    ? withRating.reduce((s, r) => s + (r.rating ?? 0), 0) / withRating.length
+    : null;
+
+  function timeAgo(dateStr: string) {
+    const d = new Date(dateStr);
+    const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
+    if (diff === 0) return "Aujourd'hui";
+    if (diff === 1) return "Hier";
+    if (diff < 30) return `Il y a ${diff} jour${diff>1?"s":""}`;
+    const m = Math.floor(diff/30);
+    if (m < 12) return `Il y a ${m} mois`;
+    return d.toLocaleDateString("fr-FR", { day:"numeric", month:"short", year:"numeric" });
+  }
+
+  return (
+    <div className="sc">
+      <div className="sh">
+        <div>
+          <h2 className="st">Avis reçus</h2>
+          <p className="ss">Ce que les utilisateurs pensent de tes parrainages</p>
+        </div>
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign:"center", padding:"2rem", color:"rgba(255,255,255,.25)", fontSize:".875rem" }}>Chargement…</div>
+      ) : reviews.length === 0 ? (
+        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2.5rem", textAlign:"center" }}>
+          <div style={{ fontSize:"2rem", marginBottom:".75rem" }}>⭐</div>
+          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, color:"rgba(255,255,255,.5)", marginBottom:".5rem" }}>Pas encore d'avis</p>
+          <p style={{ fontSize:".825rem", color:"rgba(255,255,255,.25)" }}>Tes avis apparaîtront ici quand des utilisateurs noteront tes annonces.</p>
+        </div>
+      ) : (
+        <>
+          {/* Résumé */}
+          <div style={{ display:"flex", gap:12, marginBottom:"1.25rem", flexWrap:"wrap" }}>
+            <div style={{ flex:1, minWidth:120, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
+              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"'Syne',sans-serif", color:"#fff", lineHeight:1 }}>
+                {avgRating !== null ? avgRating.toFixed(1) : "—"}
+              </p>
+              {avgRating !== null && <div style={{ display:"flex", justifyContent:"center", margin:"4px 0" }}><ReviewStars value={Math.round(avgRating)} /></div>}
+              <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.3)", marginTop:2 }}>Note moyenne</p>
+            </div>
+            <div style={{ flex:1, minWidth:120, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
+              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"'Syne',sans-serif", color:"#fff", lineHeight:1 }}>{reviews.length}</p>
+              <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.3)", marginTop:6 }}>Avis reçu{reviews.length>1?"s":""}</p>
+            </div>
+            <div style={{ flex:1, minWidth:120, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
+              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"'Syne',sans-serif", color:"#4ade80", lineHeight:1 }}>
+                {reviews.filter(r => r.tags.some(t => TAGS_INFO[t]?.positive)).length}
+              </p>
+              <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.3)", marginTop:6 }}>Positif{reviews.filter(r=>r.tags.some(t=>TAGS_INFO[t]?.positive)).length>1?"s":""}</p>
+            </div>
+          </div>
+
+          {/* Liste */}
+          <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+            {reviews.map(r => (
+              <div key={r.id} style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem 1.25rem" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:".625rem" }}>
+                  {/* Avatar */}
+                  <div style={{ width:32, height:32, borderRadius:"50%", background:"rgba(124,58,237,.25)", border:"1px solid rgba(124,58,237,.35)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                    <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:".8rem", color:"#a78bfa" }}>{r.raterPseudo[0]?.toUpperCase()}</span>
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                      <span style={{ fontWeight:700, fontSize:".875rem", color:"rgba(255,255,255,.85)" }}>{r.raterPseudo}</span>
+                      {r.companyName && (
+                        <span style={{ fontSize:".7rem", color:"#a78bfa", background:"rgba(124,58,237,.12)", border:"1px solid rgba(124,58,237,.25)", borderRadius:100, padding:"1px 8px" }}>
+                          {r.companyName}
+                        </span>
+                      )}
+                      {r.rating !== null && <ReviewStars value={r.rating} />}
+                    </div>
+                    <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.25)", marginTop:2 }}>{timeAgo(r.createdAt)}</p>
+                  </div>
+                </div>
+
+                {r.tags.length > 0 && (
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:5, marginBottom: r.comment ? ".625rem" : 0 }}>
+                    {r.tags.map(tag => {
+                      const info = TAGS_INFO[tag];
+                      if (!info) return null;
+                      return (
+                        <span key={tag} style={{ fontSize:".72rem", padding:"2px 9px", borderRadius:100, border:"1px solid", borderColor:info.positive?"rgba(34,197,94,.3)":"rgba(239,68,68,.3)", background:info.positive?"rgba(34,197,94,.08)":"rgba(239,68,68,.06)", color:info.positive?"#4ade80":"#f87171" }}>
+                          {info.emoji} {info.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {r.comment && (
+                  <p style={{ fontSize:".82rem", color:"rgba(255,255,255,.5)", fontStyle:"italic", borderLeft:"2px solid rgba(255,255,255,.08)", paddingLeft:".75rem", marginTop: r.tags.length ? 0 : ".25rem" }}>
+                    &ldquo;{r.comment}&rdquo;
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── Section Avis (noter le site) ──────────────────────────────────────────────
 const GOOGLE_REVIEW_URL = "https://g.page/r/CWGFDaSeMPebEAE/review";
 
@@ -769,7 +952,7 @@ export default function ProfilPage() {
       case "quetes":     return <SectionQuetes user={user} annonces={annonces} hasReview={hasReview} />;
       case "credits":    return <SectionCredits />;
       case "parametres": return <SectionParametres user={user} onPseudoSave={handlePseudoSave} onAvatarUpload={handleAvatarUpload} onBioSave={handleBioSave} />;
-      case "avis":       return <SectionAvis userId={user.id} />;
+      case "avis":       return <><SectionAvisRecus userId={user.id} /><SectionAvis userId={user.id} /></>;
     }
   };
 
