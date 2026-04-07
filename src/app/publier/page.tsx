@@ -43,9 +43,10 @@ function CompanyLogo({ domain, name, size = 34 }: { domain: string; name: string
   }
   return (
     <img
-      src={`https://logo.clearbit.com/${domain}`}
+      src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
       alt={name}
       onError={() => setError(true)}
+      onLoad={(e) => { if ((e.currentTarget as HTMLImageElement).naturalWidth <= 16) setError(true) }}
       style={{ width:size, height:size, borderRadius:size*0.28, objectFit:"contain", background:"rgba(124,58,237,0.08)", border:"1px solid rgba(124,58,237,0.2)", flexShrink:0, padding:2 }}
     />
   );
