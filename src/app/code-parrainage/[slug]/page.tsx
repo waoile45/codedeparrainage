@@ -7,78 +7,23 @@ export const revalidate = 14400
 
 type Props = { params: Promise<{ slug: string }> }
 
-// Mapping domaine DB → slug URL propre
-const DOMAIN_TO_SLUG: Record<string, string> = {
-  'boursobank.com':    'boursobank',
-  'fortuneo.fr':      'fortuneo',
-  'hello.bank':       'hello-bank',
-  'revolut.com':      'revolut',
-  'lydia-app.com':    'lydia',
-  'winamax.fr':       'winamax',
-  'betclic.fr':       'betclic',
-  'unibet.fr':        'unibet',
-  'pmu.fr':           'pmu',
-  'free.fr':          'free',
-  'sfr.fr':           'sfr',
-  'igraal.com':       'igraal',
-  'poulpeo.com':      'poulpeo',
-  'binance.com':      'binance',
-  'coinbase.com':     'coinbase',
-  'edf.fr':           'edf',
-  'engie.fr':         'engie',
-  'traderepublic.com':'trade-republic',
-  'boursedirect.fr':  'bourse-direct',
-  'pokerstars.fr':    'pokerstars',
-  '10doigts.com':     '10doigts',
-  'pokawa.com':       'pokawa',
-}
-
-// Mapping slug URL → domaine DB
-function getDomain(slug: string): string {
-  const domains: Record<string, string> = {
-    'boursobank':    'boursobank.com',
-    'fortuneo':     'fortuneo.fr',
-    'hello-bank':   'hello.bank',
-    'revolut':      'revolut.com',
-    'lydia':        'lydia-app.com',
-    'winamax':      'winamax.fr',
-    'betclic':      'betclic.fr',
-    'unibet':       'unibet.fr',
-    'pmu':          'pmu.fr',
-    'free':         'free.fr',
-    'sfr':          'sfr.fr',
-    'igraal':       'igraal.com',
-    'poulpeo':      'poulpeo.com',
-    'binance':      'binance.com',
-    'coinbase':     'coinbase.com',
-    'edf':          'edf.fr',
-    'engie':        'engie.fr',
-    'trade-republic':'traderepublic.com',
-    'bourse-direct':'boursedirect.fr',
-    'pokerstars':   'pokerstars.fr',
-    '10doigts':     '10doigts.com',
-    'pokawa':       'pokawa.com',
-  }
-  return domains[slug] ?? slug + '.com'
-}
-
 export async function generateStaticParams() {
   const supabase = createAnonSupabase()
-  const { data: companies } = await supabase.from('companies').select('slug')
-  return (companies ?? []).map((c) => ({
-    slug: DOMAIN_TO_SLUG[c.slug] ?? c.slug.replace(/\.(com|fr|io|co|net|org|bank|be|es|de)$/, ''),
-  }))
+  const { data: companies } = await supabase
+    .from('companies')
+    .select('url_slug')
+  return (companies ?? [])
+    .filter((c) => c.url_slug)
+    .map((c) => ({ slug: c.url_slug as string }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const supabase = await createServerSupabase()
-  const domain = getDomain(slug)
   const { data: company } = await supabase
     .from('companies')
     .select('*')
-    .or(`slug.eq.${domain},slug.eq.${slug}`)
-    .limit(1)
+    .eq('url_slug', slug)
     .maybeSingle()
 
   if (!company) return { title: 'Code parrainage introuvable' }
@@ -100,13 +45,11 @@ const AUTRES = ['boursobank', 'winamax', 'betclic', 'revolut', 'trade-republic',
 export default async function CompanyPage({ params }: Props) {
   const { slug } = await params
   const supabase = await createServerSupabase()
-  const domain = getDomain(slug)
 
   const { data: company } = await supabase
     .from('companies')
     .select('*')
-    .or(`slug.eq.${domain},slug.eq.${slug}`)
-    .limit(1)
+    .eq('url_slug', slug)
     .maybeSingle()
 
   if (!company) {
@@ -127,6 +70,8 @@ export default async function CompanyPage({ params }: Props) {
 
   const autresSlug = AUTRES.filter(s => s !== slug)
   const year = new Date().getFullYear()
+  // Le domaine pour le favicon (on garde la colonne slug existante qui contient le domaine)
+  const domain = company.slug ?? slug + '.com'
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -246,7 +191,6 @@ export default async function CompanyPage({ params }: Props) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
             {announcements.map((ann: any) => (
               <div key={ann.id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 18, padding: '1.25rem 1.375rem' }}>
-                {/* Code row */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-code,rgba(124,58,237,.07))', border: '1px solid var(--border)', borderRadius: 12, padding: '.75rem 1rem', marginBottom: '0.875rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#7c3aed', boxShadow: '0 0 6px #7c3aed', display: 'inline-block', flexShrink: 0 }} />
@@ -261,7 +205,6 @@ export default async function CompanyPage({ params }: Props) {
                   <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', margin: '0 0 .875rem', lineHeight: 1.55 }}>{ann.description}</p>
                 )}
 
-                {/* Footer parrain */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(124,58,237,.2)', border: '1px solid rgba(124,58,237,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.72rem', fontWeight: 700, color: '#a78bfa', flexShrink: 0 }}>
                     {ann.users?.pseudo?.slice(0, 1).toUpperCase()}
@@ -300,7 +243,7 @@ export default async function CompanyPage({ params }: Props) {
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {autresSlug.map((s) => (
-              <a key={s} href={`/code-parrainage/${s}`} style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'var(--bg-card-md)', border: '1px solid var(--border)', color: 'var(--text-dim)', textDecoration: 'none', transition: 'all .18s' }}>
+              <a key={s} href={`/code-parrainage/${s}`} style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'var(--bg-card-md)', border: '1px solid var(--border)', color: 'var(--text-dim)', textDecoration: 'none' }}>
                 Code parrainage {s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ')}
               </a>
             ))}
@@ -311,9 +254,7 @@ export default async function CompanyPage({ params }: Props) {
 
       <style>{`
         details summary::-webkit-details-marker { display: none; }
-        @media (max-width: 600px) {
-          h1 { font-size: 1.35rem !important; }
-        }
+        @media (max-width: 600px) { h1 { font-size: 1.35rem !important; } }
       `}</style>
     </div>
   )
