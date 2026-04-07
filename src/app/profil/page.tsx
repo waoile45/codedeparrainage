@@ -88,17 +88,24 @@ function AvatarUpload({ letter, avatarUrl, size=72, onUpload }: { letter:string;
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
     setUploading(true);
-    setPreview(URL.createObjectURL(f));
+    const localPreview = URL.createObjectURL(f);
+    setPreview(localPreview);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setUploading(false); return; }
-    const ext = f.name.split(".").pop();
-    const path = `${user.id}/avatar.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, f, { upsert: true });
-    if (!error) {
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      await supabase.from("users").update({ avatar_url: data.publicUrl }).eq("id", user.id);
-      onUpload(data.publicUrl);
+    // Toujours utiliser avatar.webp pour écraser la version précédente
+    const path = `${user.id}/avatar`;
+    const { error } = await supabase.storage.from("avatars").upload(path, f, { upsert: true, contentType: f.type });
+    if (error) {
+      console.error("Avatar upload error:", error);
+      setUploading(false);
+      return;
     }
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    // Ajoute un timestamp pour forcer le rechargement de l'image
+    const urlWithBust = `${data.publicUrl}?t=${Date.now()}`;
+    await supabase.from("users").update({ avatar_url: data.publicUrl }).eq("id", user.id);
+    setPreview(urlWithBust);
+    onUpload(data.publicUrl);
     setUploading(false);
   };
 
