@@ -1,16 +1,9 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 
 export default function CompanyLogo({ domain, name }: { domain: string; name: string }) {
   const [failed, setFailed] = useState(false)
-  const imgRef = useRef<HTMLImageElement>(null)
-
-  // Cas où l'image a échoué avant que React n'hydrate le composant
-  useEffect(() => {
-    const img = imgRef.current
-    if (img && img.complete && img.naturalWidth === 0) setFailed(true)
-  }, [])
 
   if (failed) {
     return (
@@ -28,13 +21,14 @@ export default function CompanyLogo({ domain, name }: { domain: string; name: st
     )
   }
 
-  // Sans fallback_opts, l'API renvoie 404 pour les domaines sans favicon → onError → lettre
   return (
     <img
-      ref={imgRef}
-      src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&url=https://${domain}&size=128`}
+      src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
       alt={name}
       onError={() => setFailed(true)}
+      onLoad={(e) => {
+        if ((e.currentTarget as HTMLImageElement).naturalWidth <= 16) setFailed(true)
+      }}
       style={{ width: 36, height: 36, objectFit: "contain", borderRadius: 8 }}
     />
   )
