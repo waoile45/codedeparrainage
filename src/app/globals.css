@@ -30,7 +30,7 @@ html, body { max-width: 100%; overflow-x: hidden; }
 }
 
 [data-theme="light"] {
-  --bg:              #eae6f5;
+  --bg:              #ddd5f5;
   --step-num:        rgba(109,40,217,0.12);
   --bg-card:         #ffffff;
   --bg-card-md:      #f0f1f5;

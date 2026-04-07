@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import { ENTREPRISES, type Entreprise } from "@/data/entreprises";
@@ -34,6 +34,11 @@ const MAX_DISPLAY = 80;
 // ── Logo avec fallback ─────────────────────────────────────────────────────────
 function CompanyLogo({ domain, name, size = 34 }: { domain: string; name: string; size?: number }) {
   const [error, setError] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth === 0) setError(true);
+  }, []);
   if (error) {
     return (
       <div style={{ width:size, height:size, borderRadius:size*0.28, background:"rgba(124,58,237,0.15)", border:"1px solid rgba(124,58,237,0.2)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:size*0.45, flexShrink:0, color:"#a78bfa", fontWeight:800, fontFamily:"'Syne',sans-serif" }}>
@@ -43,10 +48,10 @@ function CompanyLogo({ domain, name, size = 34 }: { domain: string; name: string
   }
   return (
     <img
-      src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
+      ref={imgRef}
+      src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&url=https://${domain}&size=128`}
       alt={name}
       onError={() => setError(true)}
-      onLoad={(e) => { if ((e.currentTarget as HTMLImageElement).naturalWidth <= 16) setError(true) }}
       style={{ width:size, height:size, borderRadius:size*0.28, objectFit:"contain", background:"rgba(124,58,237,0.08)", border:"1px solid rgba(124,58,237,0.2)", flexShrink:0, padding:2 }}
     />
   );
