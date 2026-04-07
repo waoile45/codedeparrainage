@@ -288,7 +288,32 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
 }
 
 // ── Section Annonces ───────────────────────────────────────────────────────────
-function SectionAnnonces({ annonces, onDelete }: { annonces:Annonce[]; onDelete:(id:string)=>void }) {
+function SectionAnnonces({ annonces, onDelete, onEdit }: {
+  annonces: Annonce[];
+  onDelete: (id: string) => void;
+  onEdit:   (id: string, code: string, description: string) => Promise<void>;
+}) {
+  const [editingId, setEditingId]     = useState<string | null>(null);
+  const [editCode, setEditCode]       = useState("");
+  const [editDesc, setEditDesc]       = useState("");
+  const [saving, setSaving]           = useState(false);
+
+  const startEdit = (a: Annonce) => {
+    setEditingId(a.id);
+    setEditCode(a.code);
+    setEditDesc(a.description ?? "");
+  };
+
+  const cancelEdit = () => { setEditingId(null); };
+
+  const saveEdit = async () => {
+    if (!editingId || !editCode.trim()) return;
+    setSaving(true);
+    await onEdit(editingId, editCode.trim(), editDesc.trim());
+    setSaving(false);
+    setEditingId(null);
+  };
+
   return (
     <div className="sc">
       <div className="sh">
@@ -302,20 +327,72 @@ function SectionAnnonces({ annonces, onDelete }: { annonces:Annonce[]; onDelete:
         </div>
       )}
       {annonces.map(a => (
-        <div key={a.id} className="row-card">
-          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-            <div style={{ width:8, height:8, borderRadius:"50%", background:"#22c55e", boxShadow:"0 0 6px #22c55e" }} />
-            <div>
-              <p style={{ fontWeight:700, color:"#fff", fontSize:"0.9rem" }}>{a.companies?.name ?? "Inconnu"}</p>
-              <code style={{ fontFamily:"monospace", fontSize:"0.8rem", color:"rgba(255,255,255,.4)", letterSpacing:"0.06em" }}>{a.code}</code>
+        <div key={a.id} className="row-card" style={{ flexDirection:"column", alignItems:"stretch", gap:"0.875rem" }}>
+          {/* Ligne principale */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:8 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+              <div style={{ width:8, height:8, borderRadius:"50%", background:"#22c55e", boxShadow:"0 0 6px #22c55e", flexShrink:0 }} />
+              <div>
+                <p style={{ fontWeight:700, color:"#fff", fontSize:"0.9rem" }}>{a.companies?.name ?? "Inconnu"}</p>
+                <code style={{ fontFamily:"monospace", fontSize:"0.8rem", color:"rgba(255,255,255,.4)", letterSpacing:"0.06em" }}>{a.code}</code>
+              </div>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+              {a.companies?.category && <span className="cat-tag">{a.companies.category}</span>}
+              <span style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>⚡ {a.bumps_today} boosts</span>
+              <a href="/boost" className="btn-ghost-sm">Booster ⚡</a>
+              {editingId !== a.id && (
+                <button className="btn-ghost-sm" onClick={() => startEdit(a)}>✏️ Modifier</button>
+              )}
+              <button className="btn-ghost-sm danger" onClick={() => onDelete(a.id)}>Supprimer</button>
             </div>
           </div>
-          <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-            {a.companies?.category && <span className="cat-tag">{a.companies.category}</span>}
-            <span style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>⚡ {a.bumps_today} boosts</span>
-            <a href="/boost" className="btn-ghost-sm">Booster ⚡</a>
-            <button className="btn-ghost-sm danger" onClick={()=>onDelete(a.id)}>Supprimer</button>
-          </div>
+
+          {/* Formulaire de modification inline */}
+          {editingId === a.id && (
+            <div style={{ background:"rgba(124,58,237,.07)", border:"1px solid rgba(124,58,237,.2)", borderRadius:12, padding:"1rem", display:"flex", flexDirection:"column", gap:"0.75rem" }}>
+              <div className="form-g">
+                <label className="form-l">CODE DE PARRAINAGE</label>
+                <input
+                  className="form-i"
+                  value={editCode}
+                  onChange={e => {
+                    const v = e.target.value;
+                    setEditCode(v.startsWith("http") ? v : v.toUpperCase());
+                  }}
+                  maxLength={500}
+                  placeholder="Ton code ou lien"
+                />
+              </div>
+              <div className="form-g">
+                <label className="form-l">DESCRIPTION <span style={{ color:"rgba(255,255,255,.2)", fontWeight:400 }}>optionnel</span></label>
+                <textarea
+                  className="form-i form-ta"
+                  value={editDesc}
+                  onChange={e => setEditDesc(e.target.value)}
+                  maxLength={280}
+                  placeholder="Décris ce que le filleul peut gagner..."
+                  style={{ resize:"vertical", minHeight:72 }}
+                />
+                <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.25)" }}>{editDesc.length}/280</p>
+              </div>
+              <div style={{ display:"flex", gap:8 }}>
+                <button
+                  onClick={saveEdit}
+                  disabled={saving || !editCode.trim()}
+                  style={{ background:"#7c3aed", color:"#fff", fontWeight:700, fontSize:".82rem", padding:".5rem 1.25rem", borderRadius:10, border:"none", cursor:"pointer", opacity:saving||!editCode.trim()?0.6:1 }}
+                >
+                  {saving ? "Enregistrement…" : "✓ Sauvegarder"}
+                </button>
+                <button
+                  onClick={cancelEdit}
+                  style={{ background:"rgba(255,255,255,.05)", color:"rgba(255,255,255,.5)", fontWeight:600, fontSize:".82rem", padding:".5rem 1rem", borderRadius:10, border:"1px solid rgba(255,255,255,.1)", cursor:"pointer" }}
+                >
+                  Annuler
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -519,11 +596,23 @@ export default function ProfilPage() {
     setAnnonces(prev => prev.filter(a => a.id !== id));
   };
 
+  const handleEditAnnonce = async (id: string, code: string, description: string) => {
+    // On ne met à jour QUE code et description — jamais created_at ni d'autres champs
+    // afin d'éviter tout remontée artificielle dans le classement
+    const { error } = await supabase
+      .from("announcements")
+      .update({ code, description: description || null })
+      .eq("id", id);
+    if (!error) {
+      setAnnonces(prev => prev.map(a => a.id === id ? { ...a, code, description: description || null } : a));
+    }
+  };
+
   const renderSection = () => {
     if (loading || !user) return <Skeleton />;
     switch (active) {
       case "profil":     return <SectionProfil user={user} annonces={annonces} onPseudoSave={handlePseudoSave} onAvatarUpload={handleAvatarUpload} />;
-      case "annonces":   return <SectionAnnonces annonces={annonces} onDelete={handleDeleteAnnonce} />;
+      case "annonces":   return <SectionAnnonces annonces={annonces} onDelete={handleDeleteAnnonce} onEdit={handleEditAnnonce} />;
       case "messages":   return <SectionMessages />;
       case "badges":     return <SectionBadges xp={user.xp} annoncesCount={annonces.length} />;
       case "quetes":     return <SectionQuetes user={user} annonces={annonces} />;
