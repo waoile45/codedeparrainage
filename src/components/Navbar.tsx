@@ -13,6 +13,7 @@ export default function Navbar({ activePage }: NavbarProps) {
   const { theme, toggle: toggleTheme } = useTheme();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [pseudo, setPseudo] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -20,11 +21,12 @@ export default function Navbar({ activePage }: NavbarProps) {
       if (!user) return;
       const { data: profile } = await supabase
         .from("users")
-        .select("pseudo")
+        .select("pseudo, avatar_url")
         .eq("id", user.id)
         .single();
       setIsLoggedIn(true);
       setPseudo(profile?.pseudo ?? user.email?.split("@")[0] ?? "Moi");
+      setAvatarUrl(profile?.avatar_url ?? null);
     });
   }, []);
 
@@ -221,7 +223,12 @@ export default function Navbar({ activePage }: NavbarProps) {
                 {/* Avatar dropdown */}
                 <div style={{ position: "relative" }}>
                   <button className="nav-avatar-btn" onClick={() => setMenuOpen(!menuOpen)}>
-                    <div className="nav-avatar">{pseudo[0]?.toUpperCase()}</div>
+                    <div className="nav-avatar" style={avatarUrl ? { padding: 0, overflow: "hidden" } : {}}>
+                      {avatarUrl
+                        ? <img src={avatarUrl} alt={pseudo} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} onError={() => setAvatarUrl(null)} />
+                        : pseudo[0]?.toUpperCase()
+                      }
+                    </div>
                     <span className="nav-pseudo">{pseudo}</span>
                     <svg className={`nav-chevron ${menuOpen ? "open" : ""}`} width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                   </button>

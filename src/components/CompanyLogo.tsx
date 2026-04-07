@@ -22,7 +22,7 @@ export default function CompanyLogo({ domain, name }: { domain: string; name: st
 
   return (
     <img
-      src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${domain}&size=128`}
+      src={`https://logo.clearbit.com/${domain}`}
       alt={name}
       onError={() => setFailed(true)}
       style={{ width: 36, height: 36, objectFit: "contain", borderRadius: 8 }}
