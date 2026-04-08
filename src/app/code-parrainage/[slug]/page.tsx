@@ -119,61 +119,6 @@ export default async function CompanyPage({ params }: Props) {
           </div>
         </div>
 
-        {/* ── Comment utiliser ── */}
-        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginBottom: '1.25rem' }}>
-          <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
-            Comment utiliser un code parrainage {company.name} ?
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[
-              `Choisissez un code dans la liste ci-dessous.`,
-              `Copiez-le et rendez-vous sur le site ou l'application ${company.name}.`,
-              `Entrez le code lors de votre inscription (champ "code parrainage" ou "code promo").`,
-              `${company.referral_bonus_description} — la récompense sera créditée après validation.`,
-            ].map((step, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(124,58,237,.2)', border: '1px solid rgba(124,58,237,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.7rem', fontWeight: 800, color: '#a78bfa', flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
-                <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.55 }}>{step}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── FAQ ── */}
-        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
-            Questions fréquentes — {company.name}
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {[
-              {
-                q: `Le code parrainage ${company.name} est-il valable en ${year} ?`,
-                a: `Oui. Les codes présentés sont vérifiés par notre communauté. ${company.referral_bonus_description}. Vérifiez les conditions directement sur le site ${company.name} lors de l'inscription.`,
-              },
-              {
-                q: `Peut-on utiliser plusieurs codes parrainage ${company.name} ?`,
-                a: `Non, ${company.name} n'accepte généralement qu'un seul code par compte. Choisissez un parrain actif dans la liste ci-dessous.`,
-              },
-              {
-                q: `Où entrer le code parrainage ${company.name} ?`,
-                a: `Le code s'entre lors de votre inscription, dans le champ "code parrainage", "code promo" ou "code ami" selon la plateforme.`,
-              },
-              {
-                q: `Combien de temps pour recevoir la récompense ${company.name} ?`,
-                a: `Le délai varie selon les conditions de ${company.name}. En général, la récompense est versée après validation du compte et des conditions requises (dépôt minimum, première mise, etc.).`,
-              },
-            ].map((item, i, arr) => (
-              <details key={i} style={{ borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none', padding: '0.75rem 0' }}>
-                <summary style={{ fontSize: '.875rem', fontWeight: 600, color: 'var(--text-strong)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                  {item.q}
-                  <span style={{ color: 'var(--text-faint)', fontSize: '.75rem', flexShrink: 0 }}>▼</span>
-                </summary>
-                <p style={{ fontSize: '.85rem', color: 'var(--text-muted)', margin: '.625rem 0 0', lineHeight: 1.6 }}>{item.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-
         {/* ── Liste des codes ── */}
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1rem' }}>
           <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: 0, color: 'var(--text-strong)' }}>
@@ -233,6 +178,61 @@ export default async function CompanyPage({ params }: Props) {
           </div>
         )}
 
+        {/* ── Comment utiliser ── */}
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginTop: '1.5rem', marginBottom: '1.25rem' }}>
+          <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
+            Comment utiliser un code parrainage {company.name} ?
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              `Choisissez un code dans la liste ci-dessus.`,
+              `Copiez-le et rendez-vous sur le site ou l'application ${company.name}.`,
+              `Entrez le code lors de votre inscription (champ "code parrainage" ou "code promo").`,
+              `${company.referral_bonus_description} — la récompense sera créditée après validation.`,
+            ].map((step, i) => (
+              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(124,58,237,.2)', border: '1px solid rgba(124,58,237,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.7rem', fontWeight: 800, color: '#a78bfa', flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
+                <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.55 }}>{step}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── FAQ ── */}
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
+            Questions fréquentes — {company.name}
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {[
+              {
+                q: `Le code parrainage ${company.name} est-il valable en ${year} ?`,
+                a: `Oui. Les codes présentés sont vérifiés par notre communauté. ${company.referral_bonus_description}. Vérifiez les conditions directement sur le site ${company.name} lors de l'inscription.`,
+              },
+              {
+                q: `Peut-on utiliser plusieurs codes parrainage ${company.name} ?`,
+                a: `Non, ${company.name} n'accepte généralement qu'un seul code par compte. Choisissez un parrain actif dans la liste ci-dessus.`,
+              },
+              {
+                q: `Où entrer le code parrainage ${company.name} ?`,
+                a: `Le code s'entre lors de votre inscription, dans le champ "code parrainage", "code promo" ou "code ami" selon la plateforme.`,
+              },
+              {
+                q: `Combien de temps pour recevoir la récompense ${company.name} ?`,
+                a: `Le délai varie selon les conditions de ${company.name}. En général, la récompense est versée après validation du compte et des conditions requises (dépôt minimum, première mise, etc.).`,
+              },
+            ].map((item, i, arr) => (
+              <details key={i} style={{ borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none', padding: '0.75rem 0' }}>
+                <summary style={{ fontSize: '.875rem', fontWeight: 600, color: 'var(--text-strong)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                  {item.q}
+                  <span className="faq-arrow" style={{ color: 'var(--text-faint)', fontSize: '.75rem', flexShrink: 0, transition: 'transform .2s' }}>▼</span>
+                </summary>
+                <p style={{ fontSize: '.85rem', color: 'var(--text-muted)', margin: '.625rem 0 0', lineHeight: 1.6 }}>{item.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+
         {/* ── Maillage interne ── */}
         <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '0.875rem', fontFamily: "var(--font-syne),Syne,sans-serif" }}>
@@ -241,7 +241,7 @@ export default async function CompanyPage({ params }: Props) {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {autresSlug.map((s) => (
               <a key={s} href={`/code-parrainage/${s}`} style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'var(--bg-card-md)', border: '1px solid var(--border)', color: 'var(--text-dim)', textDecoration: 'none' }}>
-                Code parrainage {s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ')}
+                {s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ')}
               </a>
             ))}
           </div>
@@ -251,6 +251,7 @@ export default async function CompanyPage({ params }: Props) {
 
       <style>{`
         details summary::-webkit-details-marker { display: none; }
+        details[open] .faq-arrow { transform: rotate(180deg); }
         @media (max-width: 600px) { h1 { font-size: 1.35rem !important; } }
       `}</style>
     </div>

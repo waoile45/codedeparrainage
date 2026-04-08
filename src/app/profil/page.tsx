@@ -243,8 +243,8 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
           <AvatarUpload letter={user.pseudo[0]?.toUpperCase()??"?"} avatarUrl={user.avatar_url} size={72} onUpload={onAvatarUpload} />
           <div style={{ flex:1 }}>
             <EditablePseudo value={user.pseudo} onSave={onPseudoSave} />
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:5, flexWrap:"wrap" }}>
-              <span style={{ fontSize:"0.72rem", fontWeight:700, background:"rgba(124,58,237,.2)", color:"#a78bfa", padding:"3px 10px", borderRadius:100, border:"1px solid rgba(124,58,237,.35)" }}>{user.level}</span>
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:6, flexWrap:"wrap", lineHeight:1 }}>
+              <span style={{ fontSize:"0.72rem", fontWeight:700, background:"rgba(124,58,237,.2)", color:"#a78bfa", padding:"4px 10px", borderRadius:100, border:"1px solid rgba(124,58,237,.35)", display:"inline-flex", alignItems:"center" }}>{user.level}</span>
               <span style={{ fontSize:"0.8rem", color:"#a78bfa", fontWeight:700 }}>{user.xp} XP</span>
               <span style={{ color:"rgba(255,255,255,.2)" }}>·</span>
               <span style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>{xpNextLabel} à {xpNext} XP</span>
@@ -448,7 +448,7 @@ function SectionBadges({ xp, annoncesCount }: { xp:number; annoncesCount:number 
 function SectionQuetes({ user, annonces, hasReview }: { user:UserProfile; annonces:Annonce[]; hasReview:boolean }) {
   const quetes: { label:string; xp:number; done:boolean; progress:number; total:number; link?:string }[] = [
     { label:"Publier ton premier code",      xp:10, done:annonces.length>0,   progress:Math.min(annonces.length,1), total:1, link:"/publier" },
-    { label:"Se connecter 7 jours de suite", xp:25, done:user.streak_days>=7, progress:user.streak_days, total:7 },
+    { label:"Se connecter 7 jours de suite", xp:25, done:user.streak_days>=7, progress:Math.max(user.streak_days, 1), total:7 },
     { label:"Atteindre 100 XP",              xp:20, done:user.xp>=100,        progress:user.xp, total:100 },
     { label:"Publier 5 annonces",            xp:30, done:annonces.length>=5,  progress:annonces.length, total:5, link:"/publier" },
     { label:"Laisser un avis sur la plateforme", xp:15, done:hasReview, progress:hasReview?1:0, total:1, link:"/avis" },

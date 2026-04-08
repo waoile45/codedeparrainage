@@ -230,7 +230,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
   );
 }
 
-function CodeCardItem({ card, index, onRate, onContact, currentUserId }: { card: CodeCard; index: number; onRate:(card:CodeCard)=>void; onContact:(card:CodeCard)=>void; currentUserId:string|null }) {
+function CodeCardItem({ card, index, onRate, onContact, onEdit, onDelete, currentUserId }: { card: CodeCard; index: number; onRate:(card:CodeCard)=>void; onContact:(card:CodeCard)=>void; onEdit:(card:CodeCard)=>void; onDelete:(card:CodeCard)=>void; currentUserId:string|null }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -253,11 +253,8 @@ function CodeCardItem({ card, index, onRate, onContact, currentUserId }: { card:
           <div className="reward-pill">{card.reward}</div>
         </div>
       </div>
-      <div className="code-row">
-        <div className="code-display"><span className="code-dot" /><code className="code-text">{card.code}</code></div>
-        <CopyButton code={card.code} />
-      </div>
-      <div className="card-footer">
+      {/* Parrain au-dessus du code */}
+      <div className="card-footer" style={{ marginBottom:"0.75rem" }}>
         <div className="parrain-info">
           <div className="parrain-avatar" style={{ background:niveauColor+"33", borderColor:niveauColor+"66" }}>{card.parrain[0]?.toUpperCase()}</div>
           <div>
@@ -269,12 +266,34 @@ function CodeCardItem({ card, index, onRate, onContact, currentUserId }: { card:
           </div>
         </div>
         <div className="card-actions">
-          <button className="action-btn" onClick={() => !isOwn && onContact(card)} disabled={isOwn} style={isOwn ? { opacity:0.4, cursor:"not-allowed" } : {}} title={isOwn ? "Votre propre annonce" : "Contacter le parrain"}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Contacter</button>
-          <button className="action-btn" onClick={() => onRate(card)}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            Avis
-          </button>
+          {isOwn ? (
+            <>
+              <button className="action-btn action-btn-own" onClick={() => onEdit(card)} title="Modifier mon annonce">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Modifier
+              </button>
+              <button className="action-btn action-btn-delete" onClick={() => onDelete(card)} title="Supprimer mon annonce">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                Supprimer
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="action-btn" onClick={() => onContact(card)}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Contacter</button>
+              <button className="action-btn" onClick={() => onRate(card)}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Avis
+              </button>
+            </>
+          )}
         </div>
+      </div>
+      <div className="code-row">
+        <div className="code-display">
+          <span className="code-dot" />
+          <code className={`code-text ${card.code.startsWith("http") ? "code-url" : ""}`}>{card.code}</code>
+        </div>
+        <CopyButton code={card.code} />
       </div>
     </div>
   );
@@ -292,6 +311,11 @@ export default function CodesClient() {
   const [sort, setSort]             = useState<"popular"|"recent">("popular");
   const [count, setCount]           = useState(0);
   const [ratingModal, setRatingModal] = useState<CodeCard|null>(null);
+  const [editModal, setEditModal]   = useState<CodeCard|null>(null);
+  const [editCode, setEditCode]     = useState("");
+  const [editDesc, setEditDesc]     = useState("");
+  const [editSaving, setEditSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<CodeCard|null>(null);
   const [currentUserId, setCurrentUserId] = useState<string|null>(null);
   const supabase = createClient();
 
@@ -399,6 +423,27 @@ export default function CodesClient() {
     window.location.href = `/messages?to=${card.userId}&annonce=${card.id}`;
   }
 
+  function handleEditOpen(card: CodeCard) {
+    setEditModal(card);
+    setEditCode(card.code);
+    setEditDesc(card.description);
+  }
+
+  async function handleEditSave() {
+    if (!editModal) return;
+    setEditSaving(true);
+    await supabase.from("announcements").update({ code: editCode.trim(), description: editDesc.trim() }).eq("id", editModal.id);
+    setCodes(prev => prev.map(c => c.id === editModal.id ? { ...c, code: editCode.trim(), description: editDesc.trim() } : c));
+    setEditModal(null);
+    setEditSaving(false);
+  }
+
+  async function handleDelete(card: CodeCard) {
+    await supabase.from("announcements").delete().eq("id", card.id);
+    setCodes(prev => prev.filter(c => c.id !== card.id));
+    setDeleteConfirm(null);
+  }
+
   function loadMore() {
     const next = page + 1;
     setPage(next);
@@ -447,9 +492,10 @@ export default function CodesClient() {
         .code-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:1.5rem;opacity:0;transform:translateY(16px);transition:opacity .4s ease,transform .4s ease,border-color .2s,box-shadow .2s;position:relative;overflow:hidden}
         .code-card:hover{border-color:rgba(124,58,237,.25);box-shadow:0 8px 32px rgba(0,0,0,.15)}
         .code-card.visible{opacity:1;transform:translateY(0)}
-        .code-card.boosted{border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.04)}
-        .code-card.boosted::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#7c3aed,transparent)}
-        .boost-badge{display:inline-flex;align-items:center;gap:5px;padding:.25rem .625rem;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:100px;font-size:.72rem;font-weight:600;color:#a78bfa;margin-bottom:1rem}
+        .code-card.boosted{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03)}
+        .code-card.boosted::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#22c55e,transparent)}
+        .code-card:not(.boosted){border-color:rgba(124,58,237,.2);background:rgba(124,58,237,.03)}
+        .boost-badge{display:inline-flex;align-items:center;gap:5px;padding:.25rem .625rem;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:100px;font-size:.72rem;font-weight:600;color:#22c55e;margin-bottom:1rem}
         .boost-lightning{animation:flicker 1.5s ease-in-out infinite}
         @keyframes flicker{0%,100%{opacity:1}50%{opacity:.6}}
         .card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem}
@@ -475,6 +521,11 @@ export default function CodesClient() {
         .card-actions{display:flex;gap:6px}
         .action-btn{display:inline-flex;align-items:center;gap:5px;padding:.35rem .75rem;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:8px;color:var(--text-muted);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
         .action-btn:hover{color:var(--text-strong);border-color:var(--border-lg);background:var(--bg-btn)}
+        .action-btn-own{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.35);color:#a78bfa}
+        .action-btn-own:hover{background:rgba(124,58,237,.22);color:#c4b5fd}
+        .action-btn-delete{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25);color:#f87171}
+        .action-btn-delete:hover{background:rgba(239,68,68,.15);color:#fca5a5}
+        .code-url{color:#60a5fa !important;text-decoration:underline;word-break:break-all}
         .results-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
         .results-count{font-size:.8rem;color:var(--text-faint)}
         .results-count strong{color:var(--text-muted)}
@@ -555,7 +606,7 @@ export default function CodesClient() {
         ) : filtered.length > 0 ? (
           <div className="cards-list">
             {filtered.map((card, i) => (
-              <CodeCardItem key={card.id} card={card} index={i} onRate={setRatingModal} onContact={handleContact} currentUserId={currentUserId} />
+              <CodeCardItem key={card.id} card={card} index={i} onRate={setRatingModal} onContact={handleContact} onEdit={handleEditOpen} onDelete={c => setDeleteConfirm(c)} currentUserId={currentUserId} />
             ))}
           </div>
         ) : (
@@ -591,6 +642,44 @@ export default function CodesClient() {
             setRatingModal(null);
           }}
         />
+      )}
+
+      {/* Modal édition */}
+      {editModal && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", backdropFilter:"blur(4px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={() => setEditModal(null)}>
+          <div style={{ background:"var(--bg-card)", border:"1px solid rgba(124,58,237,.3)", borderRadius:24, padding:"1.75rem", maxWidth:460, width:"100%", position:"relative" }} onClick={e=>e.stopPropagation()}>
+            <button onClick={() => setEditModal(null)} style={{ position:"absolute", top:14, right:14, background:"none", border:"none", color:"rgba(255,255,255,.3)", cursor:"pointer", fontSize:"1.25rem" }}>×</button>
+            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:"var(--text-strong)", marginBottom:"1.25rem" }}>Modifier mon annonce</p>
+            <div style={{ display:"flex", flexDirection:"column", gap:"1rem" }}>
+              <div>
+                <label style={{ fontSize:".78rem", fontWeight:600, color:"var(--text-muted)", display:"block", marginBottom:5 }}>Code de parrainage</label>
+                <input value={editCode} onChange={e=>setEditCode(e.target.value)} style={{ width:"100%", background:"var(--bg-input)", border:"1px solid var(--border-md)", borderRadius:10, padding:".7rem 1rem", color:"var(--text-strong)", fontSize:".9rem", fontFamily:"'DM Sans',sans-serif", outline:"none" }} />
+              </div>
+              <div>
+                <label style={{ fontSize:".78rem", fontWeight:600, color:"var(--text-muted)", display:"block", marginBottom:5 }}>Description</label>
+                <textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} rows={3} style={{ width:"100%", background:"var(--bg-input)", border:"1px solid var(--border-md)", borderRadius:10, padding:".7rem 1rem", color:"var(--text-strong)", fontSize:".875rem", fontFamily:"'DM Sans',sans-serif", outline:"none", resize:"vertical" }} />
+              </div>
+              <button onClick={handleEditSave} disabled={editSaving || !editCode.trim()} style={{ background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif", opacity:editSaving?.5:1 }}>
+                {editSaving ? "Sauvegarde…" : "Enregistrer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal suppression */}
+      {deleteConfirm && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", backdropFilter:"blur(4px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={() => setDeleteConfirm(null)}>
+          <div style={{ background:"var(--bg-card)", border:"1px solid rgba(239,68,68,.3)", borderRadius:24, padding:"1.75rem", maxWidth:400, width:"100%", textAlign:"center" }} onClick={e=>e.stopPropagation()}>
+            <div style={{ fontSize:"2rem", marginBottom:".75rem" }}>🗑️</div>
+            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:"var(--text-strong)", marginBottom:".5rem" }}>Supprimer cette annonce ?</p>
+            <p style={{ fontSize:".875rem", color:"var(--text-muted)", marginBottom:"1.5rem" }}>Cette action est irréversible.</p>
+            <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
+              <button onClick={() => setDeleteConfirm(null)} style={{ background:"none", border:"1px solid var(--border-md)", borderRadius:10, padding:".65rem 1.25rem", color:"var(--text-muted)", fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>Annuler</button>
+              <button onClick={() => handleDelete(deleteConfirm)} style={{ background:"rgba(239,68,68,.9)", color:"#fff", border:"none", borderRadius:10, padding:".65rem 1.25rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>Supprimer</button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

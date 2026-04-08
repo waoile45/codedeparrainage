@@ -12,6 +12,7 @@ interface Parrain {
   xp: number;
   annonces: number;
   streak: number;
+  avatarUrl?: string | null;
   isMe?: boolean;
 }
 
@@ -50,12 +51,16 @@ function Counter({ target, duration=800 }: { target:number; duration?:number }) 
 }
 
 // ── Avatar ────────────────────────────────────────────────────────────────────
-function Avatar({ pseudo, size=44, isMe=false }: { pseudo:string; size?:number; isMe?:boolean }) {
+function Avatar({ pseudo, size=44, isMe=false, avatarUrl }: { pseudo:string; size?:number; isMe?:boolean; avatarUrl?:string|null }) {
+  const [imgErr, setImgErr] = useState(false);
   return (
     <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
       {isMe && <div style={{ position:"absolute", inset:-2, borderRadius:"50%", background:"conic-gradient(#7c3aed,#a855f7,#7c3aed)", animation:"spin 4s linear infinite" }} />}
-      <div style={{ position:"relative", width:size, height:size, borderRadius:"50%", background:`linear-gradient(135deg,${isMe?"#7c3aed,#4f46e5":"#1e1b4b,#312e81"})`, border:`2px solid ${isMe?"#7c3aed":"rgba(124,58,237,.3)"}`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:size*.38, color:"#fff" }}>{pseudo[0]?.toUpperCase()}</span>
+      <div style={{ position:"relative", width:size, height:size, borderRadius:"50%", background:`linear-gradient(135deg,${isMe?"#7c3aed,#4f46e5":"#1e1b4b,#312e81"})`, border:`2px solid ${isMe?"#7c3aed":"rgba(124,58,237,.3)"}`, display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden" }}>
+        {avatarUrl && !imgErr
+          ? <img src={avatarUrl} alt={pseudo} style={{ width:"100%", height:"100%", objectFit:"cover" }} onError={() => setImgErr(true)} />
+          : <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:size*.38, color:"#fff" }}>{pseudo[0]?.toUpperCase()}</span>
+        }
       </div>
     </div>
   );
@@ -83,7 +88,7 @@ function PodiumCard({ parrain, config }: { parrain:Parrain; config:typeof PODIUM
           <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,rgba(251,191,36,.6),transparent)", borderRadius:"20px 20px 0 0" }} />
         )}
         <div style={{ display:"flex", justifyContent:"center", marginBottom:"0.75rem" }}>
-          <Avatar pseudo={parrain.pseudo} size={52} isMe={parrain.isMe} />
+          <Avatar pseudo={parrain.pseudo} size={52} isMe={parrain.isMe} avatarUrl={parrain.avatarUrl} />
         </div>
         <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.95rem", color:"var(--text-strong)", marginBottom:3, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{parrain.pseudo}</p>
         <span style={{ fontSize:"0.65rem", fontWeight:700, background:`${color}22`, color, padding:"2px 8px", borderRadius:100, border:`1px solid ${color}44`, display:"inline-block", marginBottom:"0.75rem" }}>{parrain.level}</span>
@@ -119,7 +124,7 @@ function RankRow({ parrain, rank, index }: { parrain:Parrain; rank:number; index
       <div style={{ width:28, textAlign:"center", flexShrink:0 }}>
         <RankBadge rank={rank} />
       </div>
-      <Avatar pseudo={parrain.pseudo} size={36} isMe={parrain.isMe} />
+      <Avatar pseudo={parrain.pseudo} size={36} isMe={parrain.isMe} avatarUrl={parrain.avatarUrl} />
       <div style={{ flex:1, minWidth:0 }}>
         <div style={{ display:"flex", alignItems:"center", gap:6 }}>
           <p style={{ fontWeight:700, color:"var(--text-strong)", fontSize:"0.875rem", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{parrain.pseudo}</p>
@@ -175,7 +180,7 @@ export default function ClassementPage() {
       // Users triés par XP
       const { data: users } = await supabase
         .from("users")
-        .select("id, pseudo, xp, level, streak_days")
+        .select("id, pseudo, xp, level, streak_days, avatar_url")
         .order("xp", { ascending: false })
         .limit(50);
 
@@ -192,11 +197,12 @@ export default function ClassementPage() {
       }
 
       const data: Parrain[] = users.map(u => ({
-        id:      u.id,
-        pseudo:  u.pseudo ?? "Anonyme",
-        level:   u.level  ?? "Débutant",
-        xp:      u.xp     ?? 0,
+        id:       u.id,
+        pseudo:   u.pseudo ?? "Anonyme",
+        level:    u.level  ?? "Débutant",
+        xp:       u.xp     ?? 0,
         annonces: annonceCount[u.id] ?? 0,
+        avatarUrl: u.avatar_url ?? null,
         streak:  u.streak_days ?? 0,
         isMe:    user?.id === u.id,
       }));
@@ -366,7 +372,7 @@ export default function ClassementPage() {
         {!loading && me && meRank > 3 && (
           <div className="my-rank-banner">
             <div className="my-rank-left">
-              <Avatar pseudo={me.pseudo} size={32} isMe />
+              <Avatar pseudo={me.pseudo} size={32} isMe avatarUrl={me.avatarUrl} />
               <div>
                 <p className="my-rank-label">Ta position</p>
                 <p className="my-rank-pos">#{meRank} sur {sorted.length}</p>
@@ -383,7 +389,7 @@ export default function ClassementPage() {
                   <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:"0.875rem", color:"#a78bfa" }}>+{sorted[meRank-2].xp - me.xp + 1} XP</p>
                 </div>
               )}
-              <a href="/publier" style={{ display:"inline-flex", alignItems:"center", gap:5, background:"rgba(124,58,237,.2)", border:"1px solid rgba(124,58,237,.4)", borderRadius:9, padding:".4rem .875rem", color:"#c4b5fd", fontSize:".78rem", fontWeight:600, textDecoration:"none", transition:"all .2s", whiteSpace:"nowrap" }}>
+              <a href="/faq" style={{ display:"inline-flex", alignItems:"center", gap:5, background:"rgba(124,58,237,.2)", border:"1px solid rgba(124,58,237,.4)", borderRadius:9, padding:".4rem .875rem", color:"#c4b5fd", fontSize:".78rem", fontWeight:600, textDecoration:"none", transition:"all .2s", whiteSpace:"nowrap" }}>
                 Monter ↑
               </a>
             </div>

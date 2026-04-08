@@ -1,8 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
+
+// ── Count-up animation ────────────────────────────────────────────────────────
+function CountUp({ target, suffix="" }: { target: number; suffix?: string }) {
+  const [val, setVal] = useState(0);
+  const started = useRef(false);
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !started.current) {
+        started.current = true;
+        const steps = 40;
+        const dur = 1200;
+        let cur = 0;
+        const inc = target / steps;
+        const t = setInterval(() => {
+          cur = Math.min(cur + inc, target);
+          setVal(Math.round(cur));
+          if (cur >= target) clearInterval(t);
+        }, dur / steps);
+      }
+    }, { threshold: 0.5 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [target]);
+  return <span ref={ref}>{val.toLocaleString("fr-FR")}{suffix}</span>;
+}
 
 // ── Particles ─────────────────────────────────────────────────────────────────
 
@@ -258,9 +286,15 @@ export default function HomeClient() {
             >Publier mon code →</Link>
           </div>
           <div id="hp-hero-stats" style={{ display:"flex", gap:"2rem", marginTop:"2.5rem" }}>
-            {[{ n:"4 200+", l:"Codes actifs" },{ n:"850+", l:"Parrains vérifiés" },{ n:"97%", l:"Avis positifs" }].map(s=>(
+            {[
+              { target:4200, suffix:"+", l:"Codes actifs" },
+              { target:850,  suffix:"+", l:"Parrains vérifiés" },
+              { target:97,   suffix:"%", l:"Avis positifs" },
+            ].map(s=>(
               <div key={s.l}>
-                <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.5rem", color:"var(--text-strong)" }}>{s.n}</div>
+                <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.5rem", color:"var(--text-strong)" }}>
+                  <CountUp target={s.target} suffix={s.suffix} />
+                </div>
                 <div style={{ fontSize:"0.75rem", color:"var(--text-dim)", marginTop:2 }}>{s.l}</div>
               </div>
             ))}
@@ -330,7 +364,7 @@ export default function HomeClient() {
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ fontWeight:800, fontSize:"1rem", color:"var(--text-strong)" }}>{code.name}</div>
                     <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:3 }}>
-                      <span style={{ fontSize:"0.68rem", fontWeight:700, color:code.catColor, background:`${code.catColor}18`, border:`1px solid ${code.catColor}30`, borderRadius:6, padding:"1px 7px" }}>{code.category}</span>
+                      <span style={{ fontSize:"0.68rem", fontWeight:700, color:code.catColor, background:`${code.catColor}18`, border:`1px solid ${code.catColor}30`, borderRadius:6, padding:"1px 7px", whiteSpace:"nowrap" }}>{code.category}</span>
                       <span style={{ fontSize:"0.72rem", color:"#fbbf24" }}>★</span>
                       <span style={{ fontSize:"0.72rem", color:"var(--text-dim)", fontWeight:600 }}>{code.rating}</span>
                     </div>

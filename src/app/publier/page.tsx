@@ -29,7 +29,13 @@ const CATEGORIES = ["banque","crypto","energie","cashback","telephonie","paris",
 const CAT_LABELS: Record<string,string> = { banque:"Banque", crypto:"Crypto", energie:"Énergie", cashback:"Cashback", telephonie:"Téléphonie", paris:"Paris", assurance:"Assurance", shopping:"Shopping" };
 const CAT_ICONS: Record<string,string> = { banque:"🏦", crypto:"₿", energie:"⚡", cashback:"💸", telephonie:"📱", paris:"⚽", assurance:"🛡️", shopping:"🛍️" };
 const XP_GAIN = 10;
-const MAX_DISPLAY = 80;
+const MAX_DISPLAY = 200;
+
+const BANNED_WORDS = ["bite","baise","con","connard","merde","putain","pute","salope","enculé","fdp","tg","ntm","nique","pd","ta gueule"];
+function containsBannedWord(text: string): boolean {
+  const lower = text.toLowerCase();
+  return BANNED_WORDS.some(w => lower.includes(w));
+}
 
 // ── Logo avec fallback ─────────────────────────────────────────────────────────
 function CompanyLogo({ domain, name, size = 34 }: { domain: string; name: string; size?: number }) {
@@ -132,6 +138,10 @@ export default function PublierPage() {
   // ── Publier le code ──
   const handleSubmit = async () => {
     if (!code.trim() || !selectedEntreprise || !selectedCategory) return;
+    if (containsBannedWord(code) || containsBannedWord(desc)) {
+      setError("Votre annonce contient un mot interdit. Merci de la corriger.");
+      return;
+    }
     setSubmitting(true);
     setError("");
 
@@ -315,26 +325,19 @@ export default function PublierPage() {
           {/* ── Step 1 : choisir l'entreprise ── */}
           {step === 1 && (
             <div>
-              {/* Recommandées */}
+              {/* Populaires */}
               {!search.trim() && (
                 <div style={{ marginBottom:"1.25rem" }}>
-                  <p style={{ fontSize:".72rem", fontWeight:600, color:"#a78bfa", letterSpacing:".06em", textTransform:"uppercase", marginBottom:".625rem" }}>⭐ Recommandées</p>
-                  <div className="company-grid" style={{ maxHeight:"none", overflow:"visible" }}>
+                  <p style={{ fontSize:".72rem", fontWeight:600, color:"#a78bfa", letterSpacing:".06em", textTransform:"uppercase", marginBottom:".625rem" }}>⭐ Populaires</p>
+                  <div style={{ display:"flex", gap:".5rem", overflowX:"auto", paddingBottom:".5rem", scrollbarWidth:"thin" }}>
                     {RECOMMENDED.map(e => (
                       <div
                         key={e.domain}
-                        className={`company-card ${selectedEntreprise?.domain === e.domain ? "selected" : ""}`}
+                        style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:".75rem .875rem", background: selectedEntreprise?.domain === e.domain ? "rgba(124,58,237,.12)" : "var(--bg-card)", border:`1px solid ${selectedEntreprise?.domain === e.domain ? "rgba(124,58,237,.5)" : "var(--border)"}`, borderRadius:12, cursor:"pointer", flexShrink:0, minWidth:80, transition:"all .18s" }}
                         onClick={() => setSelectedEntreprise(e)}
                       >
                         <CompanyLogo domain={e.domain} name={e.nom} size={34} />
-                        <div style={{ flex:1, minWidth:0 }}>
-                          <p className="company-name">{e.nom}</p>
-                        </div>
-                        {selectedEntreprise?.domain === e.domain && (
-                          <div style={{ width:18, height:18, borderRadius:"50%", background:"#7c3aed", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginLeft:"auto" }}>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
-                          </div>
-                        )}
+                        <p style={{ fontSize:".72rem", fontWeight:600, color:"var(--text-strong)", textAlign:"center", whiteSpace:"nowrap", maxWidth:72, overflow:"hidden", textOverflow:"ellipsis" }}>{e.nom}</p>
                       </div>
                     ))}
                   </div>
@@ -514,21 +517,11 @@ export default function PublierPage() {
                   </label>
                   <input
                     className="form-input code-input"
-                    placeholder="Ex : VOTRE CODE"
+                    placeholder="Ex : MON_CODE ou https://..."
                     value={code}
-                    onChange={e => {
-                      const v = e.target.value;
-                      setCode(v.startsWith("http") ? v : v.toUpperCase());
-                    }}
+                    onChange={e => setCode(e.target.value)}
                     maxLength={500}
                   />
-                  {code && (
-                    <div className="code-preview">
-                      <span className="code-dot" />
-                      <code style={{ fontFamily:"'Courier New',monospace", fontWeight:700, fontSize:".9rem", color:"#e2e8f0", letterSpacing:".08em" }}>{code}</code>
-                    </div>
-                  )}
-                  <p className="form-hint">Tel qu&rsquo;il apparaîtra sur la page des codes</p>
                 </div>
 
                 {/* Description */}
