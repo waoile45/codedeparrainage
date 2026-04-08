@@ -21,7 +21,7 @@ const RECOMMENDED: Entreprise[] = [
   { nom:"Uber",          domain:"uber.com",        logo:`https://www.google.com/s2/favicons?domain=uber.com&sz=64` },
   { nom:"Veepee",        domain:"veepee.fr",       logo:`https://www.google.com/s2/favicons?domain=veepee.fr&sz=64` },
   { nom:"WeWard",        domain:"weward.fr",       logo:`https://www.google.com/s2/favicons?domain=weward.fr&sz=64` },
-  { nom:"Macadam",       domain:"macadam.fr",      logo:`https://www.google.com/s2/favicons?domain=macadam.fr&sz=64` },
+  { nom:"Macadam",       domain:"macadam.app",     logo:`https://www.google.com/s2/favicons?domain=macadam.app&sz=64` },
 ];
 
 // ── Constantes ─────────────────────────────────────────────────────────────────
