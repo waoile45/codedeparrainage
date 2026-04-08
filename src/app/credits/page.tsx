@@ -32,10 +32,26 @@ export default function CreditsPage() {
   const [loading, setLoading] = useState<string|null>(null);
 
   const handleBuy = async (packId: string) => {
+    const pack = PACKS.find(p => p.id === packId);
+    if (!pack) return;
     setLoading(packId);
-    // TODO: appel Stripe — window.location.href = stripeCheckoutUrl
-    await new Promise(r => setTimeout(r, 800));
-    setLoading(null);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credits: pack.credits }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error ?? "Erreur lors de la création du paiement.");
+      }
+    } catch {
+      alert("Erreur réseau. Réessaie.");
+    } finally {
+      setLoading(null);
+    }
   };
 
   return (
