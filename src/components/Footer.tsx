@@ -45,9 +45,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: "0.875rem" }}>
-              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 10, background: "linear-gradient(135deg,#7c3aed,#a855f7)", color: "#fff", fontWeight: 800, fontSize: "0.75rem", flexShrink: 0 }}>
-                CDP
-              </span>
+              <img src="/logo.png" alt="logo" style={{ width: 40, height: 40, objectFit: "contain", flexShrink: 0 }} />
               <span style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: "1rem", color: "#fff" }}>
                 codedeparrainage<span style={{ color: "#7c3aed" }}>.com</span>
               </span>

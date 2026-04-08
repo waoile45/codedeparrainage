@@ -228,7 +228,6 @@ export default function HomeClient() {
       {/* ══ NAVBAR ══════════════════════════════════════════════════════════ */}
       <nav id="hp-nav" style={{ position:"relative", zIndex:10, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"1.25rem 2rem", maxWidth:1200, margin:"0 auto" }}>
         <Link id="hp-nav-logo" href="/" style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.1rem", color:"var(--text-strong)", textDecoration:"none", letterSpacing:"-0.02em", display:"flex", alignItems:"center", gap:8 }}>
-          <img src="/logo.png" alt="logo" style={{ width:36, height:36, objectFit:"contain", flexShrink:0 }} />
           code<span style={{ color:"#7c3aed" }}>de</span>parrainage.com
         </Link>
         <div id="hp-nav-links" style={{ display:"flex", alignItems:"center", gap:"0.25rem" }}>

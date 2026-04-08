@@ -181,7 +181,7 @@ export default function RegisterPage() {
 
       <div className="auth-bg">
         <div className="auth-card">
-          <a href="/" className="auth-logo" style={{ display:"flex", alignItems:"center", gap:8 }}><img src="/logo.png" alt="logo" style={{ width:40, height:40, objectFit:"contain" }} />code<span>de</span>parrainage.com</a>
+          <a href="/" className="auth-logo" style={{ display:"flex", alignItems:"center", gap:8 }}>code<span>de</span>parrainage.com</a>
 
           {success ? (
             <div style={{ textAlign:"center", padding:"1rem 0" }}>

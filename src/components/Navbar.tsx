@@ -204,13 +204,11 @@ export default function Navbar({ activePage }: NavbarProps) {
           {/* Logo + Home */}
           <div className="nav-logo-wrap">
             <a href="/" className="nav-logo" style={{ display:"flex", alignItems:"center", gap:8 }}>
-              <img src="/logo.png" alt="logo" style={{ width:36, height:36, objectFit:"contain", flexShrink:0 }} />
               code<span>de</span>parrainage.com
             </a>
             {activePage && activePage !== "home" && (
               <a href="/" className="nav-home-btn">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                Accueil
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               </a>
             )}
           </div>
