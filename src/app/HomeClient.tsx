@@ -16,7 +16,7 @@ function CountUp({ target, suffix="" }: { target: number; suffix?: string }) {
       if (e.isIntersecting && !started.current) {
         started.current = true;
         const steps = 40;
-        const dur = 1200;
+        const dur = 3200;
         let cur = 0;
         const inc = target / steps;
         const t = setInterval(() => {

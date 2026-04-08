@@ -42,11 +42,21 @@ export default function Navbar({ activePage }: NavbarProps) {
           -webkit-backdrop-filter: blur(20px);
           border-bottom: 1px solid rgba(124,58,237,0.12);
         }
+        .nav-logo-wrap { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .nav-logo {
           font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.05rem;
-          color: var(--text-strong); text-decoration: none; letter-spacing: -0.02em; flex-shrink: 0;
+          color: var(--text-strong); text-decoration: none; letter-spacing: -0.02em;
         }
         .nav-logo span { color: #7c3aed; }
+        .nav-home-btn {
+          display: inline-flex; align-items: center; gap: 4px;
+          background: var(--bg-card-md); border: 1px solid var(--border-md);
+          border-radius: 8px; padding: 0.3rem 0.6rem;
+          color: var(--text-muted); font-size: 0.75rem; font-weight: 500;
+          text-decoration: none; transition: all 0.18s; font-family: 'DM Sans', sans-serif;
+          white-space: nowrap;
+        }
+        .nav-home-btn:hover { color: var(--text-strong); border-color: rgba(124,58,237,0.3); background: rgba(124,58,237,0.08); }
 
         .nav-center {
           display: flex; align-items: center; gap: 2px;
@@ -191,10 +201,18 @@ export default function Navbar({ activePage }: NavbarProps) {
 
       <div style={{ position: "sticky", top: 0, zIndex: 200 }}>
         <nav className="navbar">
-          {/* Logo */}
-          <a href="/" className="nav-logo">
-            code<span>de</span>parrainage.com
-          </a>
+          {/* Logo + Home */}
+          <div className="nav-logo-wrap">
+            <a href="/" className="nav-logo">
+              code<span>de</span>parrainage.com
+            </a>
+            {activePage && activePage !== "home" && (
+              <a href="/" className="nav-home-btn">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Accueil
+              </a>
+            )}
+          </div>
 
           {/* Center links */}
           <div className="nav-center">
