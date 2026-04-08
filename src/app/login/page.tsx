@@ -182,7 +182,7 @@ export default function LoginPage() {
 
       <div className="auth-bg">
         <div className="auth-card">
-          <a href="/" className="auth-logo">code<span>de</span>parrainage.com</a>
+          <a href="/" className="auth-logo" style={{ display:"flex", alignItems:"center", gap:8 }}><img src="/logo.png" alt="logo" style={{ width:32, height:32, objectFit:"contain", borderRadius:7 }} />code<span>de</span>parrainage.com</a>
           <p className="auth-subtitle">Connectez-vous à votre compte</p>
 
           {/* Google */}

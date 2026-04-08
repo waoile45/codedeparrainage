@@ -23,10 +23,15 @@ export const metadata: Metadata = {
     template: '%s | codedeparrainage.com',
   },
   description: 'Trouvez les meilleurs codes de parrainage français : BoursoBank, Winamax, Revolut, Betclic, Trade Republic. Codes vérifiés par la communauté, mis à jour en temps réel.',
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
   openGraph: {
     siteName: 'codedeparrainage.com',
     locale: 'fr_FR',
     type: 'website',
+    images: [{ url: '/logo.png', width: 400, height: 400, alt: 'codedeparrainage.com' }],
   },
   alternates: {
     canonical: 'https://www.codedeparrainage.com',
