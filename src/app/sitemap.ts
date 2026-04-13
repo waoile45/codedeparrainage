@@ -21,6 +21,7 @@ export default async function sitemap() {
     { url: baseUrl,                              lastModified: new Date(), changeFrequency: 'daily'   as const, priority: 1.0 },
     { url: `${baseUrl}/codes`,                   lastModified: new Date(), changeFrequency: 'daily'   as const, priority: 0.9 },
     { url: `${baseUrl}/classement`,              lastModified: new Date(), changeFrequency: 'daily'   as const, priority: 0.7 },
+    { url: `${baseUrl}/forum`,                   lastModified: new Date(), changeFrequency: 'daily'   as const, priority: 0.8 },
     { url: `${baseUrl}/faq`,                     lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.6 },
     { url: `${baseUrl}/avis`,                    lastModified: new Date(), changeFrequency: 'weekly'  as const, priority: 0.5 },
     { url: `${baseUrl}/cgu`,                     lastModified: new Date(), changeFrequency: 'yearly'  as const, priority: 0.2 },

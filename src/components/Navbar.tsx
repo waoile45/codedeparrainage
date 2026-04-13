@@ -5,7 +5,7 @@ import { useTheme } from "./ThemeProvider";
 import { createClient } from "@/lib/supabase";
 
 interface NavbarProps {
-  activePage?: "codes" | "classement" | "publier" | "messages" | "profil" | "home";
+  activePage?: "codes" | "classement" | "publier" | "messages" | "profil" | "home" | "forum";
 }
 
 export default function Navbar({ activePage }: NavbarProps) {
@@ -218,6 +218,7 @@ export default function Navbar({ activePage }: NavbarProps) {
           <div className="nav-center">
             <a href="/codes"      className={`nav-link ${activePage==="codes"      ? "active" : ""}`}>Codes</a>
             <a href="/classement" className={`nav-link ${activePage==="classement" ? "active" : ""}`}>Classement</a>
+            <a href="/forum"      className={`nav-link ${activePage==="forum"      ? "active" : ""}`}>Communauté</a>
             {isLoggedIn && (
               <a href="/messages" className={`nav-link ${activePage==="messages"   ? "active" : ""}`}>Messages</a>
             )}
@@ -304,6 +305,7 @@ export default function Navbar({ activePage }: NavbarProps) {
         <div className={`nav-mobile ${menuOpen ? "open" : ""}`}>
           <a href="/codes"      className={`nav-mobile-link ${activePage==="codes"      ? "active":""}`} onClick={()=>setMenuOpen(false)}>🔍 Codes</a>
           <a href="/classement" className={`nav-mobile-link ${activePage==="classement" ? "active":""}`} onClick={()=>setMenuOpen(false)}>🏆 Classement</a>
+          <a href="/forum"      className={`nav-mobile-link ${activePage==="forum"      ? "active":""}`} onClick={()=>setMenuOpen(false)}>💬 Communauté</a>
           {isLoggedIn && <a href="/messages" className={`nav-mobile-link ${activePage==="messages" ? "active":""}`} onClick={()=>setMenuOpen(false)}>💬 Messages</a>}
           {isLoggedIn && <a href="/publier"  className={`nav-mobile-link ${activePage==="publier"  ? "active":""}`} onClick={()=>setMenuOpen(false)}>➕ Publier un code</a>}
           {isLoggedIn && <a href="/profil"   className={`nav-mobile-link ${activePage==="profil"   ? "active":""}`} onClick={()=>setMenuOpen(false)}>👤 Mon profil</a>}
