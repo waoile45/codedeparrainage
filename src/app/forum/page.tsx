@@ -63,23 +63,37 @@ export default function ForumPage() {
   async function fetchPosts() {
     setLoading(true);
     const supabase = createClient();
-    const { data } = await supabase
+    const { data: rawPosts } = await supabase
       .from("forum_posts")
-      .select("*, users(pseudo, level)")
+      .select("*")
       .order("created_at", { ascending: false })
       .limit(100);
 
+    if (!rawPosts) { setLoading(false); return; }
+
+    // Récupérer les pseudos depuis la table users
+    const userIds = [...new Set(rawPosts.map((p: Post) => p.user_id))];
+    const { data: usersData } = await supabase
+      .from("users")
+      .select("id, pseudo, level")
+      .in("id", userIds);
+    const usersMap = Object.fromEntries((usersData ?? []).map((u: { id: string; pseudo: string; level: string }) => [u.id, u]));
+
     const { data: { user } } = await supabase.auth.getUser();
-    if (user && data) {
+    let likedSet = new Set<string>();
+    if (user) {
       const { data: liked } = await supabase
         .from("forum_likes")
         .select("post_id")
         .eq("user_id", user.id);
-      const likedSet = new Set((liked ?? []).map((l: { post_id: string }) => l.post_id));
-      setPosts((data ?? []).map((p: Post) => ({ ...p, liked: likedSet.has(p.id) })));
-    } else {
-      setPosts(data ?? []);
+      likedSet = new Set((liked ?? []).map((l: { post_id: string }) => l.post_id));
     }
+
+    setPosts(rawPosts.map((p: Post) => ({
+      ...p,
+      users: usersMap[p.user_id] ?? null,
+      liked: likedSet.has(p.id),
+    })));
     setLoading(false);
   }
 
