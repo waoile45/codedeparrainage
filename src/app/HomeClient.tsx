@@ -228,8 +228,8 @@ export default function HomeClient() {
       {/* ══ NAVBAR ══════════════════════════════════════════════════════════ */}
       <nav id="hp-nav" style={{ position:"relative", zIndex:10, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"1.25rem 2rem", maxWidth:1200, margin:"0 auto" }}>
         <Link id="hp-nav-logo" href="/" style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.1rem", color:"var(--text-strong)", textDecoration:"none", letterSpacing:"-0.02em", display:"flex", alignItems:"center", gap:8 }}>
-          <img src="/logo.jpg" alt="codedeparrainage.com" style={{ height:32, width:"auto", borderRadius:6, objectFit:"contain" }} />
-          <span>codede<span style={{ color:"#7c3aed" }}>parrainage</span></span>
+          <img src="/logo.png" alt="codedeparrainage.com" style={{ height:48, width:"auto", objectFit:"contain" }} />
+          <span style={{ color:"var(--text-strong)" }}>codede<span style={{ color:"#7c3aed" }}>parrainage</span></span>
         </Link>
         <div id="hp-nav-links" style={{ display:"flex", alignItems:"center", gap:"0.25rem" }}>
           {[{ label:"Codes", href:"/codes" },{ label:"Classement", href:"/classement" },{ label:"Connexion", href:"/login" }].map(item => (
