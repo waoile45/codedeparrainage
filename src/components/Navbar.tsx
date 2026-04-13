@@ -205,7 +205,7 @@ export default function Navbar({ activePage }: NavbarProps) {
           <div className="nav-logo-wrap">
             <a href="/" className="nav-logo" style={{ display:"flex", alignItems:"center", gap:8 }}>
               <img src="/logo.png" alt="codedeparrainage.com" style={{ height:48, width:"auto", objectFit:"contain" }} />
-              <span style={{ color:"var(--text-strong)" }}>codede<span style={{ color:"#7c3aed" }}>parrainage</span></span>
+              <span style={{ color:"var(--text-strong)" }}>code<span style={{ color:"#7c3aed" }}>de</span>parrainage</span>
             </a>
             {activePage && activePage !== "home" && (
               <a href="/" className="nav-home-btn">
