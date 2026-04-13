@@ -267,10 +267,12 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
 
       <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"0.875rem" }}>
         <div className="action-card">
-          <div className="action-card-top"><div className="action-icon-wrap" style={{ background:"rgba(124,58,237,.12)", border:"1px solid rgba(124,58,237,.25)" }}><I.list /></div><span className="action-label">Annonces publiées</span></div>
-          <p className="action-value">{annonces.length}</p>
-          <p className="action-sub">{annonces.length === 0 ? "Publie ton premier code !" : `${annonces.length} code${annonces.length>1?"s":""} actif${annonces.length>1?"s":""}`}</p>
-          <a href="/publier" className="action-btn">Nouvelle annonce <I.arrow /></a>
+          <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 0%,rgba(124,58,237,.15),transparent 65%)", pointerEvents:"none", borderRadius:"inherit" }} />
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,#7c3aed,transparent)" }} />
+          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(124,58,237,.2)", border:"1px solid rgba(124,58,237,.4)" }}><I.list /></div><span className="action-label">Annonces publiées</span></div>
+          <p className="action-value" style={{ color:"#a78bfa", position:"relative", zIndex:1 }}>{annonces.length}</p>
+          <p className="action-sub" style={{ position:"relative", zIndex:1 }}>{annonces.length === 0 ? "Publie ton premier code !" : `${annonces.length} code${annonces.length>1?"s":""} actif${annonces.length>1?"s":""}`}</p>
+          <a href="/publier" className="action-btn" style={{ position:"relative", zIndex:1 }}>Nouvelle annonce <I.arrow /></a>
         </div>
         <div className="action-card action-card-boost">
           <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 0%,rgba(124,58,237,.18),transparent 65%)", pointerEvents:"none", borderRadius:"inherit" }} />
@@ -281,25 +283,30 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
           <a href="/classement" className="action-btn action-btn-boost" style={{ position:"relative", zIndex:1 }}>Voir le classement <I.arrow /></a>
         </div>
         <div className="action-card">
-          <div className="action-card-top"><div className="action-icon-wrap" style={{ background:"rgba(124,58,237,.12)", border:"1px solid rgba(124,58,237,.25)" }}><I.msg /></div><span className="action-label">Messages</span></div>
-          <p className="action-value">0</p>
-          <p className="action-sub">0 non lu</p>
-          <a href="/messages" className="action-btn">Messagerie <I.arrow /></a>
+          <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 0%,rgba(124,58,237,.15),transparent 65%)", pointerEvents:"none", borderRadius:"inherit" }} />
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,#7c3aed,transparent)" }} />
+          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(124,58,237,.2)", border:"1px solid rgba(124,58,237,.4)" }}><I.msg /></div><span className="action-label">Messages</span></div>
+          <p className="action-value" style={{ color:"#a78bfa", position:"relative", zIndex:1 }}>0</p>
+          <p className="action-sub" style={{ position:"relative", zIndex:1 }}>0 non lu</p>
+          <a href="/messages" className="action-btn" style={{ position:"relative", zIndex:1 }}>Messagerie <I.arrow /></a>
         </div>
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"0.75rem" }}>
         {[
-          { v: annonces.length,       l:"Annonces" },
+          { v: annonces.length,          l:"Annonces" },
           { v: `${user.streak_days} 🔥`, l:"Streak" },
-          { v: user.xp,               l:"XP total" },
-          { v: user.level,            l:"Niveau", small:true },
+          { v: user.xp,                  l:"XP total" },
         ].map((s,i) => (
-          <div key={i} style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"0.9rem 0.75rem", display:"flex", flexDirection:"column", alignItems:"center", gap:3, textAlign:"center" }}>
-            <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:(s as any).small?"0.8rem":"1.35rem", color:"#fff" }}>{s.v}</span>
+          <div key={i} style={{ background:"rgba(124,58,237,.05)", border:"1px solid rgba(124,58,237,.2)", borderRadius:14, padding:"0.9rem 0.75rem", display:"flex", flexDirection:"column", alignItems:"center", gap:3, textAlign:"center" }}>
+            <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.35rem", color:"#fff" }}>{s.v}</span>
             <span style={{ color:"rgba(255,255,255,.35)", fontSize:"0.72rem" }}>{s.l}</span>
           </div>
         ))}
+        <div style={{ background:"rgba(124,58,237,.05)", border:"1px solid rgba(124,58,237,.2)", borderRadius:14, padding:"0.9rem 0.75rem", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:5, textAlign:"center" }}>
+          <span style={{ fontSize:"0.75rem", fontWeight:700, background:"rgba(124,58,237,.25)", color:"#a78bfa", padding:"3px 10px", borderRadius:100, border:"1px solid rgba(124,58,237,.4)" }}>{user.level}</span>
+          <span style={{ color:"rgba(255,255,255,.35)", fontSize:"0.72rem" }}>Niveau</span>
+        </div>
       </div>
     </div>
   );
@@ -916,6 +923,18 @@ export default function ProfilPage() {
       supabase.from("announcements").select("id, code, description, bumps_today, created_at, companies(name, category)").eq("user_id", authUser.id).order("created_at", { ascending: false }),
       supabase.from("platform_reviews").select("id").eq("user_id", authUser.id).maybeSingle(),
     ]);
+    // Fix rétroactif : si l'utilisateur a un avis mais n'a pas reçu les +15 XP
+    if (reviewData && profile) {
+      const hasAnnonce = (userAnnonces?.length ?? 0) > 0;
+      const minExpected = (hasAnnonce ? 10 : 0) + 15;
+      if ((profile.xp ?? 0) < minExpected) {
+        const newXp = Math.max(profile.xp ?? 0, minExpected);
+        const newLevel = newXp >= 10000 ? "Parrain Légendaire" : newXp >= 5000 ? "Super Parrain" : newXp >= 2000 ? "Parrain Or" : newXp >= 500 ? "Parrain Argent" : newXp >= 100 ? "Parrain Bronze" : "Débutant";
+        await supabase.from("users").update({ xp: newXp, level: newLevel }).eq("id", authUser.id);
+        profile.xp = newXp;
+        profile.level = newLevel;
+      }
+    }
     if (profile) setUser(profile);
     if (userAnnonces) setAnnonces(userAnnonces as any);
     setHasReview(!!reviewData);
@@ -990,9 +1009,9 @@ export default function ProfilPage() {
         .sh{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem}
         .st{font-family:'Syne',sans-serif;font-weight:800;font-size:1.45rem;color:#fff;letter-spacing:-.03em}
         .ss{color:rgba(255,255,255,.35);font-size:.84rem;margin-top:2px}
-        .action-card{position:relative;overflow:hidden;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:1.25rem;display:flex;flex-direction:column;gap:.6rem;transition:border-color .2s,transform .2s}
-        .action-card:hover{border-color:rgba(124,58,237,.25);transform:translateY(-2px)}
-        .action-card-boost{background:rgba(124,58,237,.05);border-color:rgba(124,58,237,.25)}
+        .action-card{position:relative;overflow:hidden;background:rgba(124,58,237,.05);border:1px solid rgba(124,58,237,.25);border-radius:18px;padding:1.25rem;display:flex;flex-direction:column;gap:.6rem;transition:border-color .2s,transform .2s}
+        .action-card:hover{border-color:rgba(124,58,237,.45);transform:translateY(-2px)}
+        .action-card-boost{background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.35)}
         .action-card-top{display:flex;align-items:center;gap:9px}
         .action-icon-wrap{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(255,255,255,.7)}
         .action-label{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.5)}

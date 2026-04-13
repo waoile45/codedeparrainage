@@ -371,7 +371,7 @@ export default function HomeClient() {
                   </div>
                   <div style={{ textAlign:"right", flexShrink:0, maxWidth:130 }}>
                     <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.35rem", color:"#34d399", lineHeight:1 }}>{code.gain}</div>
-                    <div style={{ fontSize:"0.68rem", color:"var(--text-dim)", marginTop:3, overflow:"hidden", textOverflow:"ellipsis", display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical" as const }}>{code.gainSub}</div>
+                    <div style={{ fontSize:"0.68rem", color:"var(--text-dim)", marginTop:3, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{code.gainSub}</div>
                   </div>
                 </div>
                 {/* Description */}
