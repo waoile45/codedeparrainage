@@ -468,6 +468,32 @@ export default function HomeClient() {
         </div>
       </section>
 
+      {/* ══ FAQ ═══════════════════════════════════════════════════════════════ */}
+      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:860, margin:"0 auto", paddingTop:"1rem", paddingBottom:"3.5rem" }}>
+        <div style={{ fontSize:"0.72rem", fontWeight:700, letterSpacing:"0.08em", color:"var(--text-faint)", marginBottom:"1.25rem", fontFamily:"var(--font-syne),Syne,sans-serif", textTransform:"uppercase" }}>
+          Questions fréquentes
+        </div>
+        <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.5rem", color:"var(--text-strong)", margin:"0 0 1.5rem" }}>
+          Tout savoir sur les codes de parrainage
+        </h2>
+        {[
+          { q:"Qu'est-ce qu'un code de parrainage ?", a:"Un code de parrainage est un code unique qu'un client existant partage avec ses proches. Quand un nouveau client s'inscrit avec ce code, les deux parties reçoivent une récompense : bonus en cash, mois offerts, réductions, etc. C'est un système gagnant-gagnant utilisé par les banques en ligne, plateformes de paris, applications crypto et bien d'autres." },
+          { q:"Comment utiliser un code de parrainage ?", a:"Lors de votre inscription sur un service (BoursoBank, Revolut, Winamax, etc.), il y a généralement un champ \"code de parrainage\" ou \"code ami\". Copiez un code depuis codedeparrainage.com, collez-le dans ce champ, et validez votre inscription. Le bonus s'applique automatiquement une fois les conditions remplies (premier virement, premier pari, etc.)." },
+          { q:"Les codes de parrainage sur ce site sont-ils vérifiés ?", a:"Oui. Chaque code est noté par la communauté : les utilisateurs indiquent si le code fonctionne ou non. Les codes avec de mauvaises notes sont signalés et retirés. Nous affichons uniquement les codes récents et actifs. Vous pouvez aussi consulter la date de publication pour évaluer la fraîcheur d'un code." },
+          { q:"Quels sont les meilleurs codes de parrainage en 2026 ?", a:"Les offres les plus généreuses en 2026 sont : BoursoBank (jusqu'à 130€), Revolut (jusqu'à 200€), Trade Republic (jusqu'à 200€ en actions), Winamax (100€ remboursés sur le premier pari perdu), et Betclic (30€ offerts). Toutes ces offres sont disponibles sur notre page /codes avec les codes les plus récents." },
+          { q:"Peut-on partager son propre code de parrainage ?", a:"Absolument ! Inscrivez-vous gratuitement sur codedeparrainage.com, puis cliquez sur \"Publier\" pour ajouter votre code. Votre annonce sera visible par toute la communauté. Plus votre code est utilisé, plus vous montez dans le classement et gagnez des XP et badges." },
+          { q:"Est-ce légal d'utiliser un code de parrainage ?", a:"Oui, totalement légal. Les programmes de parrainage sont officiellement proposés par les entreprises elles-mêmes dans le cadre de leur acquisition client. Utiliser un code de parrainage ne comporte aucun risque — vous bénéficiez simplement de l'offre de bienvenue prévue par l'entreprise." },
+        ].map(({ q, a }, i) => (
+          <details key={i} style={{ borderBottom:"1px solid var(--border)", paddingBottom:"1rem", marginBottom:"1rem" }}>
+            <summary style={{ cursor:"pointer", fontWeight:700, fontSize:"0.95rem", color:"var(--text-strong)", padding:"0.5rem 0", listStyle:"none", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              {q}
+              <span style={{ color:"#a78bfa", fontSize:"1.1rem", flexShrink:0, marginLeft:12 }}>+</span>
+            </summary>
+            <p style={{ color:"var(--text-muted)", fontSize:"0.875rem", lineHeight:1.7, margin:"0.75rem 0 0", paddingLeft:"0.25rem" }}>{a}</p>
+          </details>
+        ))}
+      </section>
+
       {/* Keyframes + Mobile */}
       <style>{`
         @keyframes fadeInUp      { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }

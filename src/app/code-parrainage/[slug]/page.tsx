@@ -88,9 +88,37 @@ export default async function CompanyPage({ params }: Props) {
     })),
   }
 
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    'mainEntity': [
+      {
+        '@type': 'Question',
+        'name': `Le code parrainage ${company.name} est-il valable en ${year} ?`,
+        'acceptedAnswer': { '@type': 'Answer', 'text': `Oui. Les codes présentés sont vérifiés par notre communauté. ${company.referral_bonus_description}. Vérifiez les conditions directement sur le site ${company.name} lors de l'inscription.` },
+      },
+      {
+        '@type': 'Question',
+        'name': `Où entrer le code parrainage ${company.name} ?`,
+        'acceptedAnswer': { '@type': 'Answer', 'text': `Le code s'entre lors de votre inscription, dans le champ "code parrainage", "code promo" ou "code ami" selon la plateforme.` },
+      },
+      {
+        '@type': 'Question',
+        'name': `Peut-on utiliser plusieurs codes parrainage ${company.name} ?`,
+        'acceptedAnswer': { '@type': 'Answer', 'text': `Non, ${company.name} n'accepte généralement qu'un seul code par compte. Choisissez un parrain actif dans la liste.` },
+      },
+      {
+        '@type': 'Question',
+        'name': `Combien de temps pour recevoir la récompense ${company.name} ?`,
+        'acceptedAnswer': { '@type': 'Answer', 'text': `Le délai varie selon les conditions de ${company.name}. La récompense est versée après validation du compte et des conditions requises (dépôt minimum, première mise, etc.).` },
+      },
+    ],
+  }
+
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-dm-sans),'DM Sans',sans-serif", color: 'var(--text-strong)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
       <Navbar />
 

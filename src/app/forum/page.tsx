@@ -236,7 +236,7 @@ export default function ForumPage() {
           filtered.map(post => {
             const color = CAT_COLORS[post.category] ?? "#6366f1";
             return (
-              <div key={post.id} className="forum-card">
+              <a key={post.id} className="forum-card" href={`/forum/${post.id}`} style={{ display:"block", textDecoration:"none", color:"inherit" }}>
                 <div className="forum-cat-tag" style={{ background:`${color}18`, color, border:`1px solid ${color}30` }}>
                   {CAT_ICONS[post.category] ?? "💬"} {post.category}
                 </div>
@@ -259,7 +259,7 @@ export default function ForumPage() {
                     ♥ {post.likes}
                   </button>
                 </div>
-              </div>
+              </a>
             );
           })
         )}
