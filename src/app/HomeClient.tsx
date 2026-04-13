@@ -228,7 +228,7 @@ export default function HomeClient() {
       {/* ══ NAVBAR ══════════════════════════════════════════════════════════ */}
       <nav id="hp-nav" style={{ position:"relative", zIndex:10, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"1.25rem 2rem", maxWidth:1200, margin:"0 auto" }}>
         <Link id="hp-nav-logo" href="/" style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.1rem", color:"var(--text-strong)", textDecoration:"none", letterSpacing:"-0.02em", display:"flex", alignItems:"center", gap:8 }}>
-          code<span style={{ color:"#7c3aed" }}>de</span>parrainage.com
+          <img src="/logo.jpg" alt="codedeparrainage.com" style={{ height:32, width:"auto", borderRadius:6, objectFit:"contain" }} />
         </Link>
         <div id="hp-nav-links" style={{ display:"flex", alignItems:"center", gap:"0.25rem" }}>
           {[{ label:"Codes", href:"/codes" },{ label:"Classement", href:"/classement" },{ label:"Connexion", href:"/login" }].map(item => (
@@ -259,7 +259,7 @@ export default function HomeClient() {
       </nav>
 
       {/* ══ HERO ════════════════════════════════════════════════════════════ */}
-      <section id="hp-hero" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"3rem 2rem 5rem", display:"grid", gap:"2rem", alignItems:"center" }}>
+      <section id="hp-hero" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", padding:"1.5rem 2rem 2.5rem", display:"grid", gap:"2rem", alignItems:"center" }}>
 
         {/* Left */}
         <div style={{ animation: mounted ? "fadeInUp 0.6s ease both" : "none" }}>
@@ -313,8 +313,8 @@ export default function HomeClient() {
       </section>
 
       {/* ══ COMMENT ÇA MARCHE ═══════════════════════════════════════════════ */}
-      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"2rem", paddingBottom:"4rem" }}>
-        <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:"0 0 2rem", textAlign:"center" }}>Comment ça marche ?</h2>
+      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"1rem", paddingBottom:"2rem" }}>
+        <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:"0 0 1.5rem", textAlign:"center" }}>Comment ça marche ?</h2>
         <div id="hp-how" style={{ display:"grid", gap:"1.25rem" }}>
           {[
             { num:"01", title:"Trouve un code",   desc:"Parcours des milliers de codes vérifiés par catégorie ou marque.", icon:"🔍" },
@@ -332,7 +332,7 @@ export default function HomeClient() {
       </section>
 
       {/* ══ MEILLEURS CODES ═════════════════════════════════════════════════ */}
-      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"1rem", paddingBottom:"4rem" }}>
+      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"0.5rem", paddingBottom:"2rem" }}>
         <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:"1.5rem" }}>
           <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:0 }}>
             🔥 Codes les plus populaires
@@ -369,9 +369,9 @@ export default function HomeClient() {
                       <span style={{ fontSize:"0.72rem", color:"var(--text-dim)", fontWeight:600 }}>{code.rating}</span>
                     </div>
                   </div>
-                  <div style={{ textAlign:"right", flexShrink:0 }}>
+                  <div style={{ textAlign:"right", flexShrink:0, maxWidth:130 }}>
                     <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.35rem", color:"#34d399", lineHeight:1 }}>{code.gain}</div>
-                    <div style={{ fontSize:"0.68rem", color:"var(--text-dim)", marginTop:3 }}>{code.gainSub}</div>
+                    <div style={{ fontSize:"0.68rem", color:"var(--text-dim)", marginTop:3, overflow:"hidden", textOverflow:"ellipsis", display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical" as const }}>{code.gainSub}</div>
                   </div>
                 </div>
                 {/* Description */}
@@ -388,7 +388,7 @@ export default function HomeClient() {
       </section>
 
       {/* ══ CATEGORIES ══════════════════════════════════════════════════════ */}
-      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"2rem", paddingBottom:"4rem" }}>
+      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"1rem", paddingBottom:"2rem" }}>
         <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:"1.5rem" }}>
           <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:0 }}>Parcourir par catégorie</h2>
           <Link href="/codes" style={{ fontSize:"0.82rem", color:"#a78bfa", textDecoration:"none", fontWeight:600 }}>Voir tout →</Link>
@@ -414,7 +414,7 @@ export default function HomeClient() {
       </section>
 
       {/* ══ AVIS ════════════════════════════════════════════════════════════ */}
-      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"2rem", paddingBottom:"4rem" }}>
+      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"1rem", paddingBottom:"2rem" }}>
         <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:"1.5rem" }}>
           <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:0 }}>Ce qu&apos;ils en pensent</h2>
           <div style={{ display:"flex", alignItems:"center", gap:6 }}>
@@ -452,7 +452,7 @@ export default function HomeClient() {
       </section>
 
       {/* ══ TAGS POPULAIRES ═════════════════════════════════════════════════ */}
-      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"1rem", paddingBottom:"6rem" }}>
+      <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"1rem", paddingBottom:"3rem" }}>
         <div style={{ fontSize:"0.72rem", fontWeight:700, letterSpacing:"0.08em", color:"var(--text-faint)", marginBottom:"1rem", fontFamily:"var(--font-syne),Syne,sans-serif", textTransform:"uppercase" }}>
           Codes populaires
         </div>

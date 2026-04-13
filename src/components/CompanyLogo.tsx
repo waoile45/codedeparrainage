@@ -27,7 +27,7 @@ export default function CompanyLogo({ domain, name }: { domain: string; name: st
       alt={name}
       onError={() => setFailed(true)}
       onLoad={(e) => {
-        if ((e.currentTarget as HTMLImageElement).naturalWidth <= 16) setFailed(true)
+        if ((e.currentTarget as HTMLImageElement).naturalWidth <= 1) setFailed(true)
       }}
       style={{ width: 36, height: 36, objectFit: "contain", borderRadius: 8 }}
     />

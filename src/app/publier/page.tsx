@@ -93,6 +93,7 @@ export default function PublierPage() {
   const [search, setSearch]                     = useState("");
   const [code, setCode]                         = useState("");
   const [desc, setDesc]                         = useState("");
+  const [gain, setGain]                         = useState("");
   const [submitting, setSubmitting]             = useState(false);
   const [error, setError]                       = useState("");
   const [showProposal, setShowProposal]         = useState(false);
@@ -174,6 +175,10 @@ export default function PublierPage() {
 
     companyId = existing.id;
 
+    // Construire la description finale (avec gain optionnel en préfixe)
+    const gainPrefix = gain.trim() ? `__gain__${gain.trim()}\n` : "";
+    const finalDesc = gainPrefix + (desc.trim() || "");
+
     // Insérer l'annonce
     const { error: insertError } = await supabase
       .from("announcements")
@@ -181,7 +186,7 @@ export default function PublierPage() {
         user_id:    user.id,
         company_id: companyId,
         code:       code.trim(),
-        description: desc.trim() || null,
+        description: finalDesc || null,
       });
 
     if (insertError) {
@@ -509,6 +514,30 @@ export default function PublierPage() {
                   </div>
                 </div>
 
+                {/* Gain affiché */}
+                <div className="form-group">
+                  <label className="form-label">
+                    <span style={{ display:"inline-flex", alignItems:"center", gap:5 }}>
+                      <span style={{ background:"rgba(34,197,94,.15)", border:"1px solid rgba(34,197,94,.3)", borderRadius:6, padding:"1px 8px", color:"#16a34a", fontSize:".75rem", fontWeight:700 }}>Gain</span>
+                      Gain affiché sur l&apos;annonce
+                    </span>
+                    <span className="form-label-opt">optionnel</span>
+                  </label>
+                  <input
+                    className="form-input"
+                    placeholder="Ex : 80€ offerts, 100€ remboursés..."
+                    value={gain}
+                    onChange={e => setGain(e.target.value)}
+                    maxLength={60}
+                  />
+                  {gain.trim() && (
+                    <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:4 }}>
+                      <span style={{ fontSize:".72rem", color:"var(--text-faint)" }}>Aperçu :</span>
+                      <span style={{ padding:".25rem .625rem", background:"rgba(34,197,94,.12)", border:"1px solid rgba(34,197,94,.25)", borderRadius:8, color:"#16a34a", fontSize:".8rem", fontWeight:700 }}>{gain.trim()}</span>
+                    </div>
+                  )}
+                </div>
+
                 {/* Code */}
                 <div className="form-group">
                   <label className="form-label">
@@ -573,7 +602,7 @@ export default function PublierPage() {
               <div className="success-xp">+{XP_GAIN} XP gagnés ⚡</div>
               <div className="success-actions">
                 <a href="/codes" className="btn-success-primary">Voir les codes</a>
-                <button className="btn-success-ghost" onClick={() => { setStep(1); setSelectedEntreprise(null); setSelectedCategory(""); setCode(""); setDesc(""); setError(""); }}>
+                <button className="btn-success-ghost" onClick={() => { setStep(1); setSelectedEntreprise(null); setSelectedCategory(""); setCode(""); setDesc(""); setGain(""); setError(""); }}>
                   Publier un autre code
                 </button>
                 <a href="/profil" className="btn-success-ghost">Mon profil</a>

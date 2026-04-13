@@ -1,13 +1,13 @@
 import HomeClient from './HomeClient'
 
 export const metadata = {
-  title: 'codedeparrainage.com — Les meilleurs codes de parrainage 2025',
+  title: 'codedeparrainage.com — Les meilleurs codes de parrainage 2026',
   description: 'Trouvez les meilleurs codes de parrainage français : BoursoBank, Winamax, Revolut, Betclic, Trade Republic. Codes vérifiés par la communauté, mis à jour en temps réel.',
   alternates: {
     canonical: 'https://www.codedeparrainage.com',
   },
   openGraph: {
-    title: 'codedeparrainage.com — Les meilleurs codes de parrainage 2025',
+    title: 'codedeparrainage.com — Les meilleurs codes de parrainage 2026',
     description: 'Trouvez les meilleurs codes de parrainage français : BoursoBank, Winamax, Revolut, Betclic, Trade Republic.',
     url: 'https://www.codedeparrainage.com',
     type: 'website',
@@ -52,7 +52,7 @@ export default function HomePage() {
           overflow: 'hidden',
         }}
       >
-        <h1>Les meilleurs codes de parrainage 2025 — codedeparrainage.com</h1>
+        <h1>Les meilleurs codes de parrainage 2026 — codedeparrainage.com</h1>
         <p>
           Trouvez et partagez les meilleurs codes de parrainage français.
           BoursoBank, Winamax, Betclic, Revolut, Trade Republic et bien d'autres.

@@ -243,7 +243,7 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
           <AvatarUpload letter={user.pseudo[0]?.toUpperCase()??"?"} avatarUrl={user.avatar_url} size={72} onUpload={onAvatarUpload} />
           <div style={{ flex:1 }}>
             <EditablePseudo value={user.pseudo} onSave={onPseudoSave} />
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:6, flexWrap:"wrap", lineHeight:1 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:6, flexWrap:"wrap" }}>
               <span style={{ fontSize:"0.72rem", fontWeight:700, background:"rgba(124,58,237,.2)", color:"#a78bfa", padding:"4px 10px", borderRadius:100, border:"1px solid rgba(124,58,237,.35)", display:"inline-flex", alignItems:"center" }}>{user.level}</span>
               <span style={{ fontSize:"0.8rem", color:"#a78bfa", fontWeight:700 }}>{user.xp} XP</span>
               <span style={{ color:"rgba(255,255,255,.2)" }}>·</span>
@@ -267,7 +267,7 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
 
       <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"0.875rem" }}>
         <div className="action-card">
-          <div className="action-card-top"><div className="action-icon-wrap" style={{ background:"rgba(99,102,241,.12)", border:"1px solid rgba(99,102,241,.25)" }}><I.list /></div><span className="action-label">Annonces publiées</span></div>
+          <div className="action-card-top"><div className="action-icon-wrap" style={{ background:"rgba(124,58,237,.12)", border:"1px solid rgba(124,58,237,.25)" }}><I.list /></div><span className="action-label">Annonces publiées</span></div>
           <p className="action-value">{annonces.length}</p>
           <p className="action-sub">{annonces.length === 0 ? "Publie ton premier code !" : `${annonces.length} code${annonces.length>1?"s":""} actif${annonces.length>1?"s":""}`}</p>
           <a href="/publier" className="action-btn">Nouvelle annonce <I.arrow /></a>
@@ -281,7 +281,7 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
           <a href="/classement" className="action-btn action-btn-boost" style={{ position:"relative", zIndex:1 }}>Voir le classement <I.arrow /></a>
         </div>
         <div className="action-card">
-          <div className="action-card-top"><div className="action-icon-wrap" style={{ background:"rgba(34,197,94,.1)", border:"1px solid rgba(34,197,94,.22)" }}><I.msg /></div><span className="action-label">Messages</span></div>
+          <div className="action-card-top"><div className="action-icon-wrap" style={{ background:"rgba(124,58,237,.12)", border:"1px solid rgba(124,58,237,.25)" }}><I.msg /></div><span className="action-label">Messages</span></div>
           <p className="action-value">0</p>
           <p className="action-sub">0 non lu</p>
           <a href="/messages" className="action-btn">Messagerie <I.arrow /></a>
@@ -791,7 +791,16 @@ function SectionAvis({ userId }: { userId:string }) {
 
   async function submitNegative() {
     setSending(true);
-    try { await supabase.from("platform_reviews").insert({ user_id: userId, rating, comment: comment.trim()||null }); } catch {}
+    try {
+      await supabase.from("platform_reviews").insert({ user_id: userId, rating, comment: comment.trim()||null });
+      // +15 XP pour la quête "Laisser un avis sur la plateforme"
+      const { data: prof } = await supabase.from("users").select("xp").eq("id", userId).single();
+      if (prof) {
+        const newXp = (prof.xp ?? 0) + 15;
+        const newLevel = newXp >= 10000 ? "Parrain Légendaire" : newXp >= 5000 ? "Super Parrain" : newXp >= 2000 ? "Parrain Or" : newXp >= 500 ? "Parrain Argent" : newXp >= 100 ? "Parrain Bronze" : "Débutant";
+        await supabase.from("users").update({ xp: newXp, level: newLevel }).eq("id", userId);
+      }
+    } catch {}
     setSending(false);
     setStep("done");
   }
@@ -835,7 +844,18 @@ function SectionAvis({ userId }: { userId:string }) {
           <p style={{ color:"rgba(255,255,255,.45)", fontSize:".875rem", marginBottom:"1.5rem" }}>Ça nous ferait vraiment plaisir si tu laissais un avis sur Google — ça prend 30 secondes 🙏</p>
           <a href={GOOGLE_REVIEW_URL} target="_blank" rel="noopener noreferrer"
             style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#4285F4", color:"#fff", textDecoration:"none", borderRadius:12, padding:".8rem 1.5rem", fontWeight:700, fontSize:".875rem", fontFamily:"'DM Sans',sans-serif" }}
-            onClick={() => setTimeout(() => setStep("done"), 400)}>
+            onClick={async () => {
+              try {
+                await supabase.from("platform_reviews").insert({ user_id: userId, rating: rating||5, comment: null });
+                const { data: prof } = await supabase.from("users").select("xp").eq("id", userId).single();
+                if (prof) {
+                  const newXp = (prof.xp ?? 0) + 15;
+                  const newLevel = newXp >= 10000 ? "Parrain Légendaire" : newXp >= 5000 ? "Super Parrain" : newXp >= 2000 ? "Parrain Or" : newXp >= 500 ? "Parrain Argent" : newXp >= 100 ? "Parrain Bronze" : "Débutant";
+                  await supabase.from("users").update({ xp: newXp, level: newLevel }).eq("id", userId);
+                }
+              } catch {}
+              setTimeout(() => setStep("done"), 400);
+            }}>
             Laisser un avis Google
           </a>
           <button onClick={() => setStep("done")} style={{ display:"block", width:"100%", marginTop:".75rem", background:"none", border:"1px solid rgba(255,255,255,.1)", borderRadius:12, padding:".7rem", color:"rgba(255,255,255,.35)", fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
@@ -978,8 +998,8 @@ export default function ProfilPage() {
         .action-label{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.5)}
         .action-value{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:#fff;line-height:1}
         .action-sub{font-size:.75rem;color:rgba(255,255,255,.3)}
-        .action-btn{display:inline-flex;align-items:center;gap:5px;margin-top:auto;padding:.45rem .875rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;color:rgba(255,255,255,.55);font-size:.76rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:'DM Sans',sans-serif;justify-content:center}
-        .action-btn:hover{color:#fff;border-color:rgba(255,255,255,.22)}
+        .action-btn{display:inline-flex;align-items:center;gap:5px;margin-top:auto;padding:.45rem .875rem;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);border-radius:9px;color:#c4b5fd;font-size:.76rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:'DM Sans',sans-serif;justify-content:center}
+        .action-btn:hover{color:#fff;background:rgba(124,58,237,.22);border-color:rgba(124,58,237,.5)}
         .action-btn-boost{background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.4);color:#c4b5fd}
         .row-card{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1rem 1.25rem;transition:border-color .2s}
         .row-card:hover{border-color:rgba(124,58,237,.2)}

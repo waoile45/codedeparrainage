@@ -241,7 +241,7 @@ function CodeCardItem({ card, index, onRate, onContact, onEdit, onDelete, curren
   const niveauColor = NIVEAU_COLORS[card.niveau] ?? "#6366f1";
   const isOwn = currentUserId !== null && currentUserId === card.userId;
   return (
-    <div ref={ref} className={`code-card ${card.boosted?"boosted":""} ${visible?"visible":""}`}>
+    <div ref={ref} className={`code-card ${card.boosted?"boosted":""} ${isOwn?"own":""} ${visible?"visible":""}`}>
       {card.boosted && <div className="boost-badge"><span className="boost-lightning">⚡</span><span>Annonce boostée</span></div>}
       <div className="card-top">
         <div className="brand-row">
@@ -383,16 +383,25 @@ export default function CodesClient() {
       const tagCounts = tagsByAnn[row.id] ?? {};
       const topTag = Object.entries(tagCounts).sort((a,b) => b[1]-a[1])[0]?.[0] ?? "";
       const totalRatings = (ratingsData ?? []).filter((r:any) => r.announcement_id === row.id).length;
+      // Extraire le gain personnalisé si présent (format: __gain__texte\nreste)
+      const rawDesc = row.description ?? "";
+      let customReward: string | null = null;
+      let cleanDesc = rawDesc;
+      if (rawDesc.startsWith("__gain__")) {
+        const firstLine = rawDesc.split("\n")[0];
+        customReward = firstLine.replace("__gain__", "").trim();
+        cleanDesc = rawDesc.split("\n").slice(1).join("\n").trim();
+      }
       return {
         id:          row.id,
         userId:      row.user_id ?? "",
         code:        row.code,
-        description: row.description || row.companies?.referral_bonus_description || "",
+        description: cleanDesc || row.companies?.referral_bonus_description || "",
         boosted:     (row.bumps_today ?? 0) > 0,
         brand:       row.companies?.name ?? "Inconnu",
         slug:        row.companies?.slug ?? "",
         category:    row.companies?.category ?? "shopping",
-        reward:      row.companies?.referral_bonus_description ?? "Offre de bienvenue",
+        reward:      customReward ?? row.companies?.referral_bonus_description ?? "Offre de bienvenue",
         parrain:     row.users?.pseudo ?? "Anonyme",
         niveau:      row.users?.level ?? "Débutant",
         avgRating:   avg,
@@ -495,6 +504,9 @@ export default function CodesClient() {
         .code-card.boosted{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03)}
         .code-card.boosted::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#22c55e,transparent)}
         .code-card:not(.boosted){border-color:rgba(124,58,237,.2);background:rgba(124,58,237,.03)}
+        .code-card.own{border-color:rgba(124,58,237,.55)!important;background:rgba(124,58,237,.08)!important;box-shadow:0 0 0 1px rgba(124,58,237,.2)}
+        .code-card.own .code-dot{background:#a78bfa;box-shadow:0 0 8px #a78bfa}
+        .code-card.own .code-text{color:#c4b5fd!important}
         .boost-badge{display:inline-flex;align-items:center;gap:5px;padding:.25rem .625rem;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:100px;font-size:.72rem;font-weight:600;color:#22c55e;margin-bottom:1rem}
         .boost-lightning{animation:flicker 1.5s ease-in-out infinite}
         @keyframes flicker{0%,100%{opacity:1}50%{opacity:.6}}
