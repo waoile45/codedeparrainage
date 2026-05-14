@@ -180,7 +180,7 @@ export const VPN_LIST: VpnEntry[] = [
     monthlyPrice: 12.99,
     bestPrice: 2.03,
     bestPriceDuration: '2 ans + 4 mois offerts',
-    affiliateUrl: '#',
+    affiliateUrl: 'https://affily.link/jz8jXva',
     platforms: ['Windows', 'Mac', 'Linux', 'Android', 'iOS', 'Routeur'],
   },
   {
