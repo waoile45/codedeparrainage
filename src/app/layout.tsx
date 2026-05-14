@@ -50,7 +50,7 @@ export default function RootLayout({
       className={`${syne.variable} ${dmSans.variable} h-full antialiased`}
     >
       {/* Impact.com — value= est non-standard, on force via spread */}
-      <head><meta {...{ name: 'impact-site-verification', value: 'ae4e1c5f-0b23-4245-b3bf-35087bf6bfb9' } as any} /></head>
+      <head><meta {...{ name: 'impact-site-verification', value: '3879a5b0-e3f1-49f3-80ed-2b2283b6a104' } as any} /></head>
       <body className="min-h-full flex flex-col bg-[#0A0A0F] font-sans">
         <ThemeProvider>
           <ParticlesBackground />
