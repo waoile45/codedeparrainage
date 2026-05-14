@@ -52,7 +52,7 @@ export default function RootLayout({
       <head>
         {/* Impact.com — exige value= (non-standard), pas content= */}
         {/* @ts-expect-error */}
-        <meta name="impact-site-verification" value="4837e27f-0ad6-44ff-a9c0-80abee3be354" />
+        <meta name="impact-site-verification" value="31f47ebc-727a-4e3b-955e-0737408bd0dd" />
       </head>
       <body className="min-h-full flex flex-col bg-[#0A0A0F] font-sans">
         <ThemeProvider>
