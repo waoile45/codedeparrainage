@@ -37,6 +37,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://www.codedeparrainage.com',
   },
+  other: {
+    'impact-site-verification': '31f47ebc-727a-4e3b-955e-0737408bd0dd',
+  },
 };
 
 export default function RootLayout({
@@ -49,11 +52,6 @@ export default function RootLayout({
       lang="fr"
       className={`${syne.variable} ${dmSans.variable} h-full antialiased`}
     >
-      <head>
-        {/* Impact.com — exige value= (non-standard), pas content= */}
-        {/* @ts-expect-error */}
-        <meta name="impact-site-verification" value="31f47ebc-727a-4e3b-955e-0737408bd0dd" />
-      </head>
       <body className="min-h-full flex flex-col bg-[#0A0A0F] font-sans">
         <ThemeProvider>
           <ParticlesBackground />
