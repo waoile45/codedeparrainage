@@ -18,9 +18,9 @@ const COLUMNS = [
     links: [
       { label: "Meilleur VPN",              href: "/meilleur-vpn" },
       { label: "VPN pour Netflix",          href: "/meilleur-vpn/netflix" },
-      { label: "VPN pour Torrents",         href: "/meilleur-vpn/torrents" },
       { label: "VPN pour Gaming",           href: "/meilleur-vpn/gaming" },
-      { label: "VPN pour IPTV",             href: "/meilleur-vpn/iptv" },
+      { label: "Meilleure banque",          href: "/meilleure-banque" },
+      { label: "Banque pour freelance",     href: "/meilleure-banque/freelance" },
     ],
   },
   {
