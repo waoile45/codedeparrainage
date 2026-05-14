@@ -52,7 +52,6 @@ export default function HomePage() {
           overflow: 'hidden',
         }}
       >
-        <span>Impact-Site-Verification: 258648a3-b1d3-4525-8787-d19c969c5798</span>
         <h1>Les meilleurs codes de parrainage 2026 — codedeparrainage.com</h1>
         <p>
           Trouvez et partagez les meilleurs codes de parrainage français.
