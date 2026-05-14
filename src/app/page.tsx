@@ -52,6 +52,7 @@ export default function HomePage() {
           overflow: 'hidden',
         }}
       >
+        <span>Impact-Site-Verification: 258648a3-b1d3-4525-8787-d19c969c5798</span>
         <h1>Les meilleurs codes de parrainage 2026 — codedeparrainage.com</h1>
         <p>
           Trouvez et partagez les meilleurs codes de parrainage français.
@@ -81,8 +82,8 @@ export default function HomePage() {
 
         <p>
           Comment utiliser un code parrainage ? Choisissez un code dans notre annuaire,
-          copiez-le, et entrez-le lors de votre inscription sur le site de l'entreprise.
-          Vous recevrez automatiquement votre récompense après validation.
+          copie-le, et entre-le lors de ton inscription sur le site de l'entreprise.
+          Tu recevras automatiquement ta récompense après validation.
         </p>
       </div>
 
