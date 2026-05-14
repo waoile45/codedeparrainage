@@ -3,6 +3,7 @@ import { Syne, DM_Sans } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import Footer from "@/components/Footer";
+import ParticlesBackground from "@/components/ParticlesBackground";
 
 const syne = Syne({
   variable: "--font-syne",
@@ -48,8 +49,14 @@ export default function RootLayout({
       lang="fr"
       className={`${syne.variable} ${dmSans.variable} h-full antialiased`}
     >
+      <head>
+        {/* Impact.com — exige value= (non-standard), pas content= */}
+        {/* @ts-expect-error */}
+        <meta name="impact-site-verification" value="4837e27f-0ad6-44ff-a9c0-80abee3be354" />
+      </head>
       <body className="min-h-full flex flex-col bg-[#0A0A0F] font-sans">
         <ThemeProvider>
+          <ParticlesBackground />
           {children}
           <Footer />
         </ThemeProvider>

@@ -14,6 +14,16 @@ const COLUMNS = [
     ],
   },
   {
+    title: "Comparatifs",
+    links: [
+      { label: "Meilleur VPN",              href: "/meilleur-vpn" },
+      { label: "VPN pour Netflix",          href: "/meilleur-vpn/netflix" },
+      { label: "VPN pour Torrents",         href: "/meilleur-vpn/torrents" },
+      { label: "VPN pour Gaming",           href: "/meilleur-vpn/gaming" },
+      { label: "VPN pour IPTV",             href: "/meilleur-vpn/iptv" },
+    ],
+  },
+  {
     title: "Compte",
     links: [
       { label: "Mon profil",     href: "/profil" },
@@ -40,7 +50,7 @@ export default function Footer() {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "3rem 2rem 2rem" }}>
 
         {/* Top */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "2.5rem", marginBottom: "2.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", gap: "2.5rem", marginBottom: "2.5rem" }}>
 
           {/* Brand */}
           <div>
@@ -87,7 +97,7 @@ export default function Footer() {
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 6px #10b981", display: "inline-block" }} />
-            <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.3)" }}>Tous les services opérationnels</span>
+            <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.3)" }}>Tous les services sont opérationnels</span>
           </div>
         </div>
 

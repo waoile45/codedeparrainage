@@ -1,4 +1,5 @@
 import { createAnonSupabase } from '@/lib/supabase-server'
+import { USE_CASE_KEYS } from '@/data/comparatifs/vpn'
 
 export default async function sitemap() {
   const baseUrl = 'https://www.codedeparrainage.com'
@@ -27,6 +28,14 @@ export default async function sitemap() {
     { url: `${baseUrl}/cgu`,                     lastModified: new Date(), changeFrequency: 'yearly'  as const, priority: 0.2 },
     { url: `${baseUrl}/confidentialite`,         lastModified: new Date(), changeFrequency: 'yearly'  as const, priority: 0.2 },
     { url: `${baseUrl}/mentions-legales`,        lastModified: new Date(), changeFrequency: 'yearly'  as const, priority: 0.2 },
+    // Comparatifs VPN
+    { url: `${baseUrl}/meilleur-vpn`,            lastModified: new Date(), changeFrequency: 'weekly'  as const, priority: 0.85 },
+    ...USE_CASE_KEYS.map((cas) => ({
+      url: `${baseUrl}/meilleur-vpn/${cas}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    })),
     ...companyPages,
   ]
 }
