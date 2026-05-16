@@ -183,7 +183,7 @@ export default function LoginPage() {
       <div className="auth-bg">
         <div className="auth-card">
           <a href="/" className="auth-logo" style={{ display:"flex", alignItems:"center", gap:8 }}>code<span>de</span>parrainage.com</a>
-          <p className="auth-subtitle">Connectez-vous à votre compte</p>
+          <p className="auth-subtitle">Connecte-toi à ton compte</p>
 
           {/* Google */}
           <button className="auth-btn-google" onClick={handleGoogleLogin} disabled={googleLoading} type="button">

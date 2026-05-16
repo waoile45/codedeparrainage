@@ -100,7 +100,7 @@ export default async function CompanyPage({ params }: Props) {
       {
         '@type': 'Question',
         'name': `Où entrer le code parrainage ${company.name} ?`,
-        'acceptedAnswer': { '@type': 'Answer', 'text': `Le code s'entre lors de votre inscription, dans le champ "code parrainage", "code promo" ou "code ami" selon la plateforme.` },
+        'acceptedAnswer': { '@type': 'Answer', 'text': `Le code s'entre lors de ton inscription, dans le champ "code parrainage", "code promo" ou "code ami" selon la plateforme.` },
       },
       {
         '@type': 'Question',
@@ -213,9 +213,9 @@ export default async function CompanyPage({ params }: Props) {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[
-              `Choisissez un code dans la liste ci-dessus.`,
-              `Copiez-le et rendez-vous sur le site ou l'application ${company.name}.`,
-              `Entrez le code lors de votre inscription (champ "code parrainage" ou "code promo").`,
+              `Choisis un code dans la liste ci-dessus.`,
+              `Copie-le et rends-toi sur le site ou l'application ${company.name}.`,
+              `Entre le code lors de ton inscription (champ "code parrainage" ou "code promo").`,
               `${company.referral_bonus_description} — la récompense sera créditée après validation.`,
             ].map((step, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
@@ -243,7 +243,7 @@ export default async function CompanyPage({ params }: Props) {
               },
               {
                 q: `Où entrer le code parrainage ${company.name} ?`,
-                a: `Le code s'entre lors de votre inscription, dans le champ "code parrainage", "code promo" ou "code ami" selon la plateforme.`,
+                a: `Le code s'entre lors de ton inscription, dans le champ "code parrainage", "code promo" ou "code ami" selon la plateforme.`,
               },
               {
                 q: `Combien de temps pour recevoir la récompense ${company.name} ?`,

@@ -20,10 +20,11 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.codedeparrainage.com'),
   title: {
-    default: 'codedeparrainage.com — Codes de parrainage vérifiés',
+    default: 'Code Parrainage 2026 : +4200 Codes Vérifiés (Boursobank, Banque, Crypto…)',
     template: '%s | codedeparrainage.com',
   },
-  description: 'Trouvez les meilleurs codes de parrainage français : BoursoBank, Winamax, Revolut, Betclic, Trade Republic. Codes vérifiés par la communauté, mis à jour en temps réel.',
+  description: 'Trouve des codes parrainage Boursobank, Revolut, banques et +4200 autres. Parrainage gamifié avec XP, badges et classements. Codes vérifiés quotidiennement.',
+  keywords: ['code parrainage', 'parrainage boursobank', 'code parrainage revolut', 'parrainage banque', 'code parrainage 2026', 'parrainage crypto'],
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',
@@ -32,7 +33,14 @@ export const metadata: Metadata = {
     siteName: 'codedeparrainage.com',
     locale: 'fr_FR',
     type: 'website',
+    title: 'Code Parrainage 2026 : +4200 Codes Vérifiés',
+    description: 'Trouve des codes parrainage Boursobank, Revolut, banques et +4200 autres. Codes vérifiés quotidiennement.',
     images: [{ url: '/logo.png', width: 400, height: 400, alt: 'codedeparrainage.com' }],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Code Parrainage 2026 : +4200 Codes Vérifiés',
+    description: 'Trouve des codes parrainage Boursobank, Revolut, banques et +4200 autres.',
   },
   alternates: {
     canonical: 'https://www.codedeparrainage.com',

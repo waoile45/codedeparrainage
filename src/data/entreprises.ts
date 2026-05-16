@@ -268,6 +268,7 @@ export const ENTREPRISES: Entreprise[] = [
   { nom: "Bookinou", domain: "bookinou.com", logo: "https://www.google.com/s2/favicons?domain=bookinou.com&sz=64" },
   { nom: "bose", domain: "bose.com", logo: "https://www.google.com/s2/favicons?domain=bose.com&sz=64" },
   { nom: "Boulanger", domain: "boulanger.fr", logo: "https://www.google.com/s2/favicons?domain=boulanger.fr&sz=64" },
+  { nom: "Bourse Direct", domain: "boursedirect.fr", logo: "https://www.google.com/s2/favicons?domain=boursedirect.fr&sz=64" },
   { nom: "boursorama", domain: "boursorama.com", logo: "https://www.google.com/s2/favicons?domain=boursorama.com&sz=64" },
   { nom: "boutique arthur", domain: "boutique-arthur.com", logo: "https://www.google.com/s2/favicons?domain=boutique-arthur.com&sz=64" },
   { nom: "boutique zein", domain: "boutique-zein.com", logo: "https://www.google.com/s2/favicons?domain=boutique-zein.com&sz=64" },

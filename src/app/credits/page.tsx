@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
+import { createClient } from "@/lib/supabase";
 
 // ── Packs ──────────────────────────────────────────────────────────────────────
 const PACKS = [
@@ -27,9 +28,20 @@ const FAQ = [
 ];
 
 export default function CreditsPage() {
-  const [credits]    = useState(0.00);
-  const [openFaq, setOpenFaq] = useState<number|null>(null);
-  const [loading, setLoading] = useState<string|null>(null);
+  const [credits, setCredits]   = useState(0.00);
+  const [openFaq, setOpenFaq]   = useState<number|null>(null);
+  const [loading, setLoading]   = useState<string|null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function loadCredits() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from('credits').select('balance').eq('user_id', user.id).single();
+      if (data) setCredits(data.balance);
+    }
+    loadCredits();
+  }, []);
 
   const handleBuy = async (packId: string) => {
     const pack = PACKS.find(p => p.id === packId);

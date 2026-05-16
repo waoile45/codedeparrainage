@@ -81,47 +81,132 @@ function AvatarUpload({ letter, avatarUrl, size=72, onUpload }: { letter:string;
   const [preview, setPreview] = useState<string|null>(avatarUrl);
   const [hover, setHover] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // Crop modal state
+  const [cropSrc, setCropSrc] = useState<string|null>(null);
+  const [cropScale, setCropScale] = useState(1);
+  const [cropOffset, setCropOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imgRef = useRef<HTMLImageElement|null>(null);
   const ref = useRef<HTMLInputElement>(null);
   const supabase = createClient();
   useEffect(() => { setPreview(avatarUrl); }, [avatarUrl]);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const CROP_SIZE = 280;
+
+  // Draw cropped preview on canvas
+  const drawCanvas = useCallback((img: HTMLImageElement, scale: number, offset: { x: number; y: number }) => {
+    const canvas = canvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext("2d"); if (!ctx) return;
+    canvas.width = CROP_SIZE; canvas.height = CROP_SIZE;
+    ctx.clearRect(0, 0, CROP_SIZE, CROP_SIZE);
+    // Clip to circle
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(CROP_SIZE / 2, CROP_SIZE / 2, CROP_SIZE / 2, 0, Math.PI * 2);
+    ctx.clip();
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+    const x = (CROP_SIZE - w) / 2 + offset.x;
+    const y = (CROP_SIZE - h) / 2 + offset.y;
+    ctx.drawImage(img, x, y, w, h);
+    ctx.restore();
+    // Overlay ring
+    ctx.beginPath();
+    ctx.arc(CROP_SIZE / 2, CROP_SIZE / 2, CROP_SIZE / 2 - 1, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(124,58,237,0.7)";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }, []);
+
+  useEffect(() => {
+    if (cropSrc && imgRef.current) drawCanvas(imgRef.current, cropScale, cropOffset);
+  }, [cropSrc, cropScale, cropOffset, drawCanvas]);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    img.onload = () => {
+      imgRef.current = img;
+      const initScale = Math.max(CROP_SIZE / img.naturalWidth, CROP_SIZE / img.naturalHeight);
+      setCropScale(initScale);
+      setCropOffset({ x: 0, y: 0 });
+      setCropSrc(url);
+    };
+    img.src = url;
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setDragging(true);
+    setDragStart({ x: e.clientX - cropOffset.x, y: e.clientY - cropOffset.y });
+  };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!dragging) return;
+    setCropOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+  };
+  const handleMouseUp = () => setDragging(false);
+
+  const confirmCrop = async () => {
+    const canvas = canvasRef.current; if (!canvas) return;
     setUploading(true);
-    const localPreview = URL.createObjectURL(f);
-    setPreview(localPreview);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setUploading(false); return; }
-    // Toujours utiliser avatar.webp pour écraser la version précédente
-    const path = `${user.id}/avatar`;
-    const { error } = await supabase.storage.from("avatars").upload(path, f, { upsert: true, contentType: f.type });
-    if (error) {
-      console.error("Avatar upload error:", error);
+    setCropSrc(null);
+    canvas.toBlob(async (blob) => {
+      if (!blob) { setUploading(false); return; }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setUploading(false); return; }
+      const path = `${user.id}/avatar`;
+      const { error } = await supabase.storage.from("avatars").upload(path, blob, { upsert: true, contentType: "image/png" });
+      if (error) { console.error("Avatar upload error:", error); setUploading(false); return; }
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const urlWithBust = `${data.publicUrl}?t=${Date.now()}`;
+      await supabase.from("users").update({ avatar_url: data.publicUrl }).eq("id", user.id);
+      setPreview(urlWithBust);
+      onUpload(data.publicUrl);
       setUploading(false);
-      return;
-    }
-    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    // Ajoute un timestamp pour forcer le rechargement de l'image
-    const urlWithBust = `${data.publicUrl}?t=${Date.now()}`;
-    await supabase.from("users").update({ avatar_url: data.publicUrl }).eq("id", user.id);
-    setPreview(urlWithBust);
-    onUpload(data.publicUrl);
-    setUploading(false);
+    }, "image/png");
   };
 
   return (
-    <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
-      <div style={{ position:"absolute", inset:-3, borderRadius:"50%", background:"conic-gradient(#7c3aed,#a855f7,#6366f1,#7c3aed)", animation:"spin 5s linear infinite" }} />
-      <div style={{ position:"relative", zIndex:1, width:size, height:size, borderRadius:"50%", border:"3px solid #0A0A0F", overflow:"hidden", cursor:"pointer", background:"linear-gradient(135deg,#7c3aed,#4f46e5)", display:"flex", alignItems:"center", justifyContent:"center" }}
-        onMouseEnter={()=>setHover(true)} onMouseLeave={()=>setHover(false)} onClick={()=>ref.current?.click()}>
-        {preview ? <img src={preview} alt="avatar" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:size*.38, color:"#fff" }}>{letter}</span>}
-        <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.55)", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:3, opacity:(hover||uploading)?1:0, transition:"opacity .2s" }}>
-          {uploading ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-            : <><span style={{ color:"#fff" }}><I.cam /></span><span style={{ color:"rgba(255,255,255,.8)", fontSize:"0.58rem", fontWeight:600 }}>Modifier</span></>}
+    <>
+      {/* ── Crop Modal ── */}
+      {cropSrc && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.82)", backdropFilter:"blur(6px)", zIndex:9999, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:16 }}>
+          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:"1rem", color:"#fff", marginBottom:4 }}>Recadrer la photo</p>
+          <p style={{ fontSize:".78rem", color:"rgba(255,255,255,.4)", marginBottom:8 }}>Glisse pour repositionner · Molette pour zoomer</p>
+          <div
+            style={{ width:CROP_SIZE, height:CROP_SIZE, borderRadius:"50%", overflow:"hidden", cursor:dragging?"grabbing":"grab", userSelect:"none", border:"3px solid rgba(124,58,237,.6)", boxShadow:"0 0 40px rgba(124,58,237,.3)" }}
+            onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
+            onWheel={e => { e.preventDefault(); const delta = e.deltaY > 0 ? -0.05 : 0.05; const img = imgRef.current; if (!img) return; const minScale = Math.max(CROP_SIZE / img.naturalWidth, CROP_SIZE / img.naturalHeight); setCropScale(s => Math.max(minScale, Math.min(s + delta, 4))); }}
+          >
+            <canvas ref={canvasRef} width={CROP_SIZE} height={CROP_SIZE} style={{ display:"block" }} />
+          </div>
+          <div style={{ display:"flex", gap:12, marginTop:8 }}>
+            <input type="range" min={Math.max(CROP_SIZE / (imgRef.current?.naturalWidth ?? 1), CROP_SIZE / (imgRef.current?.naturalHeight ?? 1))} max={4} step={0.01} value={cropScale} onChange={e => setCropScale(+e.target.value)} style={{ width:200, accentColor:"#7c3aed" }} />
+          </div>
+          <div style={{ display:"flex", gap:10 }}>
+            <button onClick={confirmCrop} style={{ background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".65rem 1.5rem", fontWeight:700, fontSize:".9rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>Valider</button>
+            <button onClick={() => setCropSrc(null)} style={{ background:"rgba(255,255,255,.08)", color:"rgba(255,255,255,.5)", border:"1px solid rgba(255,255,255,.12)", borderRadius:12, padding:".65rem 1.25rem", fontWeight:600, fontSize:".9rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>Annuler</button>
+          </div>
         </div>
+      )}
+
+      <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
+        <div style={{ position:"absolute", inset:-3, borderRadius:"50%", background:"conic-gradient(#7c3aed,#a855f7,#6366f1,#7c3aed)", animation:"spin 5s linear infinite" }} />
+        <div style={{ position:"relative", zIndex:1, width:size, height:size, borderRadius:"50%", border:"3px solid #0A0A0F", overflow:"hidden", cursor:"pointer", background:"linear-gradient(135deg,#7c3aed,#4f46e5)", display:"flex", alignItems:"center", justifyContent:"center" }}
+          onMouseEnter={()=>setHover(true)} onMouseLeave={()=>setHover(false)} onClick={()=>ref.current?.click()}>
+          {preview ? <img src={preview} alt="avatar" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:size*.38, color:"#fff" }}>{letter}</span>}
+          <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.55)", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:3, opacity:(hover||uploading)?1:0, transition:"opacity .2s" }}>
+            {uploading ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              : <><span style={{ color:"#fff" }}><I.cam /></span><span style={{ color:"rgba(255,255,255,.8)", fontSize:"0.58rem", fontWeight:600 }}>Modifier</span></>}
+          </div>
+        </div>
+        <input ref={ref} type="file" accept="image/*" style={{ display:"none" }} onChange={handleFile} />
       </div>
-      <input ref={ref} type="file" accept="image/*" style={{ display:"none" }} onChange={handleFile} />
-    </div>
+    </>
   );
 }
 
@@ -351,14 +436,24 @@ function SectionAnnonces({ annonces, onDelete, onEdit }: {
           <p>Aucune annonce — <a href="/publier" style={{ color:"#a78bfa", textDecoration:"none" }}>publie ton premier code !</a></p>
         </div>
       )}
-      {annonces.map(a => (
+      {annonces.map(a => {
+        const gainMatch = (a.description ?? "").match(/^__gain__(.+?)(\n|$)/);
+        const gainLabel = gainMatch ? gainMatch[1].trim() : null;
+        return (
         <div key={a.id} className="row-card" style={{ flexDirection:"column", alignItems:"stretch", gap:"0.875rem" }}>
           {/* Ligne principale */}
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:8 }}>
             <div style={{ display:"flex", alignItems:"center", gap:12 }}>
               <div style={{ width:8, height:8, borderRadius:"50%", background:"#22c55e", boxShadow:"0 0 6px #22c55e", flexShrink:0 }} />
               <div>
-                <p style={{ fontWeight:700, color:"#fff", fontSize:"0.9rem" }}>{a.companies?.name ?? "Inconnu"}</p>
+                <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                  <p style={{ fontWeight:700, color:"#fff", fontSize:"0.9rem" }}>{a.companies?.name ?? "Inconnu"}</p>
+                  {gainLabel && (
+                    <span style={{ fontSize:"0.72rem", fontWeight:700, color:"#4ade80", background:"rgba(34,197,94,.12)", border:"1px solid rgba(34,197,94,.3)", borderRadius:7, padding:"2px 9px", whiteSpace:"nowrap" }}>
+                      {gainLabel}
+                    </span>
+                  )}
+                </div>
                 <code style={{ fontFamily:"monospace", fontSize:"0.8rem", color:"rgba(255,255,255,.4)", letterSpacing:"0.06em" }}>{a.code}</code>
               </div>
             </div>
@@ -419,14 +514,16 @@ function SectionAnnonces({ annonces, onDelete, onEdit }: {
             </div>
           )}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
 
 // ── Section Badges ─────────────────────────────────────────────────────────────
-function SectionBadges({ xp, annoncesCount }: { xp:number; annoncesCount:number }) {
+function SectionBadges({ xp, annoncesCount, isTop3 }: { xp:number; annoncesCount:number; isTop3:boolean }) {
   const badges: Badge[] = [
+    { id:"0", label:"Parrain du mois", icon:"👑", unlocked:isTop3, desc:"Top 3 des parrains avec le plus d'XP" },
     { id:"1", label:"Première annonce", icon:"🚀", unlocked:annoncesCount > 0, desc:"Tu as publié ton premier code" },
     { id:"2", label:"Parrain Bronze",   icon:"🥉", unlocked:xp>=100,  desc:"Atteins 100 XP" },
     { id:"3", label:"Streak x7",        icon:"🔥", unlocked:false,    desc:"Connecte-toi 7 jours de suite" },
@@ -821,7 +918,7 @@ function SectionAvis({ userId }: { userId:string }) {
       {step === "rate" && (
         <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
           <p style={{ fontSize:"1rem", fontWeight:700, color:"rgba(255,255,255,.85)", marginBottom:"1.5rem", fontFamily:"'Syne',sans-serif" }}>
-            Appréciez-vous codedeparrainage.com ?
+            Apprécies-tu codedeparrainage.com ?
           </p>
           <StarsInput value={rating} onChange={setRating} />
           {rating > 0 && <p style={{ marginTop:".75rem", fontSize:".875rem", color:"#a78bfa", fontWeight:600 }}>{LABELS[rating]}</p>}
@@ -907,6 +1004,7 @@ export default function ProfilPage() {
   const [user, setUser]         = useState<UserProfile | null>(null);
   const [annonces, setAnnonces] = useState<Annonce[]>([]);
   const [hasReview, setHasReview] = useState(false);
+  const [isTop3, setIsTop3]       = useState(false);
   const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
@@ -918,10 +1016,11 @@ export default function ProfilPage() {
   const fetchData = useCallback(async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) { window.location.href = "/login"; return; }
-    const [{ data: profile }, { data: userAnnonces }, { data: reviewData }] = await Promise.all([
+    const [{ data: profile }, { data: userAnnonces }, { data: reviewData }, { data: top3 }] = await Promise.all([
       supabase.from("users").select("*").eq("id", authUser.id).single(),
       supabase.from("announcements").select("id, code, description, bumps_today, created_at, companies(name, category)").eq("user_id", authUser.id).order("created_at", { ascending: false }),
       supabase.from("platform_reviews").select("id").eq("user_id", authUser.id).maybeSingle(),
+      supabase.from("users").select("id").order("xp", { ascending: false }).limit(3),
     ]);
     // Fix rétroactif : si l'utilisateur a un avis mais n'a pas reçu les +15 XP
     if (reviewData && profile) {
@@ -938,6 +1037,7 @@ export default function ProfilPage() {
     if (profile) setUser(profile);
     if (userAnnonces) setAnnonces(userAnnonces as any);
     setHasReview(!!reviewData);
+    setIsTop3(top3?.some(u => u.id === authUser.id) ?? false);
     setLoading(false);
   }, []);
 
@@ -987,7 +1087,7 @@ export default function ProfilPage() {
       case "profil":     return <SectionProfil user={user} annonces={annonces} onPseudoSave={handlePseudoSave} onAvatarUpload={handleAvatarUpload} />;
       case "annonces":   return <SectionAnnonces annonces={annonces} onDelete={handleDeleteAnnonce} onEdit={handleEditAnnonce} />;
       case "messages":   return <SectionMessages />;
-      case "badges":     return <SectionBadges xp={user.xp} annoncesCount={annonces.length} />;
+      case "badges":     return <SectionBadges xp={user.xp} annoncesCount={annonces.length} isTop3={isTop3} />;
       case "quetes":     return <SectionQuetes user={user} annonces={annonces} hasReview={hasReview} />;
       case "credits":    return <SectionCredits />;
       case "parametres": return <SectionParametres user={user} onPseudoSave={handlePseudoSave} onAvatarUpload={handleAvatarUpload} onBioSave={handleBioSave} />;

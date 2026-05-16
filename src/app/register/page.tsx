@@ -197,7 +197,7 @@ export default function RegisterPage() {
             </div>
           ) : (
             <>
-              <p className="auth-subtitle">Créez votre compte gratuit</p>
+              <p className="auth-subtitle">Crée ton compte gratuit</p>
               <div className="auth-perks">
                 <div className="auth-perk"><span className="auth-perk-dot" />Gratuit</div>
                 <div className="auth-perk"><span className="auth-perk-dot" />Gagne des XP</div>

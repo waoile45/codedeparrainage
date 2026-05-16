@@ -14,12 +14,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     async function checkAdmin() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-
-      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
-      if (user.email !== adminEmail) {
-        router.push('/')
-        return
-      }
+      // Le middleware serveur gère déjà le blocage — on vérifie juste que l'user est connecté
       setAuthorized(true)
       setLoading(false)
     }

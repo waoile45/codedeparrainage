@@ -364,8 +364,10 @@ export default function HomeClient() {
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ fontWeight:800, fontSize:"1rem", color:"var(--text-strong)" }}>{code.name}</div>
-                    <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:3 }}>
-                      <span style={{ fontSize:"0.68rem", fontWeight:700, color:code.catColor, background:`${code.catColor}18`, border:`1px solid ${code.catColor}30`, borderRadius:6, padding:"1px 7px", whiteSpace:"nowrap" }}>{code.category}</span>
+                    <div style={{ marginTop:4 }}>
+                      <span style={{ fontSize:"0.68rem", fontWeight:700, color:code.catColor, background:`${code.catColor}18`, border:`1px solid ${code.catColor}30`, borderRadius:6, padding:"1px 7px", whiteSpace:"nowrap", display:"inline-block", marginBottom:2 }}>{code.category}</span>
+                    </div>
+                    <div style={{ display:"flex", alignItems:"center", gap:4 }}>
                       <span style={{ fontSize:"0.72rem", color:"#fbbf24" }}>★</span>
                       <span style={{ fontSize:"0.72rem", color:"var(--text-dim)", fontWeight:600 }}>{code.rating}</span>
                     </div>
@@ -478,11 +480,11 @@ export default function HomeClient() {
         </h2>
         {[
           { q:"Qu'est-ce qu'un code de parrainage ?", a:"Un code de parrainage est un code unique qu'un client existant partage avec ses proches. Quand un nouveau client s'inscrit avec ce code, les deux parties reçoivent une récompense : bonus en cash, mois offerts, réductions, etc. C'est un système gagnant-gagnant utilisé par les banques en ligne, plateformes de paris, applications crypto et bien d'autres." },
-          { q:"Comment utiliser un code de parrainage ?", a:"Lors de votre inscription sur un service (BoursoBank, Revolut, Winamax, etc.), il y a généralement un champ \"code de parrainage\" ou \"code ami\". Copiez un code depuis codedeparrainage.com, collez-le dans ce champ, et validez votre inscription. Le bonus s'applique automatiquement une fois les conditions remplies (premier virement, premier pari, etc.)." },
+          { q:"Comment utiliser un code de parrainage ?", a:"Lors de ton inscription sur un service (BoursoBank, Revolut, Winamax, etc.), il y a généralement un champ \"code de parrainage\" ou \"code ami\". Copie un code depuis codedeparrainage.com, colle-le dans ce champ, et valide ton inscription. Le bonus s'applique automatiquement une fois les conditions remplies (premier virement, premier pari, etc.)." },
           { q:"Les codes de parrainage sur ce site sont-ils vérifiés ?", a:"Oui. Chaque code est noté par la communauté : les utilisateurs indiquent si le code fonctionne ou non. Les codes avec de mauvaises notes sont signalés et retirés. Nous affichons uniquement les codes récents et actifs. Vous pouvez aussi consulter la date de publication pour évaluer la fraîcheur d'un code." },
           { q:"Quels sont les meilleurs codes de parrainage en 2026 ?", a:"Les offres les plus généreuses en 2026 sont : BoursoBank (jusqu'à 130€), Revolut (jusqu'à 200€), Trade Republic (jusqu'à 200€ en actions), Winamax (100€ remboursés sur le premier pari perdu), et Betclic (30€ offerts). Toutes ces offres sont disponibles sur notre page /codes avec les codes les plus récents." },
-          { q:"Peut-on partager son propre code de parrainage ?", a:"Absolument ! Inscrivez-vous gratuitement sur codedeparrainage.com, puis cliquez sur \"Publier\" pour ajouter votre code. Votre annonce sera visible par toute la communauté. Plus votre code est utilisé, plus vous montez dans le classement et gagnez des XP et badges." },
-          { q:"Est-ce légal d'utiliser un code de parrainage ?", a:"Oui, totalement légal. Les programmes de parrainage sont officiellement proposés par les entreprises elles-mêmes dans le cadre de leur acquisition client. Utiliser un code de parrainage ne comporte aucun risque — vous bénéficiez simplement de l'offre de bienvenue prévue par l'entreprise." },
+          { q:"Peut-on partager son propre code de parrainage ?", a:"Absolument ! Inscris-toi gratuitement sur codedeparrainage.com, puis clique sur \"Publier\" pour ajouter ton code. Ton annonce sera visible par toute la communauté. Plus ton code est utilisé, plus tu montes dans le classement et gagnes des XP et badges." },
+          { q:"Est-ce légal d'utiliser un code de parrainage ?", a:"Oui, totalement légal. Les programmes de parrainage sont officiellement proposés par les entreprises elles-mêmes dans le cadre de leur acquisition client. Utiliser un code de parrainage ne comporte aucun risque — tu bénéficies simplement de l'offre de bienvenue prévue par l'entreprise." },
         ].map(({ q, a }, i) => (
           <details key={i} style={{ borderBottom:"1px solid var(--border)", paddingBottom:"1rem", marginBottom:"1rem" }}>
             <summary style={{ cursor:"pointer", fontWeight:700, fontSize:"0.95rem", color:"var(--text-strong)", padding:"0.5rem 0", listStyle:"none", display:"flex", justifyContent:"space-between", alignItems:"center" }}>

@@ -140,7 +140,7 @@ export default function PublierPage() {
   const handleSubmit = async () => {
     if (!code.trim() || !selectedEntreprise || !selectedCategory) return;
     if (containsBannedWord(code) || containsBannedWord(desc)) {
-      setError("Votre annonce contient un mot interdit. Merci de la corriger.");
+      setError("Ton annonce contient un mot interdit. Merci de la corriger.");
       return;
     }
     setSubmitting(true);
@@ -397,7 +397,7 @@ export default function PublierPage() {
               {search.trim() && !showProposal && !proposalSent && (
                 <div style={{ textAlign:"center", marginTop:"1rem" }}>
                   <button className="btn-propose" onClick={() => { setShowProposal(true); setProposalName(search.trim()); }}>
-                    Vous ne trouvez pas votre entreprise ? Proposez-la →
+                    Tu ne trouves pas ton entreprise ? Propose-la →
                   </button>
                 </div>
               )}
@@ -405,11 +405,11 @@ export default function PublierPage() {
               {(showProposal || proposalSent) && (
                 <div className="proposal-box">
                   {proposalSent ? (
-                    <p className="proposal-sent">✅ Merci ! Votre proposition a été envoyée à l&rsquo;équipe.</p>
+                    <p className="proposal-sent">✅ Merci ! Ta proposition a été envoyée à l&rsquo;équipe.</p>
                   ) : (
                     <>
                       <p className="proposal-title">🏢 Proposer une entreprise</p>
-                      <p className="proposal-sub">Si l&rsquo;entreprise n&rsquo;est pas encore dans notre base, indiquez son nom et nous l&rsquo;ajouterons.</p>
+                      <p className="proposal-sub">Si l&rsquo;entreprise n&rsquo;est pas encore dans notre base, indique son nom et nous l&rsquo;ajouterons.</p>
                       <div className="form-group" style={{ marginBottom:"0.75rem" }}>
                         <label className="form-label">Nom de l&rsquo;entreprise</label>
                         <input

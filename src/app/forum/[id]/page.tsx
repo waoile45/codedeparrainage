@@ -5,6 +5,67 @@ import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 
+// ── Posts démo hardcodés (miroir de forum/page.tsx) ───────────────────────────
+const DEMO_POSTS_MAP: Record<string, { title:string; content:string; category:string; likes:number; created_at:string; pseudo:string; level:string; replies:{id:string;pseudo:string;level:string;content:string;created_at:string;likes:number}[] }> = {
+  "demo-1": {
+    title: "Astuce : comment maximiser ses gains avec les codes de parrainage ?",
+    content: "Salut à tous ! Après plusieurs mois à utiliser la plateforme, j'ai quelques astuces pour optimiser ses revenus de parrainage. Déjà, commencez par les banques (BoursoBank, Revolut) qui offrent des primes élevées. Ensuite, les paris sportifs comme Winamax ou Betclic sont parfaits car le processus est rapide. Enfin, pensez à booster vos annonces en début de mois, c'est là que les gens cherchent le plus. N'hésitez pas à partager vos propres astuces !",
+    category: "Astuce", likes: 24,
+    created_at: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
+    pseudo: "Alexandre M.", level: "Super Parrain",
+    replies: [
+      { id: "dr-1-1", pseudo: "Sarah L.", level: "Parrain Or", content: "Super partage ! Je confirme pour BoursoBank, j'ai eu 240€ en 3 semaines grâce aux parrainages. Le boost en début de mois c'est une excellente idée, j'essaie ça ce mois-ci.", created_at: new Date(Date.now() - 1.8 * 24 * 3600 * 1000).toISOString(), likes: 8 },
+      { id: "dr-1-2", pseudo: "Romain D.", level: "Parrain Argent", content: "Je rajouterais : pensez à combiner les parrainages avec les offres de cashback (iGraal, TopCashback). Parfois tu peux cumuler +30% de gains supplémentaires !", created_at: new Date(Date.now() - 1.2 * 24 * 3600 * 1000).toISOString(), likes: 5 },
+      { id: "dr-1-3", pseudo: "Camille B.", level: "Parrain Bronze", content: "Merci pour le tip sur le boost ! Je savais pas que le timing avait autant d'importance 👍", created_at: new Date(Date.now() - 18 * 3600 * 1000).toISOString(), likes: 2 },
+    ],
+  },
+  "demo-2": {
+    title: "Winamax : mon code marche toujours, 100€ remboursés si premier pari perdu",
+    content: "Bonjour à tous, je partage mon code Winamax qui est toujours actif. L'offre est vraiment intéressante : si votre premier pari est perdant, vous êtes remboursé jusqu'à 100€ en freebets. C'est une des meilleures offres de bienvenue du marché en ce moment. Mon code est sur le profil. N'hésitez pas à me dire si ça fonctionne de votre côté !",
+    category: "Paris Sportifs", likes: 17,
+    created_at: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
+    pseudo: "Thomas V.", level: "Parrain Argent",
+    replies: [
+      { id: "dr-2-1", pseudo: "Lucas M.", level: "Débutant", content: "Code utilisé hier, ça marche nickel ! Merci beaucoup, les 100€ c'est vraiment appréciable pour commencer.", created_at: new Date(Date.now() - 2.5 * 24 * 3600 * 1000).toISOString(), likes: 6 },
+      { id: "dr-2-2", pseudo: "Julie P.", level: "Parrain Bronze", content: "Ça marche aussi pour moi ! Winamax c'est vraiment la meilleure offre Paris Sportifs du moment. Le remboursement a été crédité en 48h.", created_at: new Date(Date.now() - 1.5 * 24 * 3600 * 1000).toISOString(), likes: 4 },
+    ],
+  },
+  "demo-3": {
+    title: "Question : les codes Trade Republic fonctionnent-ils pour les comptes existants ?",
+    content: "Bonjour, je me demandais si les codes de parrainage Trade Republic s'appliquent uniquement aux nouvelles inscriptions ou si on peut en bénéficier même avec un compte déjà créé ? J'ai essayé d'entrer un code mais il me dit que ça ne s'applique qu'aux nouveaux comptes... Du coup, est-ce qu'il existe d'autres offres pour les comptes existants ? Merci d'avance pour vos réponses !",
+    category: "Banque", likes: 11,
+    created_at: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString(),
+    pseudo: "Marie K.", level: "Débutant",
+    replies: [
+      { id: "dr-3-1", pseudo: "Pierre L.", level: "Parrain Or", content: "Malheureusement les codes de parrainage Trade Republic sont uniquement pour les nouveaux comptes. En revanche, Trade Republic propose régulièrement des promotions pour les comptes existants, surveille bien les notifs dans l'app !", created_at: new Date(Date.now() - 4.8 * 24 * 3600 * 1000).toISOString(), likes: 9 },
+      { id: "dr-3-2", pseudo: "Alexandre M.", level: "Super Parrain", content: "Exact ce que dit Pierre. Par contre si tu as des amis qui ne sont pas encore inscrits, partage-leur ton propre code, vous gagnez tous les deux. C'est 200€ d'actions offertes, pas rien !", created_at: new Date(Date.now() - 4 * 24 * 3600 * 1000).toISOString(), likes: 7 },
+      { id: "dr-3-3", pseudo: "Marie K.", level: "Débutant", content: "Merci pour vos réponses ! Je vais partager mon code à mes amis alors. Je savais pas que moi aussi je gagnais quelque chose quand ils s'inscrivent 😊", created_at: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(), likes: 3 },
+    ],
+  },
+  "demo-4": {
+    title: "Revolut vs N26 : lequel choisir pour le parrainage ?",
+    content: "Je vois beaucoup de codes pour Revolut (+200€) et N26 sur la plateforme. J'hésite entre les deux pour m'inscrire et utiliser un code de parrainage. Quelqu'un a comparé les deux ? Est-ce que les offres de bienvenue sont vraiment valables ou il y a des conditions cachées ? Merci !",
+    category: "Banque", likes: 19,
+    created_at: new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString(),
+    pseudo: "Anaïs F.", level: "Parrain Bronze",
+    replies: [
+      { id: "dr-4-1", pseudo: "Sarah L.", level: "Parrain Or", content: "J'ai les deux. Revolut est vraiment top pour les voyages (taux de change excellent), le parrainage est valide et j'ai bien reçu mes €. N26 aussi fonctionne bien mais l'offre de parrainage est moins généreuse actuellement.", created_at: new Date(Date.now() - 6.5 * 24 * 3600 * 1000).toISOString(), likes: 11 },
+      { id: "dr-4-2", pseudo: "Thomas V.", level: "Parrain Argent", content: "Go Revolut ! Les 200€ s'obtiennent progressivement selon les dépenses. C'est transparent, pas de conditions cachées. J'ai reçu ma prime en 2 semaines.", created_at: new Date(Date.now() - 5.5 * 24 * 3600 * 1000).toISOString(), likes: 8 },
+    ],
+  },
+  "demo-5": {
+    title: "[Crypto] Binance vs Coinbase : lequel offre le meilleur bonus de parrainage ?",
+    content: "Salut ! Je veux me lancer dans la crypto et j'hésite entre Binance et Coinbase. Les deux ont des codes de parrainage sur la plateforme. Binance semble avoir une réduction sur les frais de trading, Coinbase offre des tokens gratuits. Quelqu'un a une expérience des deux ?",
+    category: "Crypto", likes: 13,
+    created_at: new Date(Date.now() - 10 * 24 * 3600 * 1000).toISOString(),
+    pseudo: "Romain D.", level: "Parrain Argent",
+    replies: [
+      { id: "dr-5-1", pseudo: "Alexandre M.", level: "Super Parrain", content: "Binance pour les frais réduits si tu trades beaucoup. Coinbase pour la simplicité si tu débutes. Les deux codes fonctionnent très bien, j'ai utilisé les deux.", created_at: new Date(Date.now() - 9 * 24 * 3600 * 1000).toISOString(), likes: 7 },
+      { id: "dr-5-2", pseudo: "Julie P.", level: "Parrain Bronze", content: "Coinbase est plus adapté aux débutants car l'interface est plus simple. Le bonus de départ est sympa pour se familiariser avec la crypto sans trop de risques.", created_at: new Date(Date.now() - 8 * 24 * 3600 * 1000).toISOString(), likes: 4 },
+    ],
+  },
+};
+
 interface Reply {
   id: string;
   post_id: string;
@@ -71,6 +132,16 @@ export default function ForumPostPage() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setUserId(user.id);
     });
+    // Post démo : charger directement sans Supabase
+    if (id && id.startsWith("demo-")) {
+      const demo = DEMO_POSTS_MAP[id];
+      if (demo) {
+        setPost({ id, title: demo.title, content: demo.content, category: demo.category, likes: demo.likes, created_at: demo.created_at, user_id: "demo", users: { pseudo: demo.pseudo, level: demo.level } });
+        setReplies(demo.replies.map(r => ({ id: r.id, post_id: id, user_id: "demo", content: r.content, created_at: r.created_at, likes: r.likes, users: { pseudo: r.pseudo, level: r.level } })));
+        setLoading(false);
+        return;
+      }
+    }
     fetchAll();
   }, [id]);
 
@@ -269,7 +340,7 @@ export default function ForumPostPage() {
             <textarea
               ref={textareaRef}
               className="reply-input"
-              placeholder="Écrivez votre réponse..."
+              placeholder="Écris ta réponse..."
               value={replyText}
               onChange={e => setReplyText(e.target.value)}
               maxLength={2000}
@@ -282,7 +353,7 @@ export default function ForumPostPage() {
           </form>
         ) : (
           <div style={{ background: "rgba(124,58,237,.05)", border: "1px solid rgba(124,58,237,.2)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
-            <span style={{ color: "var(--text-muted)", fontSize: ".875rem" }}>Connectez-vous pour répondre</span>
+            <span style={{ color: "var(--text-muted)", fontSize: ".875rem" }}>Connecte-toi pour répondre</span>
             <a href="/login" style={{ background: "#7c3aed", color: "#fff", borderRadius: 10, padding: ".4rem .875rem", fontSize: ".82rem", fontWeight: 600, textDecoration: "none" }}>Se connecter</a>
           </div>
         )}

@@ -1,6 +1,20 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { max-width: 100%; overflow-x: hidden; }
 
+@keyframes particleFall {
+  0%   { transform: translateY(-20px); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(110vh); opacity: 0; }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes floatCard0 { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+@keyframes floatCard1 { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+
 /* ═══════════════════════════════════════════════════════════════════
    CSS VARIABLES — dark (défaut) et light
    ═══════════════════════════════════════════════════════════════════ */
@@ -64,4 +78,33 @@ h1, h2, h3 {
   line-height: 1.1;
   letter-spacing: -0.02em;
   color: var(--text-strong);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Ombres légères en mode jour pour améliorer les contrastes
+   ═══════════════════════════════════════════════════════════════════ */
+[data-theme="light"] [style*="bg-card"],
+[data-theme="light"] .forum-card,
+[data-theme="light"] .row-card,
+[data-theme="light"] .sc,
+[data-theme="light"] .action-card,
+[data-theme="light"] .reply-card,
+[data-theme="light"] .top-code-card {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05) !important;
+}
+
+[data-theme="light"] [style*="border-radius: 18px"],
+[data-theme="light"] [style*="border-radius: 20px"],
+[data-theme="light"] [style*="border-radius: 16px"],
+[data-theme="light"] [style*="border-radius: 14px"],
+[data-theme="light"] [style*="border-radius:18px"],
+[data-theme="light"] [style*="border-radius:20px"],
+[data-theme="light"] [style*="border-radius:16px"],
+[data-theme="light"] [style*="border-radius:14px"] {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+}
+
+[data-theme="light"] nav,
+[data-theme="light"] #hp-nav {
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
 }
