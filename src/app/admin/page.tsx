@@ -71,6 +71,10 @@ export default function AdminPage() {
   const [creditAmount, setCreditAmount]   = useState('')
   const [creditLoading, setCreditLoading] = useState(false)
 
+  const [givingBoost, setGivingBoost]     = useState<string | null>(null)
+  const [boostDays, setBoostDays]         = useState('7')
+  const [boostLoading, setBoostLoading]   = useState(false)
+
   const supabase = createClient()
 
   useEffect(() => { loadData() }, [])
@@ -79,7 +83,7 @@ export default function AdminPage() {
     setLoading(true)
     const [{ data: comp }, { data: ann }, { data: usr }] = await Promise.all([
       supabase.from('companies').select('*').order('name'),
-      supabase.from('announcements').select('*, users(pseudo,email), companies(name)').order('created_at', { ascending: false }),
+      supabase.from('announcements').select('*, user_id, users(id,pseudo,email), companies(name)').order('created_at', { ascending: false }),
       supabase.from('users').select('*, credits(balance)').order('xp', { ascending: false }),
     ])
     setCompanies(comp ?? [])
@@ -113,6 +117,21 @@ export default function AdminPage() {
     setGivingCredits(null)
     setCreditAmount('')
     setCreditLoading(false)
+  }
+
+  async function handleToggleBadge(userId: string, current: boolean) {
+    await fetch('/api/admin/badge-parrain', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, value: !current }) })
+    setUsers(prev => prev.map(u => u.id !== userId ? u : { ...u, badge_parrain_mois: !current }))
+  }
+
+  async function handleGiveBoost(ann: any) {
+    const days = parseInt(boostDays)
+    if (isNaN(days) || days < 1) return
+    setBoostLoading(true)
+    await fetch('/api/admin/give-boost', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ announcementId: ann.id, userId: ann.user_id, days }) })
+    setGivingBoost(null)
+    setBoostDays('7')
+    setBoostLoading(false)
   }
 
   async function handleSaveCompany() {
@@ -205,6 +224,15 @@ export default function AdminPage() {
                           </div>
                         </div>
                       </div>
+                      {givingBoost === ann.id ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <input type="number" value={boostDays} onChange={e => setBoostDays(e.target.value)} placeholder="jours" min={1} style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.4)', borderRadius: 8, padding: '0.35rem 0.6rem', color: '#fff', fontSize: '0.82rem', width: 70, outline: 'none', fontFamily: 'inherit' }} />
+                          <Btn variant="primary" onClick={() => handleGiveBoost(ann)} disabled={boostLoading}>{boostLoading ? '...' : 'OK'}</Btn>
+                          <button onClick={() => setGivingBoost(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '1rem', padding: '0 2px' }}>✕</button>
+                        </div>
+                      ) : (
+                        <Btn variant="credit" onClick={() => { setGivingBoost(ann.id); setBoostDays('7') }}>⚡ Boost</Btn>
+                      )}
                       <Btn variant="danger" onClick={() => handleDeleteAnnouncement(ann.id)}>Supprimer</Btn>
                     </div>
                   ))}
@@ -252,6 +280,9 @@ export default function AdminPage() {
                           <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#a78bfa' }}>{(user.credits?.[0]?.balance ?? 0).toFixed(1)} cr.</span>
                         )}
                         <Btn variant="credit" onClick={() => { setGivingCredits(user.id); setCreditAmount('') }}>⚡ Crédits</Btn>
+                        <Btn variant={user.badge_parrain_mois ? 'primary' : 'ghost'} onClick={() => handleToggleBadge(user.id, !!user.badge_parrain_mois)}>
+                          👑 {user.badge_parrain_mois ? 'Retirer badge' : 'Badge'}
+                        </Btn>
                       </div>
                     </div>
                   ))}

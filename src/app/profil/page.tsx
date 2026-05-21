@@ -1037,7 +1037,7 @@ export default function ProfilPage() {
     if (profile) setUser(profile);
     if (userAnnonces) setAnnonces(userAnnonces as any);
     setHasReview(!!reviewData);
-    setIsTop3(top3?.some(u => u.id === authUser.id) ?? false);
+    setIsTop3((top3?.some(u => u.id === authUser.id) ?? false) || (profile?.badge_parrain_mois ?? false));
     setLoading(false);
   }, []);
 
