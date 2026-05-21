@@ -66,13 +66,21 @@ export default function AdminPage() {
 
   async function handleDeleteCompany(id: string) {
     if (!confirm('Supprimer cette entreprise ?')) return
-    await supabase.from('companies').delete().eq('id', id)
+    await fetch('/api/admin/delete', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table: 'companies', id }),
+    })
     setCompanies(prev => prev.filter(c => c.id !== id))
   }
 
   async function handleDeleteAnnouncement(id: string) {
     if (!confirm('Supprimer cette annonce ?')) return
-    await supabase.from('announcements').delete().eq('id', id)
+    await fetch('/api/admin/delete', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table: 'announcements', id }),
+    })
     setAnnouncements(prev => prev.filter(a => a.id !== id))
   }
 
