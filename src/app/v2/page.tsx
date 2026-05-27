@@ -95,7 +95,7 @@ const STEPS = [
 
 export default function HomeV2() {
   const [activeCategory, setActiveCategory] = useState("Tout");
-  const { theme, toggle } = useTheme();
+  useTheme();
 
   const categories = ["Tout", "Banque", "Crypto", "Paris sportifs", "Bourse", "Téléphonie"];
   const filtered = activeCategory === "Tout" ? FEATURED : FEATURED.filter(c => c.category === activeCategory);
@@ -112,12 +112,6 @@ export default function HomeV2() {
           code<span style={{ color: "#7c3aed" }}>de</span>parrainage.com
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <button onClick={toggle} style={{ background: "var(--bg-card-md)", border: "1px solid var(--border-lg)", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-dim)" }}>
-            {theme === "light"
-              ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" /></svg>
-              : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
-            }
-          </button>
           <Link href="/register" style={{ background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: "0.85rem", padding: "0.5rem 1rem", borderRadius: 10, textDecoration: "none" }}>
             S&apos;inscrire
           </Link>
