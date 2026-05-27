@@ -192,7 +192,7 @@ const FLOATING_CARDS = [
 
 export default function HomeClient() {
   const [mounted, setMounted] = useState(false);
-  const { theme, toggle } = useTheme();
+  useTheme();
   useEffect(() => { setMounted(true); }, []);
 
   return (
@@ -239,18 +239,6 @@ export default function HomeClient() {
               onMouseLeave={e=>(e.currentTarget.style.color="var(--text-link)")}
             >{item.label}</Link>
           ))}
-          <button
-            onClick={toggle}
-            title={theme === "light" ? "Passer en mode sombre" : "Passer en mode clair"}
-            style={{ background:"var(--bg-card-md)", border:"1px solid var(--border-lg)", borderRadius:10, width:38, height:38, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"var(--text-dim)", fontSize:"1rem", transition:"all 0.18s", flexShrink:0 }}
-            onMouseEnter={e=>{ e.currentTarget.style.background="var(--bg-btn)"; e.currentTarget.style.color="var(--text-strong)"; }}
-            onMouseLeave={e=>{ e.currentTarget.style.background="var(--bg-card-md)"; e.currentTarget.style.color="var(--text-dim)"; }}
-          >
-            {theme === "light"
-              ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/></svg>
-              : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            }
-          </button>
           <Link href="/register"
             style={{ background:"#7c3aed", color:"#fff", fontWeight:700, fontSize:"0.875rem", padding:"0.55rem 1.25rem", borderRadius:12, textDecoration:"none", boxShadow:"0 0 20px rgba(124,58,237,0.35)", transition:"all 0.2s" }}
             onMouseEnter={e=>{ e.currentTarget.style.background="#6d28d9"; e.currentTarget.style.transform="translateY(-1px)"; }}
