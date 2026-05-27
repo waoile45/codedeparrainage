@@ -23,13 +23,12 @@ export default function StickyBanner() {
 
   return (
     <div style={{
-      position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 300,
+      position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 9999,
       background: "linear-gradient(135deg, #1a0533 0%, #0f0a1e 100%)",
-      borderTop: "1px solid rgba(124,58,237,0.35)",
+      borderTop: "1px solid rgba(124,58,237,0.4)",
       padding: "0.875rem 1.5rem",
       display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
-      boxShadow: "0 -8px 32px rgba(0,0,0,0.4)",
-      backdropFilter: "blur(12px)",
+      boxShadow: "0 -8px 32px rgba(0,0,0,0.5)",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
         <span style={{ fontSize: "1.4rem", flexShrink: 0 }}>🎁</span>
@@ -42,22 +41,19 @@ export default function StickyBanner() {
           </p>
         </div>
       </div>
-
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
         <a href="/register" style={{
           background: "#7c3aed", color: "#fff", textDecoration: "none",
           padding: "0.5rem 1.1rem", borderRadius: 10,
           fontSize: "0.82rem", fontWeight: 700, fontFamily: "'DM Sans', sans-serif",
-          whiteSpace: "nowrap", transition: "all 0.15s",
-          boxShadow: "0 4px 16px rgba(124,58,237,0.4)",
+          whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(124,58,237,0.4)",
         }}>
           S'inscrire gratuitement →
         </a>
         <button onClick={dismiss} aria-label="Fermer" style={{
           background: "none", border: "none", cursor: "pointer",
-          color: "rgba(255,255,255,0.3)", fontSize: "1.1rem", lineHeight: 1,
-          padding: "4px 6px", borderRadius: 6, transition: "color 0.15s",
-          flexShrink: 0,
+          color: "rgba(255,255,255,0.35)", fontSize: "1.1rem", lineHeight: 1,
+          padding: "4px 8px", flexShrink: 0,
         }}>✕</button>
       </div>
     </div>
