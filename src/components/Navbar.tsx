@@ -14,19 +14,20 @@ export default function Navbar({ activePage }: NavbarProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [pseudo, setPseudo] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
-      const { data: profile } = await supabase
-        .from("users")
-        .select("pseudo, avatar_url")
-        .eq("id", user.id)
-        .single();
+      const [{ data: profile }, { count }] = await Promise.all([
+        supabase.from("users").select("pseudo, avatar_url").eq("id", user.id).single(),
+        supabase.from("messages").select("*", { count: "exact", head: true }).eq("receiver_id", user.id).eq("read", false),
+      ]);
       setIsLoggedIn(true);
       setPseudo(profile?.pseudo ?? user.email?.split("@")[0] ?? "Moi");
       setAvatarUrl(profile?.avatar_url ?? null);
+      setUnreadCount(count ?? 0);
     });
   }, []);
 
@@ -220,7 +221,12 @@ export default function Navbar({ activePage }: NavbarProps) {
             <a href="/classement" className={`nav-link ${activePage==="classement" ? "active" : ""}`}>Classement</a>
             <a href="/forum"      className={`nav-link ${activePage==="forum"      ? "active" : ""}`}>Communauté</a>
             {isLoggedIn && (
-              <a href="/messages" className={`nav-link ${activePage==="messages"   ? "active" : ""}`}>Messages</a>
+              <a href="/profil?tab=messages" className={`nav-link ${activePage==="messages" ? "active" : ""}`} style={{ position: "relative" }}>
+                Messages
+                {unreadCount > 0 && (
+                  <span style={{ position: "absolute", top: 2, right: 2, width: 8, height: 8, background: "#ef4444", borderRadius: "50%", border: "2px solid var(--bg-nav)" }} />
+                )}
+              </a>
             )}
           </div>
 
@@ -306,7 +312,11 @@ export default function Navbar({ activePage }: NavbarProps) {
           <a href="/codes"      className={`nav-mobile-link ${activePage==="codes"      ? "active":""}`} onClick={()=>setMenuOpen(false)}>🔍 Codes</a>
           <a href="/classement" className={`nav-mobile-link ${activePage==="classement" ? "active":""}`} onClick={()=>setMenuOpen(false)}>🏆 Classement</a>
           <a href="/forum"      className={`nav-mobile-link ${activePage==="forum"      ? "active":""}`} onClick={()=>setMenuOpen(false)}>💬 Communauté</a>
-          {isLoggedIn && <a href="/messages" className={`nav-mobile-link ${activePage==="messages" ? "active":""}`} onClick={()=>setMenuOpen(false)}>💬 Messages</a>}
+          {isLoggedIn && (
+            <a href="/profil?tab=messages" className={`nav-mobile-link ${activePage==="messages" ? "active":""}`} onClick={()=>setMenuOpen(false)}>
+              💬 Messages {unreadCount > 0 && <span style={{ background: "#ef4444", color: "#fff", borderRadius: 100, fontSize: "0.65rem", fontWeight: 700, padding: "1px 6px", marginLeft: 4 }}>{unreadCount}</span>}
+            </a>
+          )}
           {isLoggedIn && <a href="/publier"  className={`nav-mobile-link ${activePage==="publier"  ? "active":""}`} onClick={()=>setMenuOpen(false)}>➕ Publier un code</a>}
           {isLoggedIn && <a href="/profil"   className={`nav-mobile-link ${activePage==="profil"   ? "active":""}`} onClick={()=>setMenuOpen(false)}>👤 Mon profil</a>}
           <div className="nav-mobile-sep" />

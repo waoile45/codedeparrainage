@@ -650,14 +650,138 @@ function SectionParametres({ user, onPseudoSave, onAvatarUpload, onBioSave }: { 
   );
 }
 
+interface Message {
+  id: string;
+  content: string;
+  created_at: string;
+  read: boolean;
+  sender_id: string;
+  receiver_id: string;
+  announcement_id?: string | null;
+  sender?: { pseudo: string };
+  receiver?: { pseudo: string };
+  announcements?: { companies?: { name: string } } | null;
+}
+
 function SectionMessages() {
+  const supabase = createClient();
+  const [messages, setMessages]   = useState<Message[]>([]);
+  const [loading, setLoading]     = useState(true);
+  const [userId, setUserId]       = useState<string | null>(null);
+  const [reply, setReply]         = useState<Record<string, string>>({});
+  const [sending, setSending]     = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setUserId(user.id);
+      const { data } = await supabase
+        .from("messages")
+        .select("*, sender:users!sender_id(pseudo), receiver:users!receiver_id(pseudo), announcements(companies(name))")
+        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .order("created_at", { ascending: false });
+      setMessages((data ?? []) as Message[]);
+      await supabase.from("messages").update({ read: true }).eq("receiver_id", user.id).eq("read", false);
+      setLoading(false);
+    })();
+  }, []);
+
+  async function handleReply(receiverId: string, announcementId: string | null, key: string) {
+    const content = reply[key]?.trim();
+    if (!content) return;
+    setSending(key);
+    await fetch("/api/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ receiverId, announcementId, content }),
+    });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase
+        .from("messages")
+        .select("*, sender:users!sender_id(pseudo), receiver:users!receiver_id(pseudo), announcements(companies(name))")
+        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .order("created_at", { ascending: false });
+      setMessages((data ?? []) as Message[]);
+    }
+    setReply(p => ({ ...p, [key]: "" }));
+    setSending(null);
+  }
+
+  if (loading) return <div style={{ padding: "3rem", textAlign: "center", color: "rgba(255,255,255,.25)" }}>Chargement...</div>;
+
+  if (messages.length === 0) return (
+    <div style={{ textAlign: "center", padding: "3rem", color: "rgba(255,255,255,.25)", fontSize: "0.875rem" }}>
+      <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>💬</div>
+      <p>Aucun message pour l&apos;instant</p>
+      <p style={{ marginTop: 8, fontSize: "0.78rem" }}>Tu peux contacter un parrain depuis la page <a href="/codes" style={{ color: "#a78bfa" }}>Codes</a></p>
+    </div>
+  );
+
+  const grouped: Record<string, Message[]> = {};
+  messages.forEach(m => {
+    const other = m.sender_id === userId ? m.receiver_id : m.sender_id;
+    if (!grouped[other]) grouped[other] = [];
+    grouped[other].push(m);
+  });
+
   return (
-    <div className="sc">
-      <h2 className="st">Messages</h2>
-      <div style={{ textAlign:"center", padding:"3rem", color:"rgba(255,255,255,.25)", fontSize:"0.875rem" }}>
-        <div style={{ fontSize:"2.5rem", marginBottom:"0.75rem" }}>💬</div>
-        <p>Aucun message pour l&apos;instant</p>
-      </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {Object.entries(grouped).map(([otherId, msgs]) => {
+        const other = msgs[0].sender_id === userId ? msgs[0].receiver : msgs[0].sender;
+        const otherPseudo = other?.pseudo ?? "Utilisateur";
+        const company = msgs[0].announcements?.companies?.name;
+        const hasUnread = msgs.some(m => !m.read && m.receiver_id === userId);
+        const replyKey = otherId;
+        return (
+          <div key={otherId} style={{ background: "rgba(255,255,255,.03)", border: `1px solid ${hasUnread ? "rgba(124,58,237,.4)" : "rgba(255,255,255,.07)"}`, borderRadius: 16, overflow: "hidden" }}>
+            <div style={{ padding: "0.875rem 1rem", borderBottom: "1px solid rgba(255,255,255,.05)", display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(124,58,237,.2)", border: "1px solid rgba(124,58,237,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.85rem", color: "#a78bfa", flexShrink: 0 }}>
+                {otherPseudo[0]?.toUpperCase()}
+              </div>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
+                  {otherPseudo}
+                  {hasUnread && <span style={{ width: 7, height: 7, background: "#ef4444", borderRadius: "50%", display: "inline-block" }} />}
+                </div>
+                {company && <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,.3)", marginTop: 1 }}>{company}</div>}
+              </div>
+            </div>
+            <div style={{ padding: "0.75rem 1rem", display: "flex", flexDirection: "column", gap: 8, maxHeight: 280, overflowY: "auto" }}>
+              {[...msgs].reverse().map(m => {
+                const isMine = m.sender_id === userId;
+                return (
+                  <div key={m.id} style={{ display: "flex", justifyContent: isMine ? "flex-end" : "flex-start" }}>
+                    <div style={{ maxWidth: "75%", background: isMine ? "rgba(124,58,237,.2)" : "rgba(255,255,255,.05)", border: `1px solid ${isMine ? "rgba(124,58,237,.3)" : "rgba(255,255,255,.08)"}`, borderRadius: isMine ? "12px 12px 3px 12px" : "12px 12px 12px 3px", padding: "0.5rem 0.875rem" }}>
+                      <p style={{ fontSize: "0.875rem", color: "#e2e8f0", margin: 0, lineHeight: 1.5 }}>{m.content}</p>
+                      <p style={{ fontSize: "0.65rem", color: "rgba(255,255,255,.25)", margin: "4px 0 0", textAlign: isMine ? "right" : "left" }}>
+                        {new Date(m.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ padding: "0.75rem 1rem", borderTop: "1px solid rgba(255,255,255,.05)", display: "flex", gap: 8 }}>
+              <input
+                value={reply[replyKey] ?? ""}
+                onChange={e => setReply(p => ({ ...p, [replyKey]: e.target.value }))}
+                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleReply(otherId, msgs[0].announcement_id ?? null, replyKey); } }}
+                placeholder="Répondre..."
+                style={{ flex: 1, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, padding: "0.5rem 0.875rem", color: "#fff", fontSize: "0.875rem", outline: "none", fontFamily: "inherit" }}
+              />
+              <button
+                onClick={() => handleReply(otherId, msgs[0].announcement_id ?? null, replyKey)}
+                disabled={sending === replyKey}
+                style={{ background: "#7c3aed", border: "none", borderRadius: 10, padding: "0.5rem 1rem", color: "#fff", fontWeight: 600, fontSize: "0.82rem", cursor: "pointer", fontFamily: "inherit", opacity: sending === replyKey ? 0.6 : 1 }}
+              >
+                {sending === replyKey ? "..." : "Envoyer"}
+              </button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
