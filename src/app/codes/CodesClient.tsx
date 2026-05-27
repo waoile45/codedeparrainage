@@ -347,7 +347,7 @@ export default function CodesClient() {
     }
 
     let annQuery = supabase.from("announcements")
-      .select(`id, user_id, code, description, bumps_today, created_at, companies(name, slug, category, referral_bonus_description), users(pseudo, level)`)
+      .select(`id, user_id, code, description, bumps_today, created_at, companies(name, slug, category, referral_bonus_description), users(pseudo, level), boosts(active, ends_at)`)
       .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
 
     if (sortMode === "popular") annQuery = annQuery.order("bumps_today", { ascending: false }).order("created_at", { ascending: false });
@@ -397,7 +397,7 @@ export default function CodesClient() {
         userId:      row.user_id ?? "",
         code:        row.code,
         description: cleanDesc || row.companies?.referral_bonus_description || "",
-        boosted:     (row.bumps_today ?? 0) > 0,
+        boosted:     (row.boosts ?? []).some((b: any) => b.active && new Date(b.ends_at) > new Date()),
         brand:       row.companies?.name ?? "Inconnu",
         slug:        row.companies?.slug ?? "",
         category:    row.companies?.category ?? "shopping",
