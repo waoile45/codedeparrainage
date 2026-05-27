@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import Footer from "@/components/Footer";
 import ParticlesBackground from "@/components/ParticlesBackground";
+import StickyBanner from "@/components/StickyBanner";
 
 const syne = Syne({
   variable: "--font-syne",
@@ -62,6 +63,7 @@ export default function RootLayout({
           <ParticlesBackground />
           {children}
           <Footer />
+          <StickyBanner />
         </ThemeProvider>
       </body>
     </html>
