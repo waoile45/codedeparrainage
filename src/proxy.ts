@@ -34,6 +34,8 @@ const RATE_LIMITED_PATHS = [
   '/api/boost',
   '/api/bump',
   '/api/stripe/checkout',
+  '/api/proposer-entreprise',
+  '/api/verify-turnstile',
 ]
 
 export async function proxy(req: NextRequest) {
@@ -65,9 +67,10 @@ export async function proxy(req: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
 
-    // Vérification email admin (utiliser ADMIN_EMAIL côté serveur uniquement)
+    // Vérification email admin — fail-closed : si ADMIN_EMAIL n'est pas
+    // configuré, personne ne passe (plutôt que tout utilisateur connecté).
     const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL
-    if (adminEmail && user.email !== adminEmail) {
+    if (!adminEmail || user.email !== adminEmail) {
       return NextResponse.redirect(new URL('/', req.url))
     }
   }
@@ -84,14 +87,8 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  // ── En-têtes de sécurité ──────────────────────────────────────────────────
-  res.headers.set('X-Frame-Options', 'DENY')
-  res.headers.set('X-Content-Type-Options', 'nosniff')
-  res.headers.set('X-XSS-Protection', '1; mode=block')
-  res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-  res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
-  res.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
-
+  // Les en-têtes de sécurité (CSP, HSTS, X-Frame-Options…) sont définis dans
+  // next.config.ts → headers(), appliqués à toutes les réponses y compris statiques.
   return res
 }
 

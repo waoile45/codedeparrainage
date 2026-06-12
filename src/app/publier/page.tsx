@@ -101,6 +101,8 @@ export default function PublierPage() {
   const [proposalNote, setProposalNote]         = useState("");
   const [proposalSending, setProposalSending]   = useState(false);
   const [proposalSent, setProposalSent]         = useState(false);
+  // Honeypot anti-bot : champ invisible, un humain ne le remplit jamais
+  const [proposalWebsite, setProposalWebsite]   = useState("");
 
   // Filtre sur les données locales (max MAX_DISPLAY affichés)
   const filtered = useMemo(() => {
@@ -129,6 +131,7 @@ export default function PublierPage() {
           nomEntreprise: proposalName.trim(),
           note: proposalNote.trim() || undefined,
           userEmail: user?.email,
+          website: proposalWebsite || undefined,
         }),
       });
     } catch { /* silencieux */ }
@@ -434,6 +437,17 @@ export default function PublierPage() {
                           maxLength={300}
                         />
                       </div>
+                      {/* Honeypot : invisible pour les humains, rempli par les bots */}
+                      <input
+                        type="text"
+                        name="website"
+                        value={proposalWebsite}
+                        onChange={e => setProposalWebsite(e.target.value)}
+                        autoComplete="off"
+                        tabIndex={-1}
+                        aria-hidden="true"
+                        style={{ position:"absolute", left:"-9999px", width:1, height:1, opacity:0 }}
+                      />
                       <button
                         className="btn-next"
                         style={{ marginTop:0 }}
@@ -442,6 +456,11 @@ export default function PublierPage() {
                       >
                         {proposalSending ? "Envoi en cours..." : "Envoyer la proposition"}
                       </button>
+                      <p style={{ marginTop:"0.625rem", fontSize:"0.68rem", color:"var(--text-dim)", lineHeight:1.5 }}>
+                        Ces informations sont utilisées uniquement pour traiter ta proposition et ne sont pas conservées au-delà.
+                        Tu peux exercer tes droits (accès, rectification, suppression) en nous contactant. Voir notre{" "}
+                        <a href="/confidentialite" style={{ color:"var(--text-dim)", textDecoration:"underline" }}>politique de confidentialité</a>.
+                      </p>
                     </>
                   )}
                 </div>
