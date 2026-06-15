@@ -1141,7 +1141,9 @@ export default function ProfilPage() {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) { window.location.href = "/login"; return; }
     const [{ data: profile }, { data: userAnnonces }, { data: reviewData }, { data: top3 }] = await Promise.all([
-      supabase.from("users").select("*").eq("id", authUser.id).single(),
+      // email exclu : il n'est plus lisible via l'API publique (RLS colonne).
+      // On le récupère depuis la session d'auth juste après (authUser.email).
+      supabase.from("users").select("id, pseudo, avatar_url, bio, xp, level, streak_days, last_login, created_at, badge_parrain_mois").eq("id", authUser.id).single(),
       supabase.from("announcements").select("id, code, description, bumps_today, created_at, companies(name, category)").eq("user_id", authUser.id).order("created_at", { ascending: false }),
       supabase.from("platform_reviews").select("id").eq("user_id", authUser.id).maybeSingle(),
       supabase.from("users").select("id").order("xp", { ascending: false }).limit(3),
@@ -1158,7 +1160,10 @@ export default function ProfilPage() {
         profile.level = newLevel;
       }
     }
-    if (profile) setUser(profile);
+    if (profile) {
+      // L'email vient de l'auth (source autorisée), pas de la table users
+      setUser({ ...profile, email: authUser.email } as any);
+    }
     if (userAnnonces) setAnnonces(userAnnonces as any);
     setHasReview(!!reviewData);
     setIsTop3((top3?.some(u => u.id === authUser.id) ?? false) || (profile?.badge_parrain_mois ?? false));
