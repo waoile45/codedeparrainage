@@ -35,6 +35,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Metadata manquante' }, { status: 400 })
     }
 
+    // Idempotence : Stripe peut renvoyer le même événement plusieurs fois.
+    // Si ce paiement a déjà été traité, on ne recrédite pas une seconde fois.
+    const { data: alreadyProcessed } = await supabase
+      .from('credit_purchases')
+      .select('id')
+      .eq('stripe_session_id', session.id)
+      .maybeSingle()
+
+    if (alreadyProcessed) {
+      return NextResponse.json({ received: true })
+    }
+
     await supabase.from('credit_purchases').insert({
       user_id: userId,
       stripe_session_id: session.id,

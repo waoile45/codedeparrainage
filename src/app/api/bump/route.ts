@@ -51,6 +51,11 @@ export async function POST(request: Request) {
 
   if (!ann) return NextResponse.json({ error: 'Annonce introuvable' }, { status: 404 })
 
+  // Anti-IDOR : on ne peut remonter que sa propre annonce
+  if (ann.user_id !== user.id) {
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+  }
+
   const lastBump = ann.last_bumped_at ? new Date(ann.last_bumped_at) : null
   const now = new Date()
   const isNewDay = !lastBump || lastBump.toDateString() !== now.toDateString()
@@ -69,10 +74,19 @@ export async function POST(request: Request) {
     })
     .eq('id', announcementId)
 
-  await supabase
+  // Gain d'XP : lire l'XP de l'utilisateur (et non ann.xp qui n'existe pas → NaN)
+  const { data: profile } = await supabase
     .from('users')
-    .update({ xp: ann.xp + 5 })
+    .select('xp')
     .eq('id', user.id)
+    .single()
+
+  if (profile) {
+    await supabase
+      .from('users')
+      .update({ xp: (profile.xp ?? 0) + 5 })
+      .eq('id', user.id)
+  }
 
   return NextResponse.json({ success: true, bumpsLeft: 4 - bumpsToday })
 }

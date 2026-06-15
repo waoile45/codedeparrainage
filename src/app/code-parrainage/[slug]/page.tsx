@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import Navbar from '@/components/Navbar'
 import CopyButton from '@/components/CopyButton'
 import CompanyLogo from '@/components/CompanyLogo'
+import { safeJsonLd } from '@/lib/sanitize'
 
 export const revalidate = 14400
 
@@ -117,8 +118,8 @@ export default async function CompanyPage({ params }: Props) {
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-dm-sans),'DM Sans',sans-serif", color: 'var(--text-strong)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }} />
 
       <Navbar />
 

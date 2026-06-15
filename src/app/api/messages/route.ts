@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { escapeHtml } from '@/lib/sanitize'
+
+const MAX_MESSAGE_LENGTH = 2000
 
 export async function POST(request: Request) {
   const cookieStore = await cookies()
@@ -26,8 +29,16 @@ export async function POST(request: Request) {
 
   const { receiverId, announcementId, content } = await request.json()
 
-  if (!content || content.trim() === '') {
+  if (typeof content !== 'string' || content.trim() === '') {
     return NextResponse.json({ error: 'Message vide' }, { status: 400 })
+  }
+
+  if (content.length > MAX_MESSAGE_LENGTH) {
+    return NextResponse.json({ error: 'Message trop long' }, { status: 400 })
+  }
+
+  if (!receiverId || typeof receiverId !== 'string') {
+    return NextResponse.json({ error: 'Destinataire invalide' }, { status: 400 })
   }
 
   if (receiverId === user.id) {
@@ -59,11 +70,14 @@ export async function POST(request: Request) {
         const resend = new Resend(process.env.RESEND_API_KEY)
         const senderPseudo = sender?.pseudo ?? 'Un utilisateur'
         const previewText = content.trim().slice(0, 120)
+        // Échappement : pseudo et contenu sont saisis par l'utilisateur → anti-injection HTML/phishing dans l'email
+        const safePseudo = escapeHtml(senderPseudo)
+        const safePreview = escapeHtml(previewText)
 
         await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL ?? 'noreply@codedeparrainage.com',
           to: receiver.email,
-          subject: `💬 Nouveau message de ${senderPseudo}`,
+          subject: `💬 Nouveau message de ${senderPseudo.replace(/[\r\n]+/g, ' ')}`,
           html: `
             <div style="font-family:'DM Sans',Arial,sans-serif;max-width:520px;margin:0 auto;background:#0A0A0F;color:#e2e8f0;border-radius:16px;overflow:hidden;">
               <div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:28px 32px;">
@@ -72,10 +86,10 @@ export async function POST(request: Request) {
               <div style="padding:32px;">
                 <p style="margin:0 0 8px;font-size:1rem;font-weight:700;color:#fff;">Tu as un nouveau message !</p>
                 <p style="margin:0 0 20px;font-size:0.875rem;color:rgba(255,255,255,0.5);">
-                  <strong style="color:rgba(255,255,255,0.8);">${senderPseudo}</strong> t'a envoyé un message sur codedeparrainage.com.
+                  <strong style="color:rgba(255,255,255,0.8);">${safePseudo}</strong> t'a envoyé un message sur codedeparrainage.com.
                 </p>
                 <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:16px 20px;margin-bottom:24px;">
-                  <p style="margin:0;font-size:0.9rem;color:#e2e8f0;line-height:1.6;">${previewText}${content.trim().length > 120 ? '…' : ''}</p>
+                  <p style="margin:0;font-size:0.9rem;color:#e2e8f0;line-height:1.6;">${safePreview}${content.trim().length > 120 ? '…' : ''}</p>
                 </div>
                 <a href="https://codedeparrainage.com/messages" style="display:inline-block;background:#7c3aed;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:0.9rem;">
                   Répondre →

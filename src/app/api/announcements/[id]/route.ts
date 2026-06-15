@@ -24,19 +24,23 @@ export async function DELETE(
       }
     )
 
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
 
     const { error } = await supabase
       .from('announcements')
       .delete()
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      console.error('Delete announcement error:', error)
+      return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {
+    console.error('Delete announcement error:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
@@ -63,21 +67,33 @@ export async function PATCH(
       }
     )
 
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
 
     const { code, description } = await request.json()
 
+    // Validation : éviter les payloads abusifs stockés en base
+    if (typeof code !== 'string' || code.trim().length === 0 || code.length > 60) {
+      return NextResponse.json({ error: 'Code invalide' }, { status: 400 })
+    }
+    if (description != null && (typeof description !== 'string' || description.length > 600)) {
+      return NextResponse.json({ error: 'Description invalide' }, { status: 400 })
+    }
+
     const { error } = await supabase
       .from('announcements')
-      .update({ code, description })
+      .update({ code: code.trim(), description })
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      console.error('Update announcement error:', error)
+      return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {
+    console.error('Update announcement error:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

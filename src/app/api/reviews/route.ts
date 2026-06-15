@@ -25,8 +25,16 @@ export async function POST(request: Request) {
 
   const { announcementId, rating, comment } = await request.json()
 
-  if (!rating || rating < 1 || rating > 5) {
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     return NextResponse.json({ error: 'Note invalide' }, { status: 400 })
+  }
+
+  if (comment != null && (typeof comment !== 'string' || comment.length > 1000)) {
+    return NextResponse.json({ error: 'Commentaire invalide' }, { status: 400 })
+  }
+
+  if (!announcementId || typeof announcementId !== 'string') {
+    return NextResponse.json({ error: 'Annonce invalide' }, { status: 400 })
   }
 
   const { data: ann } = await supabase

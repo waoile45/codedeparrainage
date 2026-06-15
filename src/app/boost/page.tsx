@@ -93,14 +93,13 @@ export default function BoostPage() {
     try {
       for (const id of selected) {
         const d = days[id] ?? 1;
+        // Le prix est recalculé côté serveur (cf. /api/boost) — on n'envoie que la durée.
         await fetch('/api/boost', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             announcement_id: id,
             days: d,
-            cost_per_day: COST_PER_DAY,
-            total_cost: COST_PER_DAY * d,
           }),
         });
       }

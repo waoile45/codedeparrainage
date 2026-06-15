@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar'
 import { VpnEntry, UseCaseKey, USE_CASES, USE_CASE_KEYS } from '@/data/comparatifs/vpn'
+import { safeJsonLd } from '@/lib/sanitize'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -415,9 +416,9 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
         color: 'var(--text-strong)',
       }}
     >
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(itemListLd) }} />
 
       <Navbar />
 

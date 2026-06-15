@@ -31,9 +31,10 @@ export async function POST(request: Request) {
         },
     }
     )
-    const { data: { session } } = await supabase.auth.getSession()
+    // getUser() revalide le JWT côté serveur (getSession() fait juste confiance au cookie)
+    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
     }
 
@@ -47,9 +48,9 @@ export async function POST(request: Request) {
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
-      customer_email: session.user.email,
+      customer_email: user.email,
       metadata: {
-        user_id: session.user.id,
+        user_id: user.id,
         credits: pack.credits.toString(),
       },
       line_items: [

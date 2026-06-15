@@ -81,14 +81,16 @@ export default function AdminPage() {
 
   async function loadData() {
     setLoading(true)
-    const [{ data: comp }, { data: ann }, { data: usr }] = await Promise.all([
+    // Les emails ne sont plus lisibles via l'API publique : la liste des
+    // utilisateurs (avec email) passe par la route serveur admin /api/admin/users.
+    const [{ data: comp }, { data: ann }, usersRes] = await Promise.all([
       supabase.from('companies').select('*').order('name'),
-      supabase.from('announcements').select('*, user_id, users(id,pseudo,email), companies(name)').order('created_at', { ascending: false }),
-      supabase.from('users').select('*, credits(balance)').order('xp', { ascending: false }),
+      supabase.from('announcements').select('*, user_id, users(id,pseudo), companies(name)').order('created_at', { ascending: false }),
+      fetch('/api/admin/users').then(r => r.ok ? r.json() : { users: [] }),
     ])
     setCompanies(comp ?? [])
     setAnnouncements(ann ?? [])
-    setUsers(usr ?? [])
+    setUsers(usersRes.users ?? [])
     setLoading(false)
   }
 

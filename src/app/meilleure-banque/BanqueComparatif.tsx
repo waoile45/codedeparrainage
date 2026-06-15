@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar'
 import { BanqueEntry, BanqueCasKey, BANQUE_CAS, BANQUE_CAS_KEYS } from '@/data/comparatifs/banque'
+import { safeJsonLd } from '@/lib/sanitize'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -201,8 +202,8 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-dm-sans),'DM Sans',sans-serif", color: 'var(--text-strong)' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />
 
       <Navbar />
 

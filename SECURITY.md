@@ -2,6 +2,35 @@
 
 État du durcissement sécurité au 12 juin 2026.
 
+## 0. Audit du 15 juin 2026 — correctifs appliqués
+
+Suite à un audit complet, corrections livrées côté code :
+
+- **CRITIQUE — `/api/boost`** : le coût d'un boost était fourni par le client
+  (`total_cost`, `cost_per_day`), permettant des boosts gratuits ou un solde
+  négatif exploité. Désormais recalculé serveur (`COST_PER_DAY = 0.10`, 1–30 j),
+  avec `getUser()` et vérification que l'annonce appartient à l'utilisateur.
+- **ÉLEVÉ — XSS stocké via JSON-LD** : le `code` d'annonce (saisi par l'utilisateur)
+  était injecté via `JSON.stringify` + `dangerouslySetInnerHTML`, sans échapper
+  `</script>`. Nouveau helper `src/lib/sanitize.ts` → `safeJsonLd()` (échappe
+  `<`, `>`, `&` en `\uXXXX`), appliqué aux pages `/code-parrainage/[slug]`,
+  `meilleur-vpn`, `meilleure-banque`.
+- **ÉLEVÉ — webhook Stripe** : ajout de l'idempotence (dédup sur
+  `stripe_session_id`) → plus de double-crédit sur les retries Stripe.
+- **ÉLEVÉ — auth serveur** : `getSession()` → `getUser()` sur `/api/stripe/checkout`
+  et `/api/announcements/[id]` (le JWT est revalidé, plus de confiance aveugle au cookie).
+- **MOYEN — `/api/bump`** : vérification de propriété (anti-IDOR) + correction du
+  bug XP (`ann.xp` → undefined → NaN ; on lit désormais l'XP de l'utilisateur).
+- **MOYEN — `/api/messages`** : échappement HTML du pseudo et du contenu dans
+  l'email (anti-phishing) + limite de longueur (2000 car.).
+- **FAIBLE** : messages d'erreur Supabase génériques (plus de fuite de schéma),
+  cohérence de la variable admin, validation de longueur (reviews, annonces).
+
+**Reste à faire côté Supabase (non auditable dans le code, cf. point critique RLS)** :
+vérifier que la RLS est activée et restrictive sur `credits`, `boosts`,
+`credit_purchases`, `users`, `announcements`, `messages`, `reviews` ; ajouter une
+contrainte UNIQUE sur `credit_purchases.stripe_session_id`.
+
 ## 1. Headers HTTP de sécurité
 
 Définis dans `next.config.ts` → `headers()`, appliqués à **toutes** les réponses
