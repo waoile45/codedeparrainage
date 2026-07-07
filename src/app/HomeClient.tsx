@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
+import { CategoryIcon } from "@/components/CategoryIcons";
 
 // ── Count-up animation ────────────────────────────────────────────────────────
 function CountUp({ target, suffix="" }: { target: number; suffix?: string }) {
@@ -60,17 +61,6 @@ const PARTICLES = [
   { id: 22, left: "63%",  size: 5, delay: "7.5s",  dur: "10s", opacity: 0.28 },
   { id: 23, left: "78%",  size: 3, delay: "8.5s",  dur: "13s", opacity: 0.20 },
   { id: 24, left: "96%",  size: 4, delay: "4.8s",  dur: "14s", opacity: 0.24 },
-];
-
-// ── Top Codes ─────────────────────────────────────────────────────────────────
-
-const TOP_CODES = [
-  { name: "Boursobank",     icon: "🏦", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://boursobank.com&size=128",      category: "Banque",        catColor: "#3b82f6", rating: 4.9, gain: "+130€",   gainSub: "offerts à l'ouverture",    desc: "Banque en ligne, compte gratuit + prime de bienvenue.",        nbCodes: 48, slug: "boursobank"     },
-  { name: "Revolut",        icon: "💳", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://revolut.com&size=128",          category: "Banque",        catColor: "#3b82f6", rating: 4.7, gain: "+200€",   gainSub: "offerts",                  desc: "Carte internationale sans frais, virements instantanés.",      nbCodes: 31, slug: "revolut"        },
-  { name: "Winamax",        icon: "⚽", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://winamax.fr&size=128",           category: "Paris sportifs",catColor: "#10b981", rating: 4.8, gain: "+100€",   gainSub: "remboursés si 1er pari perdu", desc: "Le leader des paris sportifs en France.",                nbCodes: 62, slug: "winamax"        },
-  { name: "Trade Republic", icon: "📈", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://traderepublic.com&size=128",   category: "Bourse",        catColor: "#6366f1", rating: 4.8, gain: "+200€",   gainSub: "d'actions offerts",        desc: "Investissez en actions et ETF à 1€/ordre.",                    nbCodes: 19, slug: "trade-republic" },
-  { name: "Betclic",        icon: "🎰", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://betclic.fr&size=128",           category: "Paris sportifs",catColor: "#10b981", rating: 4.6, gain: "+30€",    gainSub: "offerts à l'ouverture",    desc: "Plateforme de paris sportifs et casino en ligne.",             nbCodes: 34, slug: "betclic"        },
-  { name: "Free Mobile",    icon: "📱", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://free.fr&size=128",              category: "Téléphonie",    catColor: "#8b5cf6", rating: 4.5, gain: "+20€",    gainSub: "de réduction",             desc: "Forfait mobile pas cher avec parrainage.",                      nbCodes: 22, slug: "free-mobile"    },
 ];
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -190,8 +180,42 @@ const FLOATING_CARDS = [
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function HomeClient() {
+type TopCode = {
+  slug: string; logo: string; name: string; category: string; catColor: string;
+  gain: string | null; gainSub: string | null; desc: string; nbCodes: number; rating: number | null;
+};
+export type HomeData = {
+  codesCount: number;
+  parrainsCount: number;
+  entreprisesCount: number;
+  catCounts: Record<string, number>;
+  topCodes: TopCode[];
+  topParrain: { pseudo: string; level: string } | null;
+};
+
+// Carte flottante « Top parrain » — branchée sur le vrai n°1 (ou message neutre si aucun)
+function TopParrainCard({ parrain }: { parrain: { pseudo: string; level: string } | null }) {
+  const pseudo = parrain?.pseudo ?? "Toi, bientôt ?";
+  const level = parrain?.level ?? "Deviens Top Parrain";
+  const initial = (parrain?.pseudo?.[0] ?? "?").toUpperCase();
+  return (
+    <div>
+      <div style={{ fontSize:"0.68rem", color:"var(--text-dim)", marginBottom:6, letterSpacing:"0.06em" }}>🏆 TOP PARRAIN</div>
+      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+        <div style={{ width:32, height:32, borderRadius:"50%", background:"linear-gradient(135deg,#7c3aed,#a78bfa)", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:"0.75rem", color:"#fff" }}>{initial}</div>
+        <div>
+          <div style={{ fontWeight:700, fontSize:"0.82rem", color:"var(--text-strong)" }}>{pseudo}</div>
+          <div style={{ fontSize:"0.68rem", color:"var(--text-dim)" }}>{level}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function HomeClient({ data }: { data?: HomeData }) {
   const [mounted, setMounted] = useState(false);
+  // Vraies données (la section Top codes est masquée tant qu'il y a moins de 3 entreprises avec des codes)
+  const topCodes = data?.topCodes ?? [];
   useTheme();
   useEffect(() => { setMounted(true); }, []);
 
@@ -254,13 +278,13 @@ export default function HomeClient() {
         <div style={{ animation: mounted ? "fadeInUp 0.6s ease both" : "none" }}>
           <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"var(--bg-card-md)", border:"1px solid var(--border-lg)", borderRadius:999, padding:"0.35rem 0.875rem", marginBottom:"1.75rem", fontSize:"0.78rem", color:"var(--text-link)" }}>
             <span style={{ width:7, height:7, borderRadius:"50%", background:"#10b981", boxShadow:"0 0 6px #10b981", display:"inline-block" }} />
-            +4 200 codes actifs en ce moment
+            {data?.codesCount ?? 0} codes actifs en ce moment
           </div>
           <h1 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"clamp(2.8rem,5vw,4.5rem)", lineHeight:1.05, letterSpacing:"-0.03em", margin:0, marginBottom:"1.5rem", color:"var(--text-strong)" }}>
-            Parraine et<br /><span style={{ color:"#7c3aed" }}>gagne</span> des<br />récompenses.
+            Ton code de<br /><span style={{ color:"#7c3aed" }}>parrainage</span><br />qui rapporte.
           </h1>
           <p style={{ color:"var(--text-muted)", fontSize:"1rem", lineHeight:1.7, maxWidth:460, marginBottom:"2rem" }}>
-            La plateforme de parrainage gamifiée. Publie ton code, monte de niveau, débloque des badges et rejoins 850+ parrains vérifiés.
+            La plateforme de parrainage gamifiée. Publie ton code, monte de niveau, débloque des badges et rejoins une communauté de parrains vérifiés.
           </p>
           <div style={{ display:"flex", gap:"0.875rem", flexWrap:"wrap" }}>
             <Link href="/codes"
@@ -276,9 +300,9 @@ export default function HomeClient() {
           </div>
           <div id="hp-hero-stats" style={{ display:"flex", gap:"2rem", marginTop:"2.5rem" }}>
             {[
-              { target:4200, suffix:"+", l:"Codes actifs" },
-              { target:850,  suffix:"+", l:"Parrains vérifiés" },
-              { target:97,   suffix:"%", l:"Avis positifs" },
+              { target: data?.codesCount ?? 0,       suffix:"", l:"Codes actifs" },
+              { target: data?.parrainsCount ?? 0,    suffix:"", l:"Parrains" },
+              { target: data?.entreprisesCount ?? 0, suffix:"", l:"Entreprises" },
             ].map(s=>(
               <div key={s.l}>
                 <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.5rem", color:"var(--text-strong)" }}>
@@ -295,7 +319,7 @@ export default function HomeClient() {
           <div style={{ position:"absolute", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(124,58,237,0.18) 0%,transparent 70%)", top:"50%", left:"50%", transform:"translate(-50%,-50%)", pointerEvents:"none" }} />
           {FLOATING_CARDS.map((card,i)=>(
             <div key={card.id} style={{ position:"absolute", top:card.top, right:card.right, background:"var(--bg-card-md)", backdropFilter:"blur(16px)", border:"1px solid var(--border)", borderRadius:16, padding:"0.875rem 1rem", minWidth:200, animation: mounted ? `floatCard${i%2} ${3+i*0.5}s ease-in-out ${i*0.4}s infinite` : "none", boxShadow:"0 8px 32px rgba(0,0,0,0.2)" }}>
-              {card.content}
+              {card.id === "top" ? <TopParrainCard parrain={data?.topParrain ?? null} /> : card.content}
             </div>
           ))}
         </div>
@@ -320,7 +344,8 @@ export default function HomeClient() {
         </div>
       </section>
 
-      {/* ══ MEILLEURS CODES ═════════════════════════════════════════════════ */}
+      {/* ══ MEILLEURS CODES (affiché seulement si ≥ 3 entreprises ont des codes) ══ */}
+      {topCodes.length >= 3 && (
       <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"0.5rem", paddingBottom:"2rem" }}>
         <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:"1.5rem" }}>
           <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:0 }}>
@@ -329,7 +354,7 @@ export default function HomeClient() {
           <Link href="/codes" style={{ fontSize:"0.82rem", color:"#a78bfa", textDecoration:"none", fontWeight:600 }}>Voir tout →</Link>
         </div>
         <div id="hp-top-codes" style={{ display:"grid", gap:"1rem" }}>
-          {TOP_CODES.map(code => (
+          {topCodes.map(code => (
             <Link key={code.slug} href={`/code-parrainage/${code.slug}`} style={{ textDecoration:"none" }}>
               <div
                 className="top-code-card"
@@ -348,22 +373,26 @@ export default function HomeClient() {
                       style={{ objectFit:"contain", borderRadius:6 }}
                       onError={e => { (e.currentTarget as HTMLImageElement).style.display="none"; (e.currentTarget.nextSibling as HTMLElement).style.display="flex"; }}
                     />
-                    <span style={{ display:"none", fontSize:26 }}>{code.icon}</span>
+                    <span style={{ display:"none" }}><CategoryIcon name={code.category} size={24} /></span>
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ fontWeight:800, fontSize:"1rem", color:"var(--text-strong)" }}>{code.name}</div>
                     <div style={{ marginTop:4 }}>
                       <span style={{ fontSize:"0.68rem", fontWeight:700, color:code.catColor, background:`${code.catColor}18`, border:`1px solid ${code.catColor}30`, borderRadius:6, padding:"1px 7px", whiteSpace:"nowrap", display:"inline-block", marginBottom:2 }}>{code.category}</span>
                     </div>
+                    {code.rating != null && (
                     <div style={{ display:"flex", alignItems:"center", gap:4 }}>
                       <span style={{ fontSize:"0.72rem", color:"#fbbf24" }}>★</span>
                       <span style={{ fontSize:"0.72rem", color:"var(--text-dim)", fontWeight:600 }}>{code.rating}</span>
                     </div>
+                    )}
                   </div>
+                  {code.gain && (
                   <div style={{ textAlign:"right", flexShrink:0, maxWidth:130 }}>
                     <div style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.35rem", color:"#34d399", lineHeight:1 }}>{code.gain}</div>
                     <div style={{ fontSize:"0.68rem", color:"var(--text-dim)", marginTop:3, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{code.gainSub}</div>
                   </div>
+                  )}
                 </div>
                 {/* Description */}
                 <p style={{ fontSize:"0.82rem", color:"var(--text-muted)", margin:0, lineHeight:1.55 }}>{code.desc}</p>
@@ -377,6 +406,7 @@ export default function HomeClient() {
           ))}
         </div>
       </section>
+      )}
 
       {/* ══ CATEGORIES ══════════════════════════════════════════════════════ */}
       <section className="hp-section" style={{ position:"relative", zIndex:1, maxWidth:1200, margin:"0 auto", paddingTop:"1rem", paddingBottom:"2rem" }}>
@@ -394,10 +424,10 @@ export default function HomeClient() {
               >
                 <div style={{ position:"absolute", bottom:0, left:0, right:0, height:2, background:cat.color, opacity:0.5 }} />
                 <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <span style={{ fontSize:20 }}>{cat.icon}</span>
+                  <CategoryIcon name={cat.slug} size={22} />
                   <span style={{ fontWeight:600, fontSize:"0.875rem", color:"var(--text-strong)" }}>{cat.label}</span>
                 </div>
-                <span style={{ fontSize:"0.7rem", fontWeight:700, color:cat.color, background:`${cat.color}18`, border:`1px solid ${cat.color}30`, borderRadius:8, padding:"2px 8px" }}>{cat.count}</span>
+                <span style={{ fontSize:"0.7rem", fontWeight:700, color:cat.color, background:`${cat.color}18`, border:`1px solid ${cat.color}30`, borderRadius:8, padding:"2px 8px" }}>{data?.catCounts?.[cat.slug] ?? 0}</span>
               </div>
             </Link>
           ))}
@@ -409,8 +439,7 @@ export default function HomeClient() {
         <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:"1.5rem" }}>
           <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1.4rem", margin:0 }}>Ce qu&apos;ils en pensent</h2>
           <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-            <span style={{ color:"#fbbf24", fontSize:"0.9rem" }}>★★★★★</span>
-            <span style={{ fontSize:"0.78rem", color:"var(--text-dim)" }}>4.9 / 5 · 850+ avis</span>
+            <span style={{ fontSize:"0.78rem", color:"var(--text-dim)" }}>Avis de membres de la communauté</span>
           </div>
         </div>
         <div id="hp-avis-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:"1rem" }}>

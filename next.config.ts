@@ -37,11 +37,24 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  poweredByHeader: false,
   async headers() {
     return [
       {
         source: '/:path*',
         headers: securityHeaders,
+      },
+    ]
+  },
+  // Une seule version canonique : non-www → www en redirection permanente.
+  // (Le trailing slash est déjà normalisé par Next : /foo/ → 308 → /foo.)
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'codedeparrainage.com' }],
+        destination: 'https://www.codedeparrainage.com/:path*',
+        permanent: true,
       },
     ]
   },

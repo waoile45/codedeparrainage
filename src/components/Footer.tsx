@@ -14,6 +14,19 @@ const COLUMNS = [
     ],
   },
   {
+    title: "Catégories",
+    links: [
+      { label: "Parrainage banque",         href: "/code-parrainage/categorie/banque" },
+      { label: "Parrainage cashback",       href: "/code-parrainage/categorie/cashback" },
+      { label: "Parrainage paris sportifs", href: "/code-parrainage/categorie/paris-sportifs" },
+      { label: "Parrainage crypto",         href: "/code-parrainage/categorie/crypto" },
+      { label: "Parrainage téléphonie",     href: "/code-parrainage/categorie/telephonie" },
+      { label: "Parrainage énergie",        href: "/code-parrainage/categorie/energie" },
+      { label: "Parrainage shopping",       href: "/code-parrainage/categorie/shopping" },
+      { label: "Parrainage covoiturage",    href: "/code-parrainage/categorie/mobilite" },
+    ],
+  },
+  {
     title: "Comparatifs",
     links: [
       { label: "Meilleur VPN",              href: "/meilleur-vpn" },
@@ -50,12 +63,12 @@ export default function Footer() {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "3rem 2rem 2rem" }}>
 
         {/* Top */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", gap: "2.5rem", marginBottom: "2.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr", gap: "2rem", marginBottom: "2.5rem" }}>
 
           {/* Brand */}
           <div>
             <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: "0.875rem" }}>
-              <img src="/logo.png" alt="logo" style={{ width: 40, height: 40, objectFit: "contain", flexShrink: 0 }} />
+              <img src="/logo.png" alt="Logo codedeparrainage.com" width={40} height={40} loading="lazy" style={{ width: 40, height: 40, objectFit: "contain", flexShrink: 0 }} />
               <span style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: "1rem", color: "#fff" }}>
                 codedeparrainage<span style={{ color: "#7c3aed" }}>.com</span>
               </span>

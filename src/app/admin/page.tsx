@@ -85,7 +85,7 @@ export default function AdminPage() {
     // utilisateurs (avec email) passe par la route serveur admin /api/admin/users.
     const [{ data: comp }, { data: ann }, usersRes] = await Promise.all([
       supabase.from('companies').select('*').order('name'),
-      supabase.from('announcements').select('*, user_id, users(id,pseudo), companies(name)').order('created_at', { ascending: false }),
+      supabase.from('announcements').select('*, user_id, users(id,pseudo), companies(name), boosts(active, ends_at)').order('created_at', { ascending: false }),
       fetch('/api/admin/users').then(r => r.ok ? r.json() : { users: [] }),
     ])
     setCompanies(comp ?? [])
@@ -130,10 +130,26 @@ export default function AdminPage() {
     const days = parseInt(boostDays)
     if (isNaN(days) || days < 1) return
     setBoostLoading(true)
-    await fetch('/api/admin/give-boost', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ announcementId: ann.id, userId: ann.user_id, days }) })
+    const res = await fetch('/api/admin/give-boost', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ announcementId: ann.id, userId: ann.user_id, days }) })
+    setBoostLoading(false)
+    if (!res.ok) {
+      const { error } = await res.json().catch(() => ({ error: 'Erreur inconnue' }))
+      alert('Le boost a échoué : ' + (error ?? res.status))
+      return
+    }
+    // Refléter le boost immédiatement (badge ⚡ Boostée)
+    const endsAt = new Date()
+    endsAt.setDate(endsAt.getDate() + days)
+    setAnnouncements(prev => prev.map(a =>
+      a.id !== ann.id ? a : { ...a, boosts: [...(a.boosts ?? []), { active: true, ends_at: endsAt.toISOString() }] }
+    ))
     setGivingBoost(null)
     setBoostDays('7')
-    setBoostLoading(false)
+  }
+
+  function isBoosted(ann: any): boolean {
+    const now = Date.now()
+    return (ann.boosts ?? []).some((b: any) => b.active && new Date(b.ends_at).getTime() > now)
   }
 
   async function handleSaveCompany() {
@@ -220,6 +236,7 @@ export default function AdminPage() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#e2e8f0' }}>{ann.companies?.name ?? '—'}</span>
                             <span style={S.code}>{ann.code}</span>
+                            {isBoosted(ann) && <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#22c55e', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 100, padding: '1px 8px' }}>⚡ Boostée</span>}
                           </div>
                           <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
                             par {ann.users?.pseudo ?? '?'} · {new Date(ann.created_at).toLocaleDateString('fr-FR')}

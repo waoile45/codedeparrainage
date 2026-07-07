@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import { ENTREPRISES, type Entreprise } from "@/data/entreprises";
+import { CategoryIcon } from "@/components/CategoryIcons";
 
 // ── Entreprises recommandées (prioritaires) ────────────────────────────────────
 const RECOMMENDED: Entreprise[] = [
@@ -27,7 +28,6 @@ const RECOMMENDED: Entreprise[] = [
 // ── Constantes ─────────────────────────────────────────────────────────────────
 const CATEGORIES = ["banque","crypto","energie","cashback","telephonie","paris","assurance","shopping"];
 const CAT_LABELS: Record<string,string> = { banque:"Banque", crypto:"Crypto", energie:"Énergie", cashback:"Cashback", telephonie:"Téléphonie", paris:"Paris", assurance:"Assurance", shopping:"Shopping" };
-const CAT_ICONS: Record<string,string> = { banque:"🏦", crypto:"₿", energie:"⚡", cashback:"💸", telephonie:"📱", paris:"⚽", assurance:"🛡️", shopping:"🛍️" };
 const XP_GAIN = 10;
 const MAX_DISPLAY = 200;
 
@@ -527,7 +527,7 @@ export default function PublierPage() {
                         onClick={() => setSelectedCategory(c)}
                         type="button"
                       >
-                        {CAT_ICONS[c]} {CAT_LABELS[c]}
+                        <CategoryIcon name={c} size={16} /> {CAT_LABELS[c]}
                       </button>
                     ))}
                   </div>

@@ -1,57 +1,82 @@
 import CodesClient from './CodesClient'
+import { createAnonSupabase } from '@/lib/supabase-server'
+import { formatBrandName } from '@/lib/seo'
+import { CATEGORIES } from '@/data/categories'
+
+// ISR 30 min : l'annuaire crawlable suit les publications de codes
+export const revalidate = 1800
 
 export const metadata = {
   title: 'Codes de parrainage — Annuaire complet',
-  description: 'Parcourez tous les codes de parrainage disponibles : banque, paris sportifs, crypto, cashback. Codes vérifiés par la communauté et mis à jour en temps réel.',
+  description: 'Parcours tous les codes de parrainage disponibles : banque, paris sportifs, crypto, cashback. Codes vérifiés par la communauté et mis à jour en temps réel.',
   alternates: {
     canonical: 'https://www.codedeparrainage.com/codes',
   },
 }
 
-const COMPANY_LINKS = [
-  { slug: 'boursobank',     name: 'BoursoBank' },
-  { slug: 'winamax',        name: 'Winamax' },
-  { slug: 'betclic',        name: 'Betclic' },
-  { slug: 'revolut',        name: 'Revolut' },
-  { slug: 'trade-republic', name: 'Trade Republic' },
-  { slug: 'bourse-direct',  name: 'BourseDirect' },
-  { slug: 'unibet',         name: 'Unibet' },
-  { slug: 'binance',        name: 'Binance' },
-  { slug: 'fortuneo',       name: 'Fortuneo' },
-  { slug: 'free',           name: 'Free Mobile' },
-]
+/**
+ * Annuaire crawlable server-rendered : chaque marque avec ≥1 code actif est
+ * liée ici → aucune page « argent » orpheline, sans dépendre du JS client.
+ */
+async function getActiveBrands(): Promise<{ slug: string; name: string }[]> {
+  const supabase = createAnonSupabase()
+  const { data } = await supabase
+    .from('announcements')
+    .select('companies (name, url_slug)')
+  const seen = new Map<string, string>()
+  for (const row of (data ?? []) as any[]) {
+    const c = row.companies
+    if (c?.url_slug && !seen.has(c.url_slug)) seen.set(c.url_slug, formatBrandName(c.name))
+  }
+  return [...seen.entries()]
+    .map(([slug, name]) => ({ slug, name }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+}
 
-// Pas de fetch Supabase ici — createClient est un client navigateur.
-// Les données sont chargées par CodesClient côté client comme avant.
-export default function CodesPage() {
+export default async function CodesPage() {
+  const brands = await getActiveBrands()
+
   return (
     <>
-      {/* Contenu statique visible par Google — maillage interne vers les pages entreprises */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          left: '-9999px',
-          width: '1px',
-          overflow: 'hidden',
-        }}
+      {/* Interface interactive — même comportement qu'avant.
+          (Le H1 de la page est rendu par CodesClient, côté serveur aussi.) */}
+      <CodesClient />
+
+      {/* ── Annuaire crawlable : marques avec codes actifs + hubs catégorie ── */}
+      <section
+        aria-label="Toutes les marques avec codes actifs"
+        style={{ position: 'relative', zIndex: 1, maxWidth: 860, margin: '0 auto', padding: '0 1.5rem 5rem', fontFamily: "var(--font-dm-sans),'DM Sans',sans-serif" }}
       >
-        <h1>Codes de parrainage — Annuaire complet</h1>
-        <p>
-          Trouvez les meilleurs codes de parrainage vérifiés par notre communauté.
-          Banque, paris sportifs, crypto, cashback — tous les secteurs sont couverts.
-        </p>
-        <nav aria-label="Pages entreprises">
-          {COMPANY_LINKS.map((c) => (
-            <a key={c.slug} href={`/code-parrainage/${c.slug}`}>
-              Code parrainage {c.name}
+        <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', color: 'var(--text-strong)', margin: '0 0 1rem' }}>
+          Toutes les marques avec codes actifs
+        </h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: '2rem' }}>
+          {brands.map((b) => (
+            <a
+              key={b.slug}
+              href={`/code-parrainage/${b.slug}`}
+              style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'var(--bg-card-md)', border: '1px solid var(--border)', color: 'var(--text-dim)', textDecoration: 'none' }}
+            >
+              {b.name}
             </a>
           ))}
-        </nav>
-      </div>
+        </div>
 
-      {/* Interface interactive — même comportement qu'avant */}
-      <CodesClient />
+        <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', color: 'var(--text-strong)', margin: '0 0 1rem' }}>
+          Parcourir par catégorie
+        </h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {CATEGORIES.map((c) => (
+            <a
+              key={c.slug}
+              href={`/code-parrainage/categorie/${c.slug}`}
+              style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'rgba(124,58,237,.1)', border: '1px solid rgba(124,58,237,.25)', color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}
+            >
+              {c.label}
+            </a>
+          ))}
+        </div>
+      </section>
     </>
   )
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
+import { CategoryIcon } from "@/components/CategoryIcons";
 
 // ── Posts démo hardcodés (miroir de forum/page.tsx) ───────────────────────────
 const DEMO_POSTS_MAP: Record<string, { title:string; content:string; category:string; likes:number; created_at:string; pseudo:string; level:string; replies:{id:string;pseudo:string;level:string;content:string;created_at:string;likes:number}[] }> = {
@@ -92,10 +93,6 @@ interface Post {
 const CAT_COLORS: Record<string, string> = {
   Général: "#6366f1", Banque: "#3b82f6", "Paris Sportifs": "#10b981",
   Crypto: "#f59e0b", Cashback: "#ec4899", Téléphonie: "#8b5cf6", Astuce: "#14b8a6",
-};
-const CAT_ICONS: Record<string, string> = {
-  Général: "💬", Banque: "🏦", "Paris Sportifs": "⚽",
-  Crypto: "₿", Cashback: "💸", Téléphonie: "📱", Astuce: "💡",
 };
 
 function timeAgo(iso: string) {
@@ -282,7 +279,7 @@ export default function ForumPostPage() {
         {/* Post principal */}
         <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 18, padding: "1.5rem", marginBottom: "1.5rem" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: ".72rem", fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: `${color}18`, color, border: `1px solid ${color}30`, marginBottom: ".75rem" }}>
-            {CAT_ICONS[post.category] ?? "💬"} {post.category}
+            <CategoryIcon name={post.category} size={14} /> {post.category}
           </div>
           <h1 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: "1.35rem", color: "var(--text-strong)", margin: "0 0 .875rem", lineHeight: 1.3 }}>
             {post.title}

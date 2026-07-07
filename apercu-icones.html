@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aperçu icônes — codedeparrainage</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#0A0A0F; color:#e2e8f0;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    padding:48px 24px 80px; min-height:100vh;
+  }
+  .wrap { max-width:920px; margin:0 auto; }
+  .label { display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.14em;
+    text-transform:uppercase; color:#a78bfa; margin-bottom:12px; }
+  h1 { font-size:1.9rem; font-weight:800; letter-spacing:-.02em; margin-bottom:8px; }
+  .sub { color:rgba(255,255,255,.45); font-size:.95rem; max-width:560px; line-height:1.6; margin-bottom:40px; }
+  .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  @media(max-width:760px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  .card {
+    background:rgba(255,255,255,.025); border:1px solid rgba(255,255,255,.07);
+    border-radius:18px; padding:22px 16px; text-align:center;
+    transition:transform .2s, border-color .2s;
+  }
+  .card:hover { transform:translateY(-3px); border-color:rgba(124,58,237,.35); }
+  .pastille {
+    width:64px; height:64px; border-radius:18px; margin:0 auto 14px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .name { font-weight:700; font-size:.92rem; color:#fff; }
+  .before { font-size:.72rem; color:rgba(255,255,255,.3); margin-top:4px; }
+  .section-title { font-size:1.05rem; font-weight:700; margin:48px 0 18px; color:#fff; }
+  .note { margin-top:48px; background:rgba(124,58,237,.07); border:1px solid rgba(124,58,237,.2);
+    border-radius:14px; padding:18px 22px; font-size:.88rem; color:rgba(255,255,255,.6); line-height:1.6; }
+  .row-sizes { display:flex; align-items:center; gap:28px; flex-wrap:wrap;
+    background:rgba(255,255,255,.025); border:1px solid rgba(255,255,255,.07);
+    border-radius:18px; padding:24px; }
+  .row-sizes > div { display:flex; align-items:center; justify-content:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="label">Proposition · icônes dessinées</span>
+  <h1>Icônes de catégories — style « illustré »</h1>
+  <p class="sub">
+    Des icônes <strong>SVG dessinées sur mesure</strong> (comme Jointy), en duotone,
+    teintées avec la couleur de chaque catégorie. Aucune librairie, aucun emoji —
+    elles sont uniques à ton site et fonctionnent parfaitement sur fond sombre.
+  </p>
+
+  <div class="grid">
+
+    <!-- BANQUE -->
+    <div class="card">
+      <div class="pastille" style="background:rgba(91,157,255,.13);border:1px solid rgba(91,157,255,.28)">
+        <svg viewBox="0 0 40 40" width="34" height="34" fill="none">
+          <path d="M20 4 L35 13 H5 Z" fill="#9ec5ff"/>
+          <rect x="5" y="13.5" width="30" height="3" rx="1.5" fill="#5b9dff"/>
+          <rect x="9" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/>
+          <rect x="15.6" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/>
+          <rect x="21.2" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/>
+          <rect x="27.4" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/>
+          <rect x="6" y="29.5" width="28" height="4" rx="1.5" fill="#9ec5ff"/>
+        </svg>
+      </div>
+      <div class="name">Banque</div>
+      <div class="before">avant&nbsp;: 🏦</div>
+    </div>
+
+    <!-- CRYPTO -->
+    <div class="card">
+      <div class="pastille" style="background:rgba(245,177,60,.13);border:1px solid rgba(245,177,60,.28)">
+        <svg viewBox="0 0 40 40" width="34" height="34" fill="none">
+          <circle cx="20" cy="20" r="14" fill="#f5b13c"/>
+          <circle cx="20" cy="20" r="14" fill="none" stroke="#ffd279" stroke-width="1.6" opacity=".55"/>
+          <g stroke="#3a2606" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d="M17 13 V27"/>
+            <path d="M17 13 H22 a3.2 3.2 0 0 1 0 6.4 H17"/>
+            <path d="M17 19.4 H22.7 a3.4 3.4 0 0 1 0 6.6 H17"/>
+            <path d="M19 10.6 V13 M22 10.6 V13 M19 27 V29.4 M22 27 V29.4"/>
+          </g>
+        </svg>
+      </div>
+      <div class="name">Crypto</div>
+      <div class="before">avant&nbsp;: ₿</div>
+    </div>
+
+    <!-- PARIS SPORTIFS -->
+    <div class="card">
+      <div class="pastille" style="background:rgba(52,211,153,.13);border:1px solid rgba(52,211,153,.28)">
+        <svg viewBox="0 0 40 40" width="34" height="34" fill="none">
+          <path d="M9 8 a4.5 4.5 0 0 0 0 9" fill="none" stroke="#34d399" stroke-width="2.6"/>
+          <path d="M31 8 a4.5 4.5 0 0 1 0 9" fill="none" stroke="#34d399" stroke-width="2.6"/>
+          <path d="M12 6 H28 V14 a8 8 0 0 1 -16 0 Z" fill="#34d399"/>
+          <path d="M12 6 H28 V9 H12 Z" fill="#6ee7b7"/>
+          <rect x="18" y="22" width="4" height="5" fill="#6ee7b7"/>
+          <rect x="13.5" y="27" width="13" height="3.6" rx="1.6" fill="#6ee7b7"/>
+        </svg>
+      </div>
+      <div class="name">Paris sportifs</div>
+      <div class="before">avant&nbsp;: ⚽</div>
+    </div>
+
+    <!-- CASHBACK -->
+    <div class="card">
+      <div class="pastille" style="background:rgba(129,140,248,.13);border:1px solid rgba(129,140,248,.28)">
+        <svg viewBox="0 0 40 40" width="34" height="34" fill="none">
+          <path d="M31 13 A12 12 0 1 0 33 21" fill="none" stroke="#b4baff" stroke-width="3" stroke-linecap="round"/>
+          <path d="M30 7 L32.5 14 L25.5 14.5 Z" fill="#b4baff"/>
+          <circle cx="19" cy="22" r="9" fill="#818cf8"/>
+          <g stroke="#1a1c3a" stroke-width="1.9" stroke-linecap="round" fill="none">
+            <path d="M22 18.5 a4.2 4.2 0 1 0 0 7"/>
+            <path d="M15.5 21 H22"/>
+            <path d="M15.5 23.2 H21"/>
+          </g>
+        </svg>
+      </div>
+      <div class="name">Cashback</div>
+      <div class="before">avant&nbsp;: 💸</div>
+    </div>
+
+    <!-- ÉNERGIE -->
+    <div class="card">
+      <div class="pastille" style="background:rgba(244,114,182,.13);border:1px solid rgba(244,114,182,.28)">
+        <svg viewBox="0 0 40 40" width="34" height="34" fill="none">
+          <path d="M23 4 L10 23 H18 L16 36 L30 16 H21 Z" fill="#f472b6"/>
+          <path d="M23 4 L10 23 H18 L21.5 9 Z" fill="#f9a8d4"/>
+        </svg>
+      </div>
+      <div class="name">Énergie</div>
+      <div class="before">avant&nbsp;: ⚡</div>
+    </div>
+
+    <!-- TÉLÉPHONIE -->
+    <div class="card">
+      <div class="pastille" style="background:rgba(167,139,250,.13);border:1px solid rgba(167,139,250,.28)">
+        <svg viewBox="0 0 40 40" width="34" height="34" fill="none">
+          <rect x="12" y="4" width="16" height="32" rx="4.5" fill="#a78bfa"/>
+          <rect x="14.6" y="9" width="10.8" height="18" rx="1.6" fill="#0A0A0F" opacity=".55"/>
+          <rect x="17.6" y="6.6" width="4.8" height="1.5" rx=".75" fill="#0A0A0F" opacity=".4"/>
+          <circle cx="20" cy="31.5" r="1.7" fill="#0A0A0F" opacity=".45"/>
+          <path d="M16 12 L20 12" stroke="#c9b8ff" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="name">Téléphonie</div>
+      <div class="before">avant&nbsp;: 📱</div>
+    </div>
+
+    <!-- ASSURANCE -->
+    <div class="card">
+      <div class="pastille" style="background:rgba(251,146,60,.13);border:1px solid rgba(251,146,60,.28)">
+        <svg viewBox="0 0 40 40" width="34" height="34" fill="none">
+          <path d="M20 4 L33 9 V19 C33 27 27 33 20 36 C13 33 7 27 7 19 V9 Z" fill="#fb923c"/>
+          <path d="M20 4 L7 9 V19 C7 27 13 33 20 36 Z" fill="#fdba74" opacity=".45"/>
+          <path d="M13.5 20 L18.5 25.5 L27 14.5" fill="none" stroke="#0A0A0F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>
+        </svg>
+      </div>
+      <div class="name">Assurance</div>
+      <div class="before">avant&nbsp;: 🛡️</div>
+    </div>
+
+    <!-- SHOPPING -->
+    <div class="card">
+      <div class="pastille" style="background:rgba(45,212,191,.13);border:1px solid rgba(45,212,191,.28)">
+        <svg viewBox="0 0 40 40" width="34" height="34" fill="none">
+          <path d="M15 15 V11 a5 5 0 0 1 10 0 V15" fill="none" stroke="#5eead4" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M9 13 H31 L29.5 33.5 a2.2 2.2 0 0 1 -2.2 2 H12.7 a2.2 2.2 0 0 1 -2.2 -2 Z" fill="#2dd4bf"/>
+          <path d="M9 13 H31 L30.5 18 H9.5 Z" fill="#5eead4" opacity=".4"/>
+          <circle cx="15.5" cy="21" r="1.5" fill="#0A0A0F" opacity=".35"/>
+          <circle cx="24.5" cy="21" r="1.5" fill="#0A0A0F" opacity=".35"/>
+        </svg>
+      </div>
+      <div class="name">Shopping</div>
+      <div class="before">avant&nbsp;: 🛍️</div>
+    </div>
+
+  </div>
+
+  <div class="section-title">Lisibilité à différentes tailles</div>
+  <div class="row-sizes">
+    <!-- Banque à 5 tailles pour montrer la netteté -->
+    <div><svg viewBox="0 0 40 40" width="18" height="18" fill="none"><path d="M20 4 L35 13 H5 Z" fill="#9ec5ff"/><rect x="5" y="13.5" width="30" height="3" rx="1.5" fill="#5b9dff"/><rect x="9" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="15.6" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="21.2" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="27.4" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="6" y="29.5" width="28" height="4" rx="1.5" fill="#9ec5ff"/></svg></div>
+    <div><svg viewBox="0 0 40 40" width="28" height="28" fill="none"><path d="M20 4 L35 13 H5 Z" fill="#9ec5ff"/><rect x="5" y="13.5" width="30" height="3" rx="1.5" fill="#5b9dff"/><rect x="9" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="15.6" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="21.2" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="27.4" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="6" y="29.5" width="28" height="4" rx="1.5" fill="#9ec5ff"/></svg></div>
+    <div><svg viewBox="0 0 40 40" width="40" height="40" fill="none"><path d="M20 4 L35 13 H5 Z" fill="#9ec5ff"/><rect x="5" y="13.5" width="30" height="3" rx="1.5" fill="#5b9dff"/><rect x="9" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="15.6" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="21.2" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="27.4" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="6" y="29.5" width="28" height="4" rx="1.5" fill="#9ec5ff"/></svg></div>
+    <div><svg viewBox="0 0 40 40" width="56" height="56" fill="none"><path d="M20 4 L35 13 H5 Z" fill="#9ec5ff"/><rect x="5" y="13.5" width="30" height="3" rx="1.5" fill="#5b9dff"/><rect x="9" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="15.6" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="21.2" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="27.4" y="18" width="3.6" height="10" rx="1.2" fill="#5b9dff"/><rect x="6" y="29.5" width="28" height="4" rx="1.5" fill="#9ec5ff"/></svg></div>
+  </div>
+
+  <div class="note">
+    👉 Si ce style te plaît, je crée le fichier <strong>src/components/CategoryIcons.tsx</strong>
+    (sur le modèle de celui de Jointy) avec ces 8 icônes + les catégories secondaires du forum
+    (Tout, Général, Astuce, Bourse), puis je remplace les emojis dans les 5 fichiers du site.
+    Tu peux aussi me dire ce que tu veux ajuster (couleurs, niveau de détail, style avec ou sans
+    contour) — c'est fait pour itérer.
+  </div>
+</div>
+</body>
+</html>

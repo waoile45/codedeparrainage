@@ -24,7 +24,11 @@ export default function CompanyLogo({ domain, name }: { domain: string; name: st
   return (
     <img
       src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
-      alt={name}
+      alt={`Logo ${name}`}
+      width={36}
+      height={36}
+      loading="lazy"
+      decoding="async"
       onError={() => setFailed(true)}
       onLoad={(e) => {
         if ((e.currentTarget as HTMLImageElement).naturalWidth <= 1) setFailed(true)

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
+import { CategoryIcon } from "@/components/CategoryIcons";
 
 type Category = "Tout" | "banque" | "paris" | "cashback" | "energie" | "telephonie" | "crypto" | "assurance" | "shopping";
 
@@ -25,7 +26,6 @@ interface CodeCard {
 
 const CATEGORIES = ["Tout","banque","paris","cashback","energie","telephonie","crypto","assurance","shopping"];
 const CATEGORY_LABELS: Record<string,string> = { Tout:"Tout", banque:"Banque", paris:"Paris", cashback:"Cashback", energie:"Énergie", telephonie:"Téléphonie", crypto:"Crypto", assurance:"Assurance", shopping:"Shopping" };
-const CATEGORY_ICONS: Record<string,string> = { Tout:"✦", banque:"🏦", paris:"⚽", cashback:"💸", energie:"⚡", telephonie:"📱", crypto:"₿", assurance:"🛡️", shopping:"🛍️" };
 const NIVEAU_COLORS: Record<string,string> = { Débutant:"#6366f1", "Parrain Bronze":"#cd7f32", "Parrain Argent":"#8b5cf6", "Parrain Or":"#f59e0b", "Super Parrain":"#a855f7", "Parrain Légendaire":"#ec4899" };
 
 function BrandLogo({ slug, brand }: { slug: string; brand: string }) {
@@ -410,6 +410,12 @@ export default function CodesClient() {
       };
     });
 
+    // Les annonces boostées passent en tête (tri "populaire").
+    // sort() est stable : à boost égal, l'ordre bumps/récence de la requête est conservé.
+    if (sortMode === "popular") {
+      mapped.sort((a, b) => Number(b.boosted) - Number(a.boosted));
+    }
+
     setHasMore((data ?? []).length === PAGE_SIZE);
 
     if (reset) {
@@ -586,7 +592,7 @@ export default function CodesClient() {
         <div className="cats-row">
           {CATEGORIES.map(cat => (
             <button key={cat} className={`cat-pill ${activeCategory===cat?"active":""}`} onClick={() => setActiveCategory(cat as Category)}>
-              <span>{CATEGORY_ICONS[cat]}</span>{CATEGORY_LABELS[cat]}
+              <CategoryIcon name={cat} size={16} /> {CATEGORY_LABELS[cat]}
             </button>
           ))}
         </div>

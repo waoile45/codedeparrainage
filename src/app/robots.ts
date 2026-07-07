@@ -17,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
           '/auth/',
           '/boost',
           '/credits',
+          '/v2', // page démo avec données fictives — jamais à indexer
         ],
       },
     ],

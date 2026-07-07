@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
+import { CategoryIcon } from "@/components/CategoryIcons";
 
 interface Post {
   id: string;
@@ -103,10 +104,6 @@ const DEMO_POSTS = [
 ];
 
 const CATS = ["Tout", "Général", "Banque", "Paris Sportifs", "Crypto", "Cashback", "Téléphonie", "Astuce"];
-const CAT_ICONS: Record<string, string> = {
-  Tout: "✦", Général: "💬", Banque: "🏦", "Paris Sportifs": "⚽",
-  Crypto: "₿", Cashback: "💸", Téléphonie: "📱", Astuce: "💡",
-};
 const CAT_COLORS: Record<string, string> = {
   Général: "#6366f1", Banque: "#3b82f6", "Paris Sportifs": "#10b981",
   Crypto: "#f59e0b", Cashback: "#ec4899", Téléphonie: "#8b5cf6", Astuce: "#14b8a6",
@@ -279,7 +276,7 @@ export default function ForumPage() {
                 <button key={c} type="button"
                   onClick={() => setNewCat(c)}
                   style={{ padding:".3rem .7rem", borderRadius:9, border:`1px solid ${newCat===c ? "rgba(124,58,237,.5)" : "var(--border-md)"}`, background:newCat===c ? "rgba(124,58,237,.15)" : "var(--bg-card-md)", color:newCat===c ? "#c4b5fd" : "var(--text-muted)", fontSize:".78rem", fontWeight:600, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
-                  {CAT_ICONS[c]} {c}
+                  <CategoryIcon name={c} size={15} /> {c}
                 </button>
               ))}
             </div>
@@ -308,7 +305,7 @@ export default function ForumPage() {
         <div className="forum-cats">
           {CATS.map(c => (
             <button key={c} className={`forum-cat-btn ${cat===c?"active":""}`} onClick={() => setCat(c)}>
-              {CAT_ICONS[c]} {c}
+              <CategoryIcon name={c} size={15} /> {c}
             </button>
           ))}
         </div>
@@ -328,7 +325,7 @@ export default function ForumPage() {
             return (
               <a key={post.id} className="forum-card" href={`/forum/${post.id}`} style={{ display:"block", textDecoration:"none", color:"inherit" }}>
                 <div className="forum-cat-tag" style={{ background:`${color}18`, color, border:`1px solid ${color}30` }}>
-                  {CAT_ICONS[post.category] ?? "💬"} {post.category}
+                  <CategoryIcon name={post.category} size={14} /> {post.category}
                 </div>
                 <div className="forum-title">{post.title}</div>
                 <div className="forum-content">{post.content}</div>
