@@ -42,6 +42,7 @@ export default function BoostPage() {
   const [selected, setSelected]   = useState<string[]>([]);
   const [boosting, setBoosting]   = useState(false);
   const [success, setSuccess]     = useState(false);
+  const [errorMsg, setErrorMsg]   = useState("");
 
   const supabase = createClient();
 
@@ -90,11 +91,17 @@ export default function BoostPage() {
 
   const handleBoost = async () => {
     setBoosting(true);
-    try {
-      for (const id of selected) {
-        const d = days[id] ?? 1;
+    setErrorMsg("");
+    // On vérifie chaque réponse : sans ça, un échec serveur (solde insuffisant,
+    // erreur réseau…) affichait quand même « Boost activé ! » à tort.
+    let spent = 0;
+    const boostedIds: string[] = [];
+    let firstError = "";
+    for (const id of selected) {
+      const d = days[id] ?? 1;
+      try {
         // Le prix est recalculé côté serveur (cf. /api/boost) — on n'envoie que la durée.
-        await fetch('/api/boost', {
+        const res = await fetch('/api/boost', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -102,12 +109,27 @@ export default function BoostPage() {
             days: d,
           }),
         });
+        if (res.ok) { spent += COST_PER_DAY * d; boostedIds.push(id); continue; }
+        const body = await res.json().catch(() => null);
+        if (!firstError) firstError = body?.error ?? `Erreur serveur (${res.status})`;
+      } catch {
+        if (!firstError) firstError = "Erreur réseau — réessaie.";
       }
-      setCredits(prev => Math.max(0, prev - totalCost));
-      setSuccess(true);
-    } finally {
-      setBoosting(false);
     }
+    setCredits(prev => Math.max(0, prev - spent));
+    if (boostedIds.length === selected.length) {
+      setSuccess(true);
+    } else {
+      // Refléter les boosts réellement créés, garder la sélection des échecs
+      setAnnonces(prev => prev.map(a => boostedIds.includes(a.id) ? { ...a, boosted: true, boostDaysLeft: days[a.id] ?? 1 } : a));
+      setSelected(prev => prev.filter(id => !boostedIds.includes(id)));
+      setErrorMsg(
+        boostedIds.length > 0
+          ? `${boostedIds.length}/${selected.length} boost(s) activé(s) — ${firstError}`
+          : firstError
+      );
+    }
+    setBoosting(false);
   };
 
   if (success) return (
@@ -289,6 +311,7 @@ export default function BoostPage() {
               {selected.length > 0 && totalCost > credits && (
                 <p className="no-credits-hint">Solde insuffisant — <a href="/credits" style={{ color:"#f87171" }}>recharger</a></p>
               )}
+              {errorMsg && <p className="no-credits-hint">{errorMsg}</p>}
             </div>
             <button className="boost-btn" disabled={!canBoost} onClick={handleBoost}>
               {boosting

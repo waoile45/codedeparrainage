@@ -24,8 +24,12 @@ export async function POST(request: Request) {
   }
 
   const { announcementId, userId, days } = await request.json()
-  if (!announcementId || !userId || !days) {
+  if (!announcementId || typeof announcementId !== 'string' || !userId || typeof userId !== 'string') {
     return NextResponse.json({ error: 'Paramètres invalides' }, { status: 400 })
+  }
+  // Validation stricte de la durée (même règle que /api/boost, bornée plus large pour l'admin)
+  if (!Number.isInteger(days) || days < 1 || days > 365) {
+    return NextResponse.json({ error: 'Durée invalide (1 à 365 jours)' }, { status: 400 })
   }
 
   const supabaseAdmin = createClient(
