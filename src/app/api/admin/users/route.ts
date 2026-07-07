@@ -33,15 +33,24 @@ export async function GET() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const { data: users, error } = await supabaseAdmin
-    .from('users')
-    .select('*, credits(balance)')
-    .order('xp', { ascending: false })
+  // Deux requêtes plates plutôt qu'un embed credits(balance) : l'embed échoue
+  // (PGRST200) si PostgREST ne connaît pas de FK credits → public.users.
+  const [{ data: users, error }, { data: credits, error: creditsError }] = await Promise.all([
+    supabaseAdmin.from('users').select('*').order('xp', { ascending: false }),
+    supabaseAdmin.from('credits').select('user_id, balance'),
+  ])
 
-  if (error) {
-    console.error('Admin users error:', error)
+  if (error || creditsError) {
+    console.error('Admin users error:', error ?? creditsError)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 
-  return NextResponse.json({ users: users ?? [] })
+  const balanceByUser = new Map((credits ?? []).map((c: any) => [c.user_id, c.balance]))
+  // Même forme que l'ancien embed : credits[0].balance, attendu par la page admin
+  const shaped = (users ?? []).map((u: any) => ({
+    ...u,
+    credits: [{ balance: balanceByUser.get(u.id) ?? 0 }],
+  }))
+
+  return NextResponse.json({ users: shaped })
 }

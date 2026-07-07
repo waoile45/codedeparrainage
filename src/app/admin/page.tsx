@@ -56,6 +56,7 @@ export default function AdminPage() {
   const [companies, setCompanies]     = useState<any[]>([])
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [users, setUsers]             = useState<any[]>([])
+  const [usersError, setUsersError]   = useState('')
   const [loading, setLoading]         = useState(true)
 
   const [searchAnn, setSearchAnn]     = useState('')
@@ -81,16 +82,32 @@ export default function AdminPage() {
 
   async function loadData() {
     setLoading(true)
+    // Supabase plafonne chaque select à 1000 lignes : on pagine pour voir
+    // TOUTES les entreprises (sinon la liste et la recherche s'arrêtent à 1000).
+    async function loadAllCompanies() {
+      const all: any[] = []
+      for (let from = 0; ; from += 1000) {
+        const { data: batch } = await supabase.from('companies').select('*').order('name').range(from, from + 999)
+        all.push(...(batch ?? []))
+        if (!batch || batch.length < 1000) break
+      }
+      return all
+    }
     // Les emails ne sont plus lisibles via l'API publique : la liste des
     // utilisateurs (avec email) passe par la route serveur admin /api/admin/users.
-    const [{ data: comp }, { data: ann }, usersRes] = await Promise.all([
-      supabase.from('companies').select('*').order('name'),
+    const [comp, { data: ann }, usersRes] = await Promise.all([
+      loadAllCompanies(),
       supabase.from('announcements').select('*, user_id, users(id,pseudo), companies(name), boosts(active, ends_at)').order('created_at', { ascending: false }),
-      fetch('/api/admin/users').then(r => r.ok ? r.json() : { users: [] }),
+      fetch('/api/admin/users').then(async r => {
+        if (r.ok) return r.json()
+        console.error('/api/admin/users a répondu', r.status)
+        return { users: [], loadError: r.status }
+      }).catch(() => ({ users: [], loadError: 'réseau' })),
     ])
-    setCompanies(comp ?? [])
+    setCompanies(comp)
     setAnnouncements(ann ?? [])
     setUsers(usersRes.users ?? [])
+    if (usersRes.loadError) setUsersError(String(usersRes.loadError))
     setLoading(false)
   }
 
@@ -153,18 +170,29 @@ export default function AdminPage() {
   }
 
   async function handleSaveCompany() {
+    // Passe par la route serveur : la RLS bloque les écritures companies depuis
+    // le navigateur (l'ancien insert client échouait en silence).
     setFormLoading(true)
+    const res = await fetch('/api/admin/companies', {
+      method: editingCompany ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editingCompany ? { id: editingCompany.id, ...companyForm } : companyForm),
+    }).catch(() => null)
+    setFormLoading(false)
+    if (!res || !res.ok) {
+      const { error } = res ? await res.json().catch(() => ({ error: `HTTP ${res.status}` })) : { error: 'Erreur réseau' }
+      alert("L'enregistrement a échoué : " + (error ?? 'erreur inconnue'))
+      return
+    }
+    const { company } = await res.json()
     if (editingCompany) {
-      await supabase.from('companies').update(companyForm).eq('id', editingCompany.id)
-      setCompanies(prev => prev.map(c => c.id === editingCompany.id ? { ...c, ...companyForm } : c))
+      setCompanies(prev => prev.map(c => c.id === editingCompany.id ? { ...c, ...company } : c))
     } else {
-      const { data } = await supabase.from('companies').insert(companyForm).select().single()
-      if (data) setCompanies(prev => [...prev, data])
+      setCompanies(prev => [...prev, company].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')))
     }
     setShowCompanyModal(false)
     setEditingCompany(null)
     setCompanyForm({ name: '', slug: '', category: '', referral_bonus_description: '' })
-    setFormLoading(false)
   }
 
   const totalCredits = users.reduce((s, u) => s + (u.credits?.[0]?.balance ?? 0), 0)
@@ -271,7 +299,12 @@ export default function AdminPage() {
                   <input style={S.search} placeholder="Pseudo ou email..." value={searchUser} onChange={e => setSearchUser(e.target.value)} />
                 </div>
                 <div style={S.rows}>
-                  {filteredUsers.length === 0 && <div style={S.empty}>Aucun utilisateur trouvé</div>}
+                  {usersError && (
+                    <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, padding: '0.7rem 1rem', fontSize: '0.8rem', color: '#f87171', marginBottom: 10 }}>
+                      La liste n&apos;a pas pu être chargée : /api/admin/users a répondu {usersError}.
+                    </div>
+                  )}
+                  {filteredUsers.length === 0 && !usersError && <div style={S.empty}>Aucun utilisateur trouvé</div>}
                   {filteredUsers.map((user: any) => (
                     <div key={user.id} style={S.row}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
