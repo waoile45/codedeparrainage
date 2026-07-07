@@ -852,6 +852,7 @@ export const ENTREPRISES: Entreprise[] = [
   { nom: "jolibump", domain: "jolibump.com", logo: "https://www.google.com/s2/favicons?domain=jolibump.com&sz=64" },
   { nom: "jollymama", domain: "jollymama.com", logo: "https://www.google.com/s2/favicons?domain=jollymama.com&sz=64" },
   { nom: "jolt", domain: "jolt.com", logo: "https://www.google.com/s2/favicons?domain=jolt.com&sz=64" },
+  { nom: "JOMO", domain: "jomo.so", logo: "https://www.google.com/s2/favicons?domain=jomo.so&sz=64" },
   { nom: "JoomPay", domain: "joompay.com", logo: "https://www.google.com/s2/favicons?domain=joompay.com&sz=64" },
   { nom: "Joovence", domain: "joovence.com", logo: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://joovence.com&size=64" },
   { nom: "jorni", domain: "jorni.com", logo: "https://icons.duckduckgo.com/ip3/jorni.com.ico" },
