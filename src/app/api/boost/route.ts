@@ -3,10 +3,12 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-// Barème serveur — DOIT rester synchronisé avec COST_PER_DAY de src/app/boost/page.tsx.
-// Le client n'a AUCUN droit de fixer le prix : on le recalcule ici.
-const COST_PER_DAY = 0.10
-const MAX_DAYS = 30
+// ── Activation d'un boost « au réel » (facturé par vue) ────────────────────────
+// Plus de durée ni de paiement d'avance : le boost reste actif sans date de fin
+// et consomme COST_PER_VIEW crédits à chaque vue dédupliquée (cf. /api/boost-view).
+// Solde épuisé → pause automatique, réactivation à la recharge.
+// DOIT rester synchronisé avec COST_PER_VIEW de src/app/boost/page.tsx.
+const COST_PER_VIEW = 0.10
 
 export async function POST(request: Request) {
   const supabaseAdmin = createClient(
@@ -36,17 +38,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
     }
 
-    const { announcement_id, days } = await request.json()
-
-    // Validation stricte de la durée (le prix vient UNIQUEMENT du serveur)
+    const { announcement_id } = await request.json()
     if (!announcement_id || typeof announcement_id !== 'string') {
       return NextResponse.json({ error: 'Annonce invalide' }, { status: 400 })
     }
-    if (!Number.isInteger(days) || days < 1 || days > MAX_DAYS) {
-      return NextResponse.json({ error: 'Durée invalide (1 à 30 jours)' }, { status: 400 })
-    }
-
-    const total_cost = Number((days * COST_PER_DAY).toFixed(2))
 
     // Vérifier que l'annonce existe ET appartient bien à l'utilisateur (anti-IDOR)
     const { data: ann } = await supabaseAdmin
@@ -59,43 +54,47 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Annonce introuvable' }, { status: 404 })
     }
 
-    // Vérifier le solde (recalculé serveur)
+    // Un seul boost par vue actif par annonce
+    const { data: existing } = await supabaseAdmin
+      .from('boosts')
+      .select('id')
+      .eq('announcement_id', announcement_id)
+      .eq('active', true)
+      .not('cost_per_view', 'is', null)
+      .limit(1)
+
+    if (existing && existing.length > 0) {
+      return NextResponse.json({ error: 'Cette annonce est déjà boostée' }, { status: 400 })
+    }
+
+    // Il faut au moins de quoi payer une vue, sinon le boost serait mis en
+    // pause immédiatement — autant le dire tout de suite.
     const { data: credits } = await supabaseAdmin
       .from('credits')
       .select('balance')
       .eq('user_id', user.id)
       .single()
 
-    if (!credits || credits.balance < total_cost) {
-      return NextResponse.json({ error: 'Solde insuffisant' }, { status: 400 })
+    if (!credits || credits.balance < COST_PER_VIEW) {
+      return NextResponse.json({ error: 'Solde insuffisant (minimum 0,10 crédit)' }, { status: 400 })
     }
 
-    // Créer le boost
-    const endsAt = new Date()
-    endsAt.setDate(endsAt.getDate() + days)
-
+    // Création du boost — rien n'est débité maintenant, la facturation se fait à la vue
     const { error: boostError } = await supabaseAdmin.from('boosts').insert({
       user_id: user.id,
       announcement_id,
-      days,
-      cost_per_day: COST_PER_DAY,
-      total_cost,
-      ends_at: endsAt.toISOString(),
+      cost_per_view: COST_PER_VIEW,
+      views_charged: 0,
+      days: null,
+      ends_at: null,
+      cost_per_day: 0,
+      total_cost: 0,
       active: true,
     })
 
     if (boostError) {
       return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
     }
-
-    // Déduire les crédits
-    await supabaseAdmin
-      .from('credits')
-      .update({
-        balance: Number((credits.balance - total_cost).toFixed(2)),
-        updated_at: new Date().toISOString()
-      })
-      .eq('user_id', user.id)
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -32,6 +32,7 @@ const RATE_LIMITED_PATHS = [
   '/api/messages',
   '/api/reviews',
   '/api/boost',
+  '/api/boost-view',
   '/api/bump',
   '/api/stripe/checkout',
   '/api/proposer-entreprise',

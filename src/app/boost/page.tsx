@@ -10,35 +10,22 @@ interface Annonce {
   code: string;
   category: string;
   boosted: boolean;
-  boostDaysLeft?: number;
+  viewsCharged?: number;
 }
 
-function DaySelector({ value, onChange, max }: { value: number; onChange: (v: number) => void; max: number }) {
-  const btn = (label: string, onClick: () => void) => (
-    <button onClick={onClick} style={{ width:28, height:28, borderRadius:8, background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.1)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1rem", transition:"all .18s", flexShrink:0 }}>{label}</button>
-  );
-  return (
-    <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-      {btn("−", () => onChange(Math.max(1, value - 1)))}
-      <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:"#fff", minWidth:24, textAlign:"center" }}>{value}</span>
-      {btn("+", () => onChange(Math.min(max, value + 1)))}
-    </div>
-  );
-}
-
-const COST_PER_DAY = 0.10;
+// DOIT rester synchronisé avec COST_PER_VIEW de /api/boost/route.ts.
+const COST_PER_VIEW = 0.10;
 
 const WHY = [
-  { icon:"📈", title:"3× plus de vues",      desc:"Ton annonce remonte en tête de /codes automatiquement." },
-  { icon:"🏆", title:"Meilleur classement",  desc:"Les annonces boostées gagnent plus d'XP et montent dans le classement." },
-  { icon:"⚡", title:"Activation immédiate", desc:"Le boost est actif dès la validation, sans délai." },
+  { icon:"📈", title:"En tête de /codes",    desc:"Ton annonce passe au-dessus des autres tant que le boost est actif." },
+  { icon:"🎯", title:"Paiement au réel",     desc:`${COST_PER_VIEW.toFixed(2)} crédit débité par vue effective — pas de forfait, pas de date de fin.` },
+  { icon:"⏸️", title:"Pause automatique",    desc:"Solde épuisé ? Le boost se met en pause et repart dès que tu recharges." },
 ];
 
 export default function BoostPage() {
   const [credits, setCredits]     = useState<number>(0);
   const [annonces, setAnnonces]   = useState<Annonce[]>([]);
   const [loading, setLoading]     = useState(true);
-  const [days, setDays]           = useState<Record<string, number>>({});
   const [selected, setSelected]   = useState<string[]>([]);
   const [boosting, setBoosting]   = useState(false);
   const [success, setSuccess]     = useState(false);
@@ -54,7 +41,7 @@ export default function BoostPage() {
       const [{ data: creditData }, { data: annData }] = await Promise.all([
         supabase.from('credits').select('balance').eq('user_id', user.id).single(),
         supabase.from('announcements')
-          .select('id, code, company_id, companies (name, category), boosts (active, ends_at)')
+          .select('id, code, company_id, companies (name, category), boosts (active, ends_at, cost_per_view, views_charged)')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false }),
       ]);
@@ -63,22 +50,19 @@ export default function BoostPage() {
 
       const now = new Date();
       const mapped: Annonce[] = (annData ?? []).map((a: any) => {
-        const activeBoost = a.boosts?.find((b: any) => b.active && new Date(b.ends_at) > now);
-        const daysLeft = activeBoost
-          ? Math.ceil((new Date(activeBoost.ends_at).getTime() - now.getTime()) / 86400000)
-          : undefined;
+        // Boost par vue : ends_at null. Anciens boosts à durée : encore actifs si ends_at futur.
+        const activeBoost = a.boosts?.find((b: any) => b.active && (!b.ends_at || new Date(b.ends_at) > now));
         return {
           id: a.id,
           company: a.companies?.name ?? 'Inconnu',
           code: a.code,
           category: a.companies?.category ?? '',
           boosted: !!activeBoost,
-          boostDaysLeft: daysLeft,
+          viewsCharged: activeBoost?.views_charged ?? undefined,
         };
       });
 
       setAnnonces(mapped);
-      setDays(Object.fromEntries(mapped.map(a => [a.id, 1])));
       setLoading(false);
     }
     load();
@@ -86,42 +70,36 @@ export default function BoostPage() {
 
   const toggle = (id: string) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
 
-  const totalCost = selected.reduce((sum, id) => sum + COST_PER_DAY * (days[id] ?? 1), 0);
-  const canBoost = selected.length > 0 && totalCost <= credits && !boosting;
+  // L'activation est gratuite ; il faut juste de quoi payer au moins une vue.
+  const canBoost = selected.length > 0 && credits >= COST_PER_VIEW && !boosting;
 
   const handleBoost = async () => {
     setBoosting(true);
     setErrorMsg("");
     // On vérifie chaque réponse : sans ça, un échec serveur (solde insuffisant,
     // erreur réseau…) affichait quand même « Boost activé ! » à tort.
-    let spent = 0;
     const boostedIds: string[] = [];
     let firstError = "";
     for (const id of selected) {
-      const d = days[id] ?? 1;
       try {
-        // Le prix est recalculé côté serveur (cf. /api/boost) — on n'envoie que la durée.
         const res = await fetch('/api/boost', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            announcement_id: id,
-            days: d,
-          }),
+          body: JSON.stringify({ announcement_id: id }),
         });
-        if (res.ok) { spent += COST_PER_DAY * d; boostedIds.push(id); continue; }
+        if (res.ok) { boostedIds.push(id); continue; }
         const body = await res.json().catch(() => null);
         if (!firstError) firstError = body?.error ?? `Erreur serveur (${res.status})`;
       } catch {
         if (!firstError) firstError = "Erreur réseau — réessaie.";
       }
     }
-    setCredits(prev => Math.max(0, prev - spent));
+    // Rien n'est débité à l'activation : la facturation se fait à la vue.
     if (boostedIds.length === selected.length) {
       setSuccess(true);
     } else {
       // Refléter les boosts réellement créés, garder la sélection des échecs
-      setAnnonces(prev => prev.map(a => boostedIds.includes(a.id) ? { ...a, boosted: true, boostDaysLeft: days[a.id] ?? 1 } : a));
+      setAnnonces(prev => prev.map(a => boostedIds.includes(a.id) ? { ...a, boosted: true, viewsCharged: 0 } : a));
       setSelected(prev => prev.filter(id => !boostedIds.includes(id)));
       setErrorMsg(
         boostedIds.length > 0
@@ -140,7 +118,8 @@ export default function BoostPage() {
         <div style={{ fontSize:"3.5rem", animation:"pop .5s ease forwards", display:"inline-block", marginBottom:"1rem" }}>⚡</div>
         <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.75rem", color:"#fff", marginBottom:".5rem" }}>Boost activé !</h2>
         <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem", marginBottom:"2rem" }}>
-          {selected.length} annonce{selected.length > 1 ? "s" : ""} boostée{selected.length > 1 ? "s" : ""} — visible en tête de /codes maintenant.
+          {selected.length} annonce{selected.length > 1 ? "s" : ""} boostée{selected.length > 1 ? "s" : ""} — en tête de /codes dès maintenant.
+          Chaque vue te coûte {COST_PER_VIEW.toFixed(2)} crédit, sans date de fin ni paiement d&apos;avance.
         </p>
         <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
           <a href="/codes" style={{ display:"inline-flex", alignItems:"center", gap:6, background:"#7c3aed", color:"#fff", borderRadius:11, padding:".65rem 1.25rem", fontSize:".875rem", fontWeight:600, textDecoration:"none" }}>Voir les codes</a>
@@ -213,7 +192,7 @@ export default function BoostPage() {
             Booster une annonce
             <span style={{ fontSize:"1.5rem", animation:"float 3s ease-in-out infinite", display:"inline-block" }}>⚡</span>
           </h1>
-          <p className="page-sub">Passe en tête de la page /codes et multiplie tes parrainages</p>
+          <p className="page-sub">Passe en tête de la page /codes — tu ne paies que les vues effectives de ton annonce</p>
         </div>
 
         <div className="solde-banner">
@@ -274,7 +253,7 @@ export default function BoostPage() {
               <p className="annonce-code">{a.code}</p>
               <div className="annonce-tags">
                 {a.category && <span className="tag tag-cat">{a.category}</span>}
-                {a.boosted && <span className="tag tag-boosted">⚡ Boost actif — {a.boostDaysLeft}j restants</span>}
+                {a.boosted && <span className="tag tag-boosted">⚡ Boost actif — {a.viewsCharged ?? 0} vue{(a.viewsCharged ?? 0) > 1 ? "s" : ""} facturée{(a.viewsCharged ?? 0) > 1 ? "s" : ""}</span>}
               </div>
             </div>
 
@@ -282,17 +261,7 @@ export default function BoostPage() {
               {a.boosted ? (
                 <span style={{ fontSize:".75rem", color:"#fbbf24", fontWeight:600 }}>En cours</span>
               ) : (
-                <>
-                  <p className="cost-per-day"><strong>{COST_PER_DAY.toFixed(2)}</strong> crédit/j</p>
-                  {selected.includes(a.id) && (
-                    <DaySelector value={days[a.id] ?? 1} onChange={v => setDays(d => ({ ...d, [a.id]: v }))} max={30} />
-                  )}
-                  {selected.includes(a.id) && (
-                    <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.3)", textAlign:"right" }}>
-                      = <strong style={{ color:"#a78bfa" }}>{(COST_PER_DAY * (days[a.id] ?? 1)).toFixed(2)}</strong> crédits
-                    </p>
-                  )}
-                </>
+                <p className="cost-per-day"><strong>{COST_PER_VIEW.toFixed(2)}</strong> crédit/vue</p>
               )}
             </div>
           </div>
@@ -304,11 +273,11 @@ export default function BoostPage() {
               <p className="summary-detail">
                 {selected.length === 0
                   ? "Sélectionne une annonce à booster"
-                  : `${selected.length} annonce${selected.length > 1 ? "s" : ""} · ${selected.reduce((s, id) => s + (days[id] ?? 1), 0)} jour${selected.reduce((s, id) => s + (days[id] ?? 1), 0) > 1 ? "s" : ""}`
+                  : `${selected.length} annonce${selected.length > 1 ? "s" : ""} · activation gratuite, sans date de fin`
                 }
               </p>
-              <p className="summary-total">Total : <span>{totalCost.toFixed(2)}</span> crédits</p>
-              {selected.length > 0 && totalCost > credits && (
+              <p className="summary-total"><span>{COST_PER_VIEW.toFixed(2)}</span> crédit par vue — ton solde couvre <span>{Math.floor(credits / COST_PER_VIEW)}</span> vues</p>
+              {selected.length > 0 && credits < COST_PER_VIEW && (
                 <p className="no-credits-hint">Solde insuffisant — <a href="/credits" style={{ color:"#f87171" }}>recharger</a></p>
               )}
               {errorMsg && <p className="no-credits-hint">{errorMsg}</p>}

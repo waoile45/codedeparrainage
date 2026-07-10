@@ -72,8 +72,6 @@ export default function AdminPage() {
   const [creditAmount, setCreditAmount]   = useState('')
   const [creditLoading, setCreditLoading] = useState(false)
 
-  const [givingBoost, setGivingBoost]     = useState<string | null>(null)
-  const [boostDays, setBoostDays]         = useState('7')
   const [boostLoading, setBoostLoading]   = useState(false)
 
   const supabase = createClient()
@@ -144,29 +142,28 @@ export default function AdminPage() {
   }
 
   async function handleGiveBoost(ann: any) {
-    const days = parseInt(boostDays)
-    if (isNaN(days) || days < 1) return
+    // Boost « au réel » : mêmes règles que côté utilisateur — facturé 0,10
+    // crédit/vue sur le solde du propriétaire, sans durée ni date de fin.
     setBoostLoading(true)
-    const res = await fetch('/api/admin/give-boost', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ announcementId: ann.id, userId: ann.user_id, days }) })
+    const res = await fetch('/api/admin/give-boost', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ announcementId: ann.id }) })
     setBoostLoading(false)
     if (!res.ok) {
       const { error } = await res.json().catch(() => ({ error: 'Erreur inconnue' }))
       alert('Le boost a échoué : ' + (error ?? res.status))
       return
     }
+    const { warning } = await res.json().catch(() => ({ warning: undefined }))
+    if (warning) alert('Boost activé, mais attention : ' + warning)
     // Refléter le boost immédiatement (badge ⚡ Boostée)
-    const endsAt = new Date()
-    endsAt.setDate(endsAt.getDate() + days)
     setAnnouncements(prev => prev.map(a =>
-      a.id !== ann.id ? a : { ...a, boosts: [...(a.boosts ?? []), { active: true, ends_at: endsAt.toISOString() }] }
+      a.id !== ann.id ? a : { ...a, boosts: [...(a.boosts ?? []), { active: true, ends_at: null }] }
     ))
-    setGivingBoost(null)
-    setBoostDays('7')
   }
 
   function isBoosted(ann: any): boolean {
     const now = Date.now()
-    return (ann.boosts ?? []).some((b: any) => b.active && new Date(b.ends_at).getTime() > now)
+    // Boost par vue : ends_at null. Anciens boosts à durée : actifs si ends_at futur.
+    return (ann.boosts ?? []).some((b: any) => b.active && (!b.ends_at || new Date(b.ends_at).getTime() > now))
   }
 
   async function handleSaveCompany() {
@@ -271,14 +268,8 @@ export default function AdminPage() {
                           </div>
                         </div>
                       </div>
-                      {givingBoost === ann.id ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <input type="number" value={boostDays} onChange={e => setBoostDays(e.target.value)} placeholder="jours" min={1} style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.4)', borderRadius: 8, padding: '0.35rem 0.6rem', color: '#fff', fontSize: '0.82rem', width: 70, outline: 'none', fontFamily: 'inherit' }} />
-                          <Btn variant="primary" onClick={() => handleGiveBoost(ann)} disabled={boostLoading}>{boostLoading ? '...' : 'OK'}</Btn>
-                          <button onClick={() => setGivingBoost(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '1rem', padding: '0 2px' }}>✕</button>
-                        </div>
-                      ) : (
-                        <Btn variant="credit" onClick={() => { setGivingBoost(ann.id); setBoostDays('7') }}>⚡ Boost</Btn>
+                      {!isBoosted(ann) && (
+                        <Btn variant="credit" onClick={() => { if (confirm('Booster cette annonce ? 0,10 crédit sera débité au propriétaire à chaque vue, sans date de fin.')) handleGiveBoost(ann) }} disabled={boostLoading}>{boostLoading ? '...' : '⚡ Boost'}</Btn>
                       )}
                       <Btn variant="danger" onClick={() => handleDeleteAnnouncement(ann.id)}>Supprimer</Btn>
                     </div>

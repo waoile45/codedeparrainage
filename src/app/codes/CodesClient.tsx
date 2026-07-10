@@ -24,6 +24,35 @@ interface CodeCard {
   topTag: string;
 }
 
+// ── Facturation des boosts « au réel » ─────────────────────────────────────────
+// Quand une carte boostée devient visible à l'écran, on le signale à
+// /api/boost-view (batch de 2 s). La dédup de session évite de re-signaler au
+// même visiteur ; la vraie dédup (1 vue/IP/24h) et le débit sont côté serveur.
+const pendingBoostViews = new Set<string>();
+let boostViewTimer: ReturnType<typeof setTimeout> | null = null;
+function reportBoostView(annId: string) {
+  try {
+    const seen: string[] = JSON.parse(sessionStorage.getItem("boost_views_sent") ?? "[]");
+    if (seen.includes(annId)) return;
+    seen.push(annId);
+    sessionStorage.setItem("boost_views_sent", JSON.stringify(seen.slice(-100)));
+  } catch { /* sessionStorage indisponible : le serveur déduplique de toute façon */ }
+  pendingBoostViews.add(annId);
+  if (boostViewTimer) return;
+  boostViewTimer = setTimeout(() => {
+    const ids = [...pendingBoostViews].slice(0, 30);
+    pendingBoostViews.clear();
+    boostViewTimer = null;
+    if (ids.length === 0) return;
+    fetch("/api/boost-view", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ announcement_ids: ids }),
+      keepalive: true,
+    }).catch(() => {});
+  }, 2000);
+}
+
 const CATEGORIES = ["Tout","banque","paris","cashback","energie","telephonie","crypto","assurance","shopping"];
 const CATEGORY_LABELS: Record<string,string> = { Tout:"Tout", banque:"Banque", paris:"Paris", cashback:"Cashback", energie:"Énergie", telephonie:"Téléphonie", crypto:"Crypto", assurance:"Assurance", shopping:"Shopping" };
 const NIVEAU_COLORS: Record<string,string> = { Débutant:"#6366f1", "Parrain Bronze":"#cd7f32", "Parrain Argent":"#8b5cf6", "Parrain Or":"#f59e0b", "Super Parrain":"#a855f7", "Parrain Légendaire":"#ec4899" };
@@ -234,7 +263,7 @@ function CodeCardItem({ card, index, onRate, onContact, onEdit, onDelete, curren
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setTimeout(() => setVisible(true), index*60); obs.disconnect(); } }, { threshold:0.1 });
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setTimeout(() => setVisible(true), index*60); if (card.boosted) reportBoostView(card.id); obs.disconnect(); } }, { threshold:0.1 });
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
   }, [index]);
@@ -397,7 +426,8 @@ export default function CodesClient() {
         userId:      row.user_id ?? "",
         code:        row.code,
         description: cleanDesc || row.companies?.referral_bonus_description || "",
-        boosted:     (row.boosts ?? []).some((b: any) => b.active && new Date(b.ends_at) > new Date()),
+        // Boost par vue : ends_at null. Anciens boosts à durée : actifs si ends_at futur.
+        boosted:     (row.boosts ?? []).some((b: any) => b.active && (!b.ends_at || new Date(b.ends_at) > new Date())),
         brand:       row.companies?.name ?? "Inconnu",
         slug:        row.companies?.slug ?? "",
         category:    row.companies?.category ?? "shopping",

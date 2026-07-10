@@ -41,16 +41,29 @@ export async function POST(request: Request) {
     .eq('user_id', userId)
     .single()
 
+  let newBalance: number
   if (credits) {
-    const newBalance = Math.max(0, credits.balance + amount)
+    newBalance = Math.max(0, credits.balance + amount)
     await supabaseAdmin
       .from('credits')
       .update({ balance: newBalance, updated_at: new Date().toISOString() })
       .eq('user_id', userId)
   } else {
+    newBalance = Math.max(0, amount)
     await supabaseAdmin
       .from('credits')
-      .insert({ user_id: userId, balance: Math.max(0, amount) })
+      .insert({ user_id: userId, balance: newBalance })
+  }
+
+  // Recharge → réactiver les boosts « par vue » mis en pause faute de solde
+  // (il n'existe pas d'arrêt manuel de boost : inactif = épuisé, sans ambiguïté)
+  if (amount > 0 && newBalance > 0) {
+    await supabaseAdmin
+      .from('boosts')
+      .update({ active: true })
+      .eq('user_id', userId)
+      .eq('active', false)
+      .not('cost_per_view', 'is', null)
   }
 
   return NextResponse.json({ success: true })

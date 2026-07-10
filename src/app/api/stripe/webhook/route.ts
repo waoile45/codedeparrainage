@@ -64,9 +64,9 @@ export async function POST(request: Request) {
     if (existing) {
       await supabase
         .from('credits')
-        .update({ 
-          balance: existing.balance + credits, 
-          updated_at: new Date().toISOString() 
+        .update({
+          balance: existing.balance + credits,
+          updated_at: new Date().toISOString()
         })
         .eq('user_id', userId)
     } else {
@@ -74,6 +74,14 @@ export async function POST(request: Request) {
         .from('credits')
         .insert({ user_id: userId, balance: credits })
     }
+
+    // Recharge → réactiver les boosts « par vue » mis en pause faute de solde
+    await supabase
+      .from('boosts')
+      .update({ active: true })
+      .eq('user_id', userId)
+      .eq('active', false)
+      .not('cost_per_view', 'is', null)
 
     console.log(`✅ ${credits} crédits ajoutés à l'utilisateur ${userId}`)
   }

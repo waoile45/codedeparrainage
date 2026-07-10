@@ -22,7 +22,7 @@ const FEATURES = [
 
 const FAQ = [
   { q:"Les crédits expirent-ils ?",           a:"Non, tes crédits sont valables à vie. Tu les utilises quand tu veux." },
-  { q:"Combien coûte un boost par jour ?",     a:"0.10 crédit par jour et par annonce. Avec 5 crédits tu peux booster une annonce 50 jours." },
+  { q:"Combien coûte un boost ?",              a:"0,10 crédit par vue de ton annonce, débité au réel. Avec 5 crédits, ton annonce est vue 50 fois. Pas de forfait ni de date de fin : solde épuisé, le boost se met en pause et repart quand tu recharges." },
   { q:"Puis-je booster plusieurs annonces ?",  a:"Oui, tu peux répartir tes crédits sur autant d'annonces que tu veux." },
   { q:"Le paiement est-il sécurisé ?",         a:"Oui, le paiement est géré par Stripe — aucune donnée bancaire n'est stockée sur nos serveurs." },
 ];

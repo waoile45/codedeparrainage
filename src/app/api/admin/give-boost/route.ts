@@ -3,6 +3,12 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+// ── Boost admin : mêmes règles que le boost utilisateur ────────────────────────
+// Le boost est facturé par vue (0,10 crédit) sur le solde du PROPRIÉTAIRE de
+// l'annonce, sans date de fin. Pour offrir un boost, donner d'abord des crédits
+// (bouton ⚡ Crédits) : c'est le solde qui finance les vues.
+const COST_PER_VIEW = 0.10
+
 export async function POST(request: Request) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -23,13 +29,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
   }
 
-  const { announcementId, userId, days } = await request.json()
-  if (!announcementId || typeof announcementId !== 'string' || !userId || typeof userId !== 'string') {
+  const { announcementId } = await request.json()
+  if (!announcementId || typeof announcementId !== 'string') {
     return NextResponse.json({ error: 'Paramètres invalides' }, { status: 400 })
-  }
-  // Validation stricte de la durée (même règle que /api/boost, bornée plus large pour l'admin)
-  if (!Number.isInteger(days) || days < 1 || days > 365) {
-    return NextResponse.json({ error: 'Durée invalide (1 à 365 jours)' }, { status: 400 })
   }
 
   const supabaseAdmin = createClient(
@@ -37,20 +39,56 @@ export async function POST(request: Request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const endsAt = new Date()
-  endsAt.setDate(endsAt.getDate() + days)
+  // Le propriétaire vient de la base, pas du client (le boost est débité chez lui)
+  const { data: ann } = await supabaseAdmin
+    .from('announcements')
+    .select('id, user_id')
+    .eq('id', announcementId)
+    .single()
+
+  if (!ann) {
+    return NextResponse.json({ error: 'Annonce introuvable' }, { status: 404 })
+  }
+
+  const { data: existing } = await supabaseAdmin
+    .from('boosts')
+    .select('id')
+    .eq('announcement_id', announcementId)
+    .eq('active', true)
+    .not('cost_per_view', 'is', null)
+    .limit(1)
+
+  if (existing && existing.length > 0) {
+    return NextResponse.json({ error: 'Cette annonce est déjà boostée' }, { status: 400 })
+  }
 
   const { error } = await supabaseAdmin.from('boosts').insert({
-    user_id: userId,
+    user_id: ann.user_id,
     announcement_id: announcementId,
-    days,
+    cost_per_view: COST_PER_VIEW,
+    views_charged: 0,
+    days: null,
+    ends_at: null,
     cost_per_day: 0,
     total_cost: 0,
-    ends_at: endsAt.toISOString(),
     active: true,
   })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ success: true })
+  // Avertir si le solde du propriétaire ne couvre même pas une vue :
+  // le boost passera en pause dès la première vue facturable.
+  const { data: credits } = await supabaseAdmin
+    .from('credits')
+    .select('balance')
+    .eq('user_id', ann.user_id)
+    .single()
+
+  const balance = credits?.balance ?? 0
+  return NextResponse.json({
+    success: true,
+    warning: balance < COST_PER_VIEW
+      ? `Solde de l'utilisateur : ${balance.toFixed(2)} crédit — le boost sera mis en pause dès la première vue. Donne-lui des crédits (⚡ Crédits).`
+      : undefined,
+  })
 }
