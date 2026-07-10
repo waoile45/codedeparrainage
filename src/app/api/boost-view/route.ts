@@ -20,13 +20,21 @@ const bodySchema = z.object({
 
 const MAX_BODY_BYTES = 4 * 1024
 
-function hashIp(ip: string): string {
-  // Pepper optionnel en env ; le hash évite de stocker des IP en clair (RGPD)
-  const pepper = process.env.BOOST_VIEW_PEPPER ?? 'cdp-boost-views-v1'
+// Le pepper n'a pas de valeur par défaut : ce dépôt est public, et l'espace
+// IPv4 (2^32) se brute-force en quelques minutes contre un sel connu — le hash
+// ne pseudonymiserait plus rien. Sans BOOST_VIEW_PEPPER, on refuse de compter
+// plutôt que de stocker des IP ré-identifiables.
+function hashIp(ip: string, pepper: string): string {
   return createHash('sha256').update(ip + pepper).digest('hex').slice(0, 32)
 }
 
 export async function POST(request: NextRequest) {
+  const pepper = process.env.BOOST_VIEW_PEPPER
+  if (!pepper) {
+    // Fail-closed : aucune vue comptée tant que le pepper n'est pas configuré.
+    return NextResponse.json({ received: true }, { status: 503 })
+  }
+
   const rawBody = await request.text()
   if (rawBody.length > MAX_BODY_BYTES) {
     return NextResponse.json({ received: true })
@@ -47,7 +55,7 @@ export async function POST(request: NextRequest) {
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('x-real-ip') ||
     'unknown'
-  const ipHash = hashIp(ip)
+  const ipHash = hashIp(ip, pepper)
 
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

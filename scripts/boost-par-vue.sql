@@ -3,6 +3,12 @@
 -- À exécuter dans le SQL Editor Supabase AVANT de déployer le code correspondant.
 -- Rétro-compatible : l'ancien code (boosts à durée) continue de fonctionner
 -- après cette migration, le nouveau code en a besoin.
+--
+-- Variable d'environnement requise sur Vercel avant le déploiement :
+--   BOOST_VIEW_PEPPER = chaîne aléatoire longue, gardée secrète.
+--   Sans elle, /api/boost-view répond 503 et ne compte aucune vue (fail-closed).
+--   Ce dépôt est public : un pepper connu rendrait les IP hachées
+--   ré-identifiables par recherche exhaustive sur l'espace IPv4.
 -- ═══════════════════════════════════════════════════════════════════════════
 
 -- 1. Nouveau modèle sur la table boosts
