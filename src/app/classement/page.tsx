@@ -271,10 +271,14 @@ export default function ClassementPage() {
         .cta-btn { display:inline-flex; align-items:center; gap:8px; background:#7c3aed; color:#fff; border:none; padding:.75rem 1.75rem; border-radius:12px; font-size:.9rem; font-weight:700; cursor:pointer; transition:all .2s; text-decoration:none; font-family:'DM Sans',sans-serif; }
         .cta-btn:hover { background:#6d28d9; transform:translateY(-2px); box-shadow:0 6px 24px rgba(124,58,237,.4); }
 
+        .rewards-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; }
+        .podium-wrap > * { min-width:0; }
         @media(max-width:600px) {
           .page { padding:2rem 1rem 5rem; }
           .podium-wrap { gap:.5rem; }
           .stats-banner { grid-template-columns:repeat(2,1fr); }
+          .rewards-grid { grid-template-columns:1fr; }
+          .my-rank-banner { flex-wrap:wrap; gap:.75rem; bottom:12px; }
         }
       `}</style>
 
@@ -285,7 +289,7 @@ export default function ClassementPage() {
         {/* Header */}
         <header className="page-header">
           <div className="header-label">Compétition</div>
-          <h1 className="page-title">🏆 Classement des parrains</h1>
+          <h1 className="page-title">Classement des parrains</h1>
           <p className="page-sub">
             <span className="live-dot" />
             Les meilleurs parrains de la communauté
@@ -309,12 +313,11 @@ export default function ClassementPage() {
           <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 0%,rgba(124,58,237,.1),transparent 65%)", pointerEvents:"none" }} />
           <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,rgba(124,58,237,.5),transparent)" }} />
           <div style={{ position:"relative", zIndex:1 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:"1.1rem" }}>
-              <span style={{ fontSize:"1rem" }}>🎁</span>
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:"1.1rem", flexWrap:"wrap" }}>
               <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.95rem", color:"var(--text-strong)" }}>Récompenses du mois</p>
               <span style={{ fontSize:"0.65rem", fontWeight:700, background:"rgba(124,58,237,.2)", color:"#a78bfa", padding:"2px 8px", borderRadius:100, border:"1px solid rgba(124,58,237,.3)", marginLeft:2 }}>Remise le 1er du mois</span>
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"0.75rem" }}>
+            <div className="rewards-grid">
               {[
                 { rank:"#1", crown:"🥇", color:"rgba(251,191,36,.9)", bg:"rgba(251,191,36,.07)", border:"rgba(251,191,36,.25)", rewards:["Badge « Top 1 » permanent", "⭐ Tag Parrain du mois (30j)", "5 crédits boost"] },
                 { rank:"#2", crown:"🥈", color:"rgba(156,163,175,.8)", bg:"rgba(156,163,175,.05)", border:"rgba(156,163,175,.2)",  rewards:["Badge « Top 2 » permanent", "3 crédits boost"] },

@@ -1,5 +1,5 @@
 import Navbar from '@/components/Navbar'
-import { BanqueEntry, BanqueCasKey, BANQUE_CAS, BANQUE_CAS_KEYS } from '@/data/comparatifs/banque'
+import { BanqueEntry, BanqueCasKey, BANQUE_CAS, BANQUE_CAS_KEYS, BANQUE_UPDATED_AT } from '@/data/comparatifs/banque'
 import { safeJsonLd } from '@/lib/sanitize'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -127,7 +127,7 @@ function BanqueCard({ banque, rank }: { banque: BanqueEntry; rank: number }) {
             </div>
             <div style={{ fontSize: '.72rem', color: 'var(--text-faint)' }}>Bonus bienvenue : {banque.bonusBienvenue}</div>
           </div>
-          <a href={banque.affiliateUrl} target="_blank" rel="nofollow sponsored noopener" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#7c3aed', color: '#fff', fontWeight: 700, fontSize: '.875rem', padding: '.65rem 1.25rem', borderRadius: 12, textDecoration: 'none' }}>
+          <a href={banque.affiliateUrl === '#' ? `https://${banque.domain}` : banque.affiliateUrl} target="_blank" rel={banque.affiliateUrl === '#' ? 'nofollow noopener' : 'nofollow sponsored noopener'} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#7c3aed', color: '#fff', fontWeight: 700, fontSize: '.875rem', padding: '.65rem 1.25rem', borderRadius: 12, textDecoration: 'none' }}>
             Ouvrir un compte {banque.name}
             <span style={{ fontSize: '.8rem' }}>↗</span>
           </a>
@@ -216,7 +216,7 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
               Comparatif Banques
             </span>
             <span style={{ fontSize: '.75rem', color: 'var(--text-faint)' }}>
-              Mis à jour le {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              Tarifs et offres relus le {new Date(BANQUE_UPDATED_AT).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
             </span>
           </div>
 
@@ -269,10 +269,10 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
         {/* ── Méthode ── */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginBottom: '1.5rem' }}>
           <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem' }}>
-            Notre méthode d'évaluation
+            Comment ce comparatif est construit
           </h2>
           <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: '0 0 .875rem' }}>
-            Chaque banque a été évaluée sur la base d'une utilisation réelle pendant plusieurs semaines. Nous testons les paiements en France et à l'étranger, les virements entrants et sortants, la réactivité du support client et la clarté des frais appliqués.
+            Les fiches reprennent les brochures tarifaires et les conditions publiées par chaque établissement : frais de tenue de compte, frais en devises, plafonds de retrait, garantie des dépôts, pays d'ouverture. Les notes pondèrent ces critères selon le profil de chaque page (freelance, voyageur, étudiant…) ; elles ne reposent pas sur un test du support client ni sur des mesures que nous n'avons pas faites.
           </p>
           <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
             Les notes de bonus tiennent compte des offres de parrainage effectives au moment de la mise à jour. Ces offres varient régulièrement — vérifiez toujours les conditions en vigueur sur le site de la banque.

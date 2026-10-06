@@ -1,9 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export default function CompanyLogo({ domain, name }: { domain: string; name: string }) {
   const [failed, setFailed] = useState(false)
+  const ref = useRef<HTMLImageElement>(null)
+
+  // Si l'image a déjà échoué avant l'hydratation, onError ne sera jamais déclenché :
+  // on relit l'état de l'élément une fois monté.
+  useEffect(() => {
+    const img = ref.current
+    if (img && img.complete && img.naturalWidth <= 1) setFailed(true)
+  }, [])
 
   if (failed) {
     return (
@@ -24,7 +32,8 @@ export default function CompanyLogo({ domain, name }: { domain: string; name: st
   return (
     <img
       src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
-      alt={`Logo ${name}`}
+      alt=""
+      ref={ref}
       width={36}
       height={36}
       loading="lazy"

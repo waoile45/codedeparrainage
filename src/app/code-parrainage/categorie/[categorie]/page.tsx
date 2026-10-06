@@ -34,9 +34,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'website',
       siteName: 'codedeparrainage.com',
       locale: 'fr_FR',
-      images: [{ url: '/logo.png', width: 400, height: 400, alt: `${cat.label} — codedeparrainage.com` }],
     },
-    twitter: { card: 'summary', title: cat.title, description: cat.metaDescription, images: ['/logo.png'] },
+    twitter: { card: 'summary_large_image', title: cat.title, description: cat.metaDescription },
   }
 }
 
@@ -126,21 +125,10 @@ export default async function CategoryPage({ params }: Props) {
     })),
   }
 
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: cat.faq.map((f) => ({
-      '@type': 'Question',
-      name: f.q,
-      acceptedAnswer: { '@type': 'Answer', text: f.a },
-    })),
-  }
-
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-dm-sans),'DM Sans',sans-serif", color: 'var(--text-strong)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(itemListJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }} />
 
       <Navbar />
 
@@ -159,7 +147,7 @@ export default async function CategoryPage({ params }: Props) {
         </h1>
         {totalCodes > 0 && (
           <p style={{ fontSize: '.8rem', color: 'var(--text-faint)', margin: '0 0 1rem' }}>
-            ✅ {totalCodes} code{totalCodes > 1 ? 's' : ''} actif{totalCodes > 1 ? 's' : ''} partagé{totalCodes > 1 ? 's' : ''} par la communauté dans cette catégorie
+            {totalCodes} code{totalCodes > 1 ? 's' : ''} actif{totalCodes > 1 ? 's' : ''} partagé{totalCodes > 1 ? 's' : ''} par la communauté dans cette catégorie
           </p>
         )}
         {cat.intro.map((p, i) => (
@@ -172,7 +160,7 @@ export default async function CategoryPage({ params }: Props) {
             <a
               key={b.slug}
               href={`/code-parrainage/${b.slug}`}
-              style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 18, padding: '1.125rem 1.375rem', textDecoration: 'none', color: 'var(--text-strong)' }}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 18, padding: '1rem 1.125rem', textDecoration: 'none', color: 'var(--text-strong)', minWidth: 0 }}
             >
               <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(124,58,237,.12)', border: '1px solid rgba(124,58,237,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
                 <CompanyLogo domain={b.domain} name={b.name} />

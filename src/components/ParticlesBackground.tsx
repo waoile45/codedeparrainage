@@ -32,6 +32,7 @@ export default function ParticlesBackground() {
 
   return (
     <div
+      className="particles-bg"
       style={{
         position: "fixed",
         inset: 0,

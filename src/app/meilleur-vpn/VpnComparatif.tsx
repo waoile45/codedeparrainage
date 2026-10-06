@@ -1,5 +1,5 @@
 import Navbar from '@/components/Navbar'
-import { VpnEntry, UseCaseKey, USE_CASES, USE_CASE_KEYS } from '@/data/comparatifs/vpn'
+import { VpnEntry, UseCaseKey, USE_CASES, USE_CASE_KEYS, VPN_UPDATED_AT } from '@/data/comparatifs/vpn'
 import { safeJsonLd } from '@/lib/sanitize'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -288,9 +288,9 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <a
-              href={vpn.affiliateUrl}
+              href={vpn.affiliateUrl === '#' ? `https://${vpn.domain}` : vpn.affiliateUrl}
               target="_blank"
-              rel="nofollow sponsored noopener"
+              rel={vpn.affiliateUrl === '#' ? 'nofollow noopener' : 'nofollow sponsored noopener'}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -443,7 +443,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
               Comparatif VPN
             </span>
             <span style={{ fontSize: '.75rem', color: 'var(--text-faint)' }}>
-              Mis à jour le {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              Tarifs et offres relus le {new Date(VPN_UPDATED_AT).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
             </span>
           </div>
 
@@ -618,13 +618,13 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
               margin: '0 0 .875rem',
             }}
           >
-            Notre méthode de test
+            Comment ce comparatif est construit
           </h2>
           <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: '0 0 .875rem' }}>
-            Chaque VPN de ce comparatif a été testé pendant un minimum de 30 jours sur Windows, Android et iOS. Nous mesurons les vitesses avec Speedtest.net depuis plusieurs localisations (Paris, Londres, New York), testons manuellement la compatibilité avec Netflix US/UK, Disney+ et Prime Video, et vérifions l'efficacité du kill switch en simulant des coupures réseau.
+            Les fiches reprennent les caractéristiques publiées par chaque éditeur (nombre de serveurs et de pays, protocoles, connexions simultanées, garantie de remboursement, tarifs affichés à la date de relecture indiquée en haut de page) ainsi que les audits indépendants rendus publics sur leur politique de conservation des données. Nous n'avons pas réalisé de mesures de vitesse en laboratoire : les notes traduisent une pondération de ces critères selon l'usage de chaque page (streaming, torrents, gaming…), pas un banc d'essai.
           </p>
           <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>
-            Les notes reflètent notre expérience réelle, pas les arguments marketing. Les inconvénients listés sont ceux que nous avons effectivement rencontrés. Nous mettons ce classement à jour à chaque changement tarifaire ou mise à jour majeure.
+            Les prix promotionnels changent souvent et diffèrent parfois selon le pays de connexion : vérifie le tarif réel sur le site de l'éditeur avant de souscrire. Le classement est revu à chaque changement tarifaire que nous constatons.
           </p>
         </div>
 

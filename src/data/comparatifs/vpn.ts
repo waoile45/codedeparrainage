@@ -36,6 +36,9 @@ export type VpnEntry = {
 //  • CyberGhost → Affily.io (programme propre CyberGhost)
 //  • ProtonVPN  → proton.me/affiliates
 
+// Date de dernière relecture des tarifs et caractéristiques (affichée sur la page)
+export const VPN_UPDATED_AT = '2026-05-14'
+
 export const VPN_LIST: VpnEntry[] = [
   {
     id: 'nordvpn',
@@ -71,7 +74,7 @@ export const VPN_LIST: VpnEntry[] = [
     bestPrice: 3.99,
     bestPriceDuration: '2 ans',
     affiliateUrl: '#',
-    badge: 'Choix de la rédaction',
+    badge: 'Le plus complet',
     platforms: ['Windows', 'Mac', 'Linux', 'Android', 'iOS', 'Routeur'],
   },
   {
@@ -127,7 +130,7 @@ export const VPN_LIST: VpnEntry[] = [
       prix: 8.5,
     },
     pros: [
-      'Protocole Lightway : vitesse la plus élevée testée',
+      'Protocole Lightway, conçu pour la vitesse',
       'Serveurs 100% RAM (zéro donnée stockée sur disque)',
       'MediaStreamer pour Smart TV et consoles',
       'Split tunneling avancé sur toutes les plateformes',
@@ -278,7 +281,7 @@ export const USE_CASES: Record<UseCaseKey, UseCase> = {
     h1: "Meilleur VPN pour l'IPTV en 2026",
     metaTitle: "Meilleur VPN pour l'IPTV en 2026 — Sans Buffering HD/4K",
     metaDescription:
-      "VPN IPTV : débits stables pour le streaming HD/4K, contournement des DPI, sans coupures. Comparatif testé sur les principales offres IPTV.",
+      "VPN pour l'IPTV : débits stables pour le HD/4K, protocoles capables de passer l'inspection de paquets des FAI. Comparatif des offres adaptées.",
     intro:
       "L'IPTV exige des débits stables et élevés en continu. Un VPN adapté doit contourner les analyses Deep Packet Inspection de certains FAI tout en maintenant des vitesses suffisantes pour la 4K sans coupures ni buffering.",
     ranking: ['nordvpn', 'cyberghost', 'surfshark', 'expressvpn', 'protonvpn'],
@@ -288,7 +291,7 @@ export const USE_CASES: Record<UseCaseKey, UseCase> = {
     h1: 'Meilleur VPN pour le Streaming en 2026',
     metaTitle: 'Meilleur VPN Streaming en 2026 — Disney+, Prime, HBO Max',
     metaDescription:
-      'Débloquez Disney+, Amazon Prime Video, HBO Max et les catalogues étrangers. Comparatif VPN streaming avec tests de vitesse 4K.',
+      'Accéder aux catalogues étrangers de Disney+, Amazon Prime Video ou HBO Max : comparatif des VPN qui annoncent des serveurs optimisés streaming.',
     intro:
       "Au-delà de Netflix, les catalogues de Disney+, Amazon Prime ou HBO Max varient considérablement selon les pays. Un VPN streaming doit maintenir des vitesses 4K tout en contournant des systèmes de détection anti-VPN de plus en plus sophistiqués.",
     ranking: ['nordvpn', 'expressvpn', 'surfshark', 'cyberghost', 'protonvpn'],
