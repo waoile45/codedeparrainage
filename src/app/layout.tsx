@@ -21,31 +21,27 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.codedeparrainage.com'),
+  // Titre par défaut sobre : chaque page indexable définit son propre titre.
+  // Pas de canonical ici : un canonical global pointait toutes les pages sans
+  // métadonnées propres (classement, FAQ, forum…) vers la page d'accueil.
   title: {
-    default: 'Code Parrainage 2026 : Codes Vérifiés sur +2700 Marques (Banque, Crypto…)',
+    default: 'codedeparrainage.com — codes de parrainage partagés par la communauté',
     template: '%s | codedeparrainage.com',
   },
-  description: 'Trouve un code parrainage vérifié : Boursobank, Revolut, Betclic et +2700 marques référencées. Parrainage gamifié avec XP, badges et classements.',
-  keywords: ['code parrainage', 'parrainage boursobank', 'code parrainage revolut', 'parrainage banque', 'code parrainage 2026', 'parrainage crypto'],
+  description:
+    'Codes de parrainage publiés par de vrais parrains : banques en ligne, paris sportifs, crypto, cashback, télécom. Copie le code, inscris-toi, touche la prime de bienvenue.',
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
+    icon: '/logo-192.png',
+    apple: '/logo-192.png',
   },
+  // L'image de partage vient de src/app/opengraph-image.tsx (1200×630).
   openGraph: {
     siteName: 'codedeparrainage.com',
     locale: 'fr_FR',
     type: 'website',
-    title: 'Code Parrainage 2026 : Codes Vérifiés sur +2700 Marques',
-    description: 'Trouve un code parrainage vérifié : Boursobank, Revolut, Betclic et +2700 marques référencées.',
-    images: [{ url: '/logo.png', width: 400, height: 400, alt: 'codedeparrainage.com' }],
   },
   twitter: {
-    card: 'summary',
-    title: 'Code Parrainage 2026 : Codes Vérifiés sur +2700 Marques',
-    description: 'Trouve un code parrainage vérifié : Boursobank, Revolut, Betclic et +2700 marques référencées.',
-  },
-  alternates: {
-    canonical: 'https://www.codedeparrainage.com',
+    card: 'summary_large_image',
   },
 };
 

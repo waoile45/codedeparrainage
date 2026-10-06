@@ -68,13 +68,13 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: "0.875rem" }}>
-              <img src="/logo.png" alt="Logo codedeparrainage.com" width={40} height={40} loading="lazy" style={{ width: 40, height: 40, objectFit: "contain", flexShrink: 0 }} />
+              <img src="/logo-96.png" alt="" width={78} height={96} loading="lazy" style={{ width: "auto", height: 40, objectFit: "contain", flexShrink: 0 }} />
               <span style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: "1rem", color: "#fff" }}>
                 codedeparrainage<span style={{ color: "#7c3aed" }}>.com</span>
               </span>
             </Link>
             <p style={{ fontSize: "0.83rem", color: "rgba(255,255,255,0.38)", lineHeight: 1.65, maxWidth: 260, margin: 0 }}>
-              La plateforme de parrainage gamifiée. Publie ton code, monte de niveau, débloque des badges.
+              Codes de parrainage publiés par de vrais clients, datés et notés par la communauté. Publie le tien, il apparaît sur la page de la marque.
             </p>
           </div>
 
@@ -108,10 +108,7 @@ export default function Footer() {
           <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.25)", margin: 0 }}>
             © {new Date().getFullYear()} codedeparrainage.com — Tous droits réservés
           </p>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 6px #10b981", display: "inline-block" }} />
-            <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.3)" }}>Tous les services sont opérationnels</span>
-          </div>
+          <Link href="/faq" style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>Comment fonctionne le site ?</Link>
         </div>
 
       </div>

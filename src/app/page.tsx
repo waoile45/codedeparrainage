@@ -16,6 +16,15 @@ const CAT_META: Record<string, { label: string; color: string }> = {
   bourse:     { label: 'Bourse',         color: '#6366f1' },
 }
 
+type CompanyRow = {
+  name: string
+  slug: string | null
+  url_slug: string | null
+  category: string | null
+  referral_bonus_description: string | null
+}
+type AnnouncementRow = { company_id: string | null; companies: CompanyRow | null }
+
 async function getHomeData(): Promise<HomeData> {
   const empty: HomeData = { codesCount: 0, parrainsCount: 0, entreprisesCount: 0, catCounts: {}, topCodes: [], topParrain: null }
   try {
@@ -28,9 +37,9 @@ async function getHomeData(): Promise<HomeData> {
       supabase.from('users').select('pseudo, level').order('xp', { ascending: false }).limit(1).maybeSingle(),
     ])
 
-    const anns = (annRes.data ?? []) as any[]
+    const anns = (annRes.data ?? []) as unknown as AnnouncementRow[]
     const catCounts: Record<string, number> = {}
-    const compMap = new Map<string, { count: number; company: any }>()
+    const compMap = new Map<string, { count: number; company: CompanyRow }>()
     for (const a of anns) {
       const c = a.companies
       if (c?.category) catCounts[c.category] = (catCounts[c.category] ?? 0) + 1
@@ -43,19 +52,21 @@ async function getHomeData(): Promise<HomeData> {
 
     const topCodes = [...compMap.values()]
       .sort((a, b) => b.count - a.count)
+      .filter(({ company }) => company.url_slug || company.slug)
       .slice(0, 6)
       .map(({ count, company }) => {
-        const meta = CAT_META[company.category] ?? { label: company.category ?? '', color: '#7c3aed' }
+        const meta = CAT_META[company.category ?? ''] ?? { label: company.category ?? '', color: '#7c3aed' }
         const domain = String(company.slug ?? '').includes('.') ? company.slug : `${company.slug}.com`
         return {
-          slug: company.url_slug ?? company.slug,
+          slug: company.url_slug ?? company.slug ?? '',
           logo: `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
           name: company.name,
           category: meta.label,
           catColor: meta.color,
           gain: null,
           gainSub: null,
-          desc: company.referral_bonus_description ?? 'Offre de bienvenue partagée par la communauté.',
+          // Offre réelle si renseignée en base, sinon formulation neutre — jamais de montant inventé
+          desc: company.referral_bonus_description ?? 'Codes partagés par des clients de la marque.',
           nbCodes: count,
           rating: null,
         }
@@ -76,103 +87,31 @@ async function getHomeData(): Promise<HomeData> {
 
 export const metadata = {
   // absolute : sans le template « %s | codedeparrainage.com » qui dupliquait la marque
-  title: { absolute: 'Code de parrainage 2026 : codes vérifiés par la communauté' },
-  description: 'Trouve les meilleurs codes de parrainage français : Betclic, Revolut, iGraal, Fortuneo… Codes vérifiés par la communauté et mis à jour en temps réel.',
+  title: { absolute: 'Code de parrainage 2026 : codes partagés par la communauté' },
+  description:
+    'Codes de parrainage publiés par de vrais clients et notés par ceux qui les utilisent : Boursobank, Revolut, Winamax, Trade Republic, iGraal… Copie le code, inscris-toi, touche la prime.',
   alternates: {
     canonical: 'https://www.codedeparrainage.com',
   },
   openGraph: {
-    title: 'Code de parrainage 2026 : codes vérifiés par la communauté',
-    description: 'Trouve les meilleurs codes de parrainage français : Betclic, Revolut, iGraal, Fortuneo… Codes vérifiés et mis à jour en temps réel.',
+    title: 'Code de parrainage 2026 : codes partagés par la communauté',
+    description:
+      'Codes de parrainage publiés par de vrais clients et notés par ceux qui les utilisent. Banque, paris sportifs, crypto, cashback, télécom.',
     url: 'https://www.codedeparrainage.com',
     type: 'website',
     siteName: 'codedeparrainage.com',
     locale: 'fr_FR',
-    images: [{ url: '/logo.png', width: 400, height: 400, alt: 'codedeparrainage.com' }],
   },
 }
 
-// Données statiques — visibles par Google sans JS.
-// ⚠️ Les gains ci-dessous reprennent EXACTEMENT les offres renseignées en base
-// (companies.referral_bonus_description) — ne jamais inventer un montant ici.
-const SEO_COMPANIES = [
-  { slug: 'boursobank',     name: 'BoursoBank',     gain: 'jusqu\'à 130€ offerts',        category: 'Banque' },
-  { slug: 'winamax',        name: 'Winamax',         gain: '100€ remboursés si 1er pari perdant', category: 'Paris sportifs' },
-  { slug: 'betclic',        name: 'Betclic',         gain: '30€ offerts',                  category: 'Paris sportifs' },
-  { slug: 'revolut',        name: 'Revolut',         gain: 'jusqu\'à 200€ offerts',        category: 'Banque' },
-  { slug: 'trade-republic', name: 'Trade Republic',  gain: 'jusqu\'à 200€ d\'actions',     category: 'Bourse' },
-  { slug: 'fortuneo',       name: 'Fortuneo',        gain: '80€ offerts',                  category: 'Banque' },
-  { slug: 'unibet',         name: 'Unibet',          gain: '10€ offerts',                  category: 'Paris sportifs' },
-  { slug: 'binance',        name: 'Binance',         gain: '10% de réduction sur les frais', category: 'Crypto' },
-]
-
-// Hubs catégorie (pages /code-parrainage/categorie/[categorie])
-const SEO_CATEGORIES = [
-  { slug: 'banque',         label: 'Banque & néobanques' },
-  { slug: 'paris-sportifs', label: 'Paris sportifs' },
-  { slug: 'crypto',         label: 'Crypto' },
-  { slug: 'cashback',       label: 'Cashback' },
-  { slug: 'energie',        label: 'Énergie' },
-  { slug: 'telephonie',     label: 'Téléphonie' },
-  { slug: 'shopping',       label: 'Shopping' },
-  { slug: 'mobilite',       label: 'Covoiturage & mobilité' },
-]
-
+/**
+ * La page d'accueil est entièrement rendue côté serveur par Next (HomeClient
+ * est un client component mais son HTML est pré-rendu) : titre, liens vers
+ * les marques et catégories, FAQ sont dans le HTML initial. Plus besoin du
+ * bloc « SEO » positionné hors écran qui doublait ce contenu — Google classe
+ * le texte et les liens cachés parmi les techniques de spam.
+ */
 export default async function HomePage() {
   const data = await getHomeData()
-  return (
-    <>
-      {/*
-        Contenu server-rendu visible par Google.
-        Positionné hors écran — pas de cloaking car le contenu est identique
-        à ce que voit l'utilisateur via HomeClient, juste pré-rendu.
-      */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          left: '-9999px',
-          width: '1px',
-          overflow: 'hidden',
-        }}
-      >
-        {/* h2 (pas h1) : le H1 unique de la home est dans le hero de HomeClient */}
-        <h2>Les meilleurs codes de parrainage 2026 — codedeparrainage.com</h2>
-        <p>
-          Trouvez et partagez les meilleurs codes de parrainage français.
-          BoursoBank, Winamax, Betclic, Revolut, Trade Republic et bien d'autres.
-          Codes vérifiés par la communauté, mis à jour en temps réel.
-        </p>
-
-        {/* Maillage interne — liens crawlables vers chaque page entreprise */}
-        <nav aria-label="Codes de parrainage par entreprise">
-          <h2>Codes de parrainage populaires</h2>
-          {SEO_COMPANIES.map((c) => (
-            <a key={c.slug} href={`/code-parrainage/${c.slug}`}>
-              Code parrainage {c.name} — {c.gain} ({c.category})
-            </a>
-          ))}
-        </nav>
-
-        {/* Liens par catégorie — vers les hubs éditoriaux */}
-        <nav aria-label="Catégories de parrainage">
-          <h2>Parcourir par catégorie</h2>
-          {SEO_CATEGORIES.map((cat) => (
-            <a key={cat.slug} href={`/code-parrainage/categorie/${cat.slug}`}>
-              Codes de parrainage {cat.label}
-            </a>
-          ))}
-        </nav>
-
-        <p>
-          Comment utiliser un code parrainage ? Choisissez un code dans notre annuaire,
-          copie-le, et entre-le lors de ton inscription sur le site de l'entreprise.
-          Tu recevras automatiquement ta récompense après validation.
-        </p>
-      </div>
-
-      {/* Interface complète avec animations et thème */}
-      <HomeClient data={data} />
-    </>
-  )
+  return <HomeClient data={data} />
 }

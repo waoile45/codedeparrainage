@@ -28,6 +28,9 @@ export type BanqueEntry = {
 // ─── Données banques ──────────────────────────────────────────────────────────
 // Pour ajouter vos liens d'affiliation, remplacez '#' par votre lien.
 
+// Date de dernière relecture des tarifs et conditions (affichée sur la page)
+export const BANQUE_UPDATED_AT = '2026-05-14'
+
 export const BANQUE_LIST: BanqueEntry[] = [
   {
     id: 'revolut',
@@ -69,7 +72,7 @@ export const BANQUE_LIST: BanqueEntry[] = [
     domain: 'wise.com',
     tagline: 'Le meilleur pour les virements internationaux et les freelances',
     description:
-      "Wise (anciennement TransferWise) a révolutionné les transferts d'argent internationaux en proposant le taux de change réel — le même que celui affiché sur Google — avec des frais transparents affichés avant confirmation. Pour les freelances et les indépendants qui facturent à l'étranger, Wise est sans équivalent : tu obtiens un IBAN local dans 10 pays (France, UK, USA, Australie...) sans ouvrir de compte dans chacun.",
+      "Wise (anciennement TransferWise) a changé les transferts d'argent internationaux en proposant le taux de change réel — le même que celui affiché sur Google — avec des frais transparents affichés avant confirmation. Pour les freelances et les indépendants qui facturent à l'étranger, Wise est sans équivalent : tu obtiens un IBAN local dans 10 pays (France, UK, USA, Australie...) sans ouvrir de compte dans chacun.",
     score: 9.3,
     scores: {
       frais: 9.0,

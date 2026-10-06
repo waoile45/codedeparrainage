@@ -5,6 +5,7 @@ import { createAnonSupabase } from '@/lib/supabase-server'
 import Navbar from '@/components/Navbar'
 import CopyButton from '@/components/CopyButton'
 import CompanyLogo from '@/components/CompanyLogo'
+import { FraicheurCode } from '@/components/FraicheurCode'
 import { safeJsonLd } from '@/lib/sanitize'
 import {
   SITE_URL,
@@ -111,18 +112,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'website',
       siteName: 'codedeparrainage.com',
       locale: 'fr_FR',
-      images: [{ url: '/logo.png', width: 400, height: 400, alt: `Code parrainage ${name} sur codedeparrainage.com` }],
     },
-    twitter: {
-      card: 'summary',
-      title,
-      description,
-      images: ['/logo.png'],
-    },
+    twitter: { card: 'summary_large_image', title, description },
   }
 }
 
-/* ── FAQ data-aware : une seule source pour le visible ET le JSON-LD ── */
+/* ── FAQ data-aware : réponses construites à partir de l'état réel de la page ── */
 function buildFaq(opts: {
   slug: string
   name: string
@@ -174,21 +169,6 @@ function buildFaq(opts: {
       a: `Les codes listés sur cette page sont publiés par des parrains inscrits et notés par la communauté (code fonctionnel, réponse rapide…)${dateStr ? ` — dernier code mis à jour le ${dateStr}` : ''}. En cas de problème, tu peux contacter le parrain directement depuis son annonce.`,
     })
   }
-
-  // 5. Un seul code par compte
-  faq.push({
-    q: `Peut-on utiliser plusieurs codes parrainage ${name} ?`,
-    a: pickVariant(slug, [
-      `Non, ${name} n'accepte généralement qu'un seul code par nouveau compte. Choisis un parrain actif et récent pour maximiser tes chances que le code soit accepté.`,
-      `Un seul code par compte, comme chez la plupart des marques : ${name} associe le parrainage à la création du compte. Choisis bien ton code avant de t'inscrire.`,
-    ], 13),
-  })
-
-  // 6. Délai
-  faq.push({
-    q: `Quand la récompense de parrainage ${name} est-elle versée ?`,
-    a: `Le délai dépend des conditions fixées par ${name} : la récompense est en général créditée une fois le compte validé et les conditions remplies (premier achat, dépôt minimum, activation…). Compte de quelques jours à quelques semaines.`,
-  })
 
   return faq
 }
@@ -260,20 +240,9 @@ export default async function CompanyPage({ params }: Props) {
     ],
   }
 
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faq.map((item) => ({
-      '@type': 'Question',
-      name: item.q,
-      acceptedAnswer: { '@type': 'Answer', text: item.a },
-    })),
-  }
-
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-dm-sans),'DM Sans',sans-serif", color: 'var(--text-strong)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }} />
 
       <Navbar />
 
@@ -294,7 +263,7 @@ export default async function CompanyPage({ params }: Props) {
 
         {/* ── En-tête entreprise ── */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.75rem', marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: bonus || codesCount > 0 ? '1.25rem' : 0 }}>
+          <div className="brand-head" style={{ marginBottom: bonus || codesCount > 0 ? '1.25rem' : 0 }}>
             <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(124,58,237,.12)', border: '1px solid rgba(124,58,237,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
               <CompanyLogo domain={domain} name={name} />
             </div>
@@ -309,7 +278,6 @@ export default async function CompanyPage({ params }: Props) {
           {/* Offre — UNIQUEMENT si la donnée existe en base (fini le « null ») */}
           {bonus && (
             <div style={{ background: 'rgba(124,58,237,.1)', border: '1px solid rgba(124,58,237,.25)', borderRadius: 14, padding: '1rem 1.25rem', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-              <span style={{ fontSize: '1.1rem', flexShrink: 0, marginTop: 1 }} aria-hidden="true">🎁</span>
               <div>
                 <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#a78bfa', marginBottom: 4 }}>Offre de parrainage</div>
                 <div style={{ color: 'var(--text-strong)', fontWeight: 600, fontSize: '.95rem' }}>{bonus}</div>
@@ -320,15 +288,15 @@ export default async function CompanyPage({ params }: Props) {
           {/* E-E-A-T : signaux réels de fraîcheur et de vérification communautaire */}
           {codesCount > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1.25rem', marginTop: bonus ? '0.875rem' : 0, fontSize: '.78rem', color: 'var(--text-muted)' }}>
-              <span>✅ {codesCount} code{codesCount > 1 ? 's' : ''} actif{codesCount > 1 ? 's' : ''}</span>
-              <span>👥 {parrainsCount} parrain{parrainsCount > 1 ? 's' : ''} vérifié{parrainsCount > 1 ? 's' : ''}</span>
-              {dateStr && <span>🕒 Mis à jour le {dateStr}</span>}
+              <span>{codesCount} code{codesCount > 1 ? 's' : ''} publié{codesCount > 1 ? 's' : ''}</span>
+              <span>{parrainsCount} parrain{parrainsCount > 1 ? 's' : ''} inscrit{parrainsCount > 1 ? 's' : ''}</span>
+              {dateStr && <span>Dernière mise à jour le {dateStr}</span>}
             </div>
           )}
         </div>
 
         {/* ── Liste des codes ── */}
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: '1rem' }}>
           <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: 0, color: 'var(--text-strong)' }}>
             {codesCount} code{codesCount > 1 ? 's' : ''} parrainage {name} disponible{codesCount > 1 ? 's' : ''}
           </h2>
@@ -356,7 +324,7 @@ export default async function CompanyPage({ params }: Props) {
                   {/* Gain custom (préfixe __gain__) parsé — plus jamais rendu brut */}
                   {gain && (
                     <span style={{ display: 'inline-block', padding: '.3rem .625rem', background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.25)', borderRadius: 8, color: '#16a34a', fontSize: '.8rem', fontWeight: 700, marginBottom: '.75rem' }}>
-                      🎁 {gain}
+                      {gain}
                     </span>
                   )}
 
@@ -380,13 +348,17 @@ export default async function CompanyPage({ params }: Props) {
                       {new Date(ann.last_bumped_at ?? ann.created_at).toLocaleDateString('fr-FR')}
                     </span>
                   </div>
+                  {/* Fraîcheur du code : la seule donnée du site qu'un moteur
+                      génératif ne peut pas restituer, puisqu'elle périme. */}
+                  <div style={{ marginTop: '.6rem', paddingTop: '.6rem', borderTop: '1px solid var(--border)' }}>
+                    <FraicheurCode stats={ann} />
+                  </div>
                 </div>
               )
             })}
           </div>
         ) : (
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 18, padding: '3rem 2rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.875rem' }} aria-hidden="true">🎯</div>
             <p style={{ color: 'var(--text-muted)', fontSize: '.9rem', marginBottom: '1.25rem' }}>
               {pickVariant(slug, [
                 `Aucun code parrainage ${name} pour l'instant — sois le premier parrain.`,
@@ -422,7 +394,7 @@ export default async function CompanyPage({ params }: Props) {
           </div>
         </div>
 
-        {/* ── FAQ (même source que le JSON-LD FAQPage) ── */}
+        {/* ── FAQ : questions dont la réponse dépend des données de la page ── */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginBottom: '1.5rem' }}>
           <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
             Questions fréquentes — parrainage {name}
@@ -472,7 +444,11 @@ export default async function CompanyPage({ params }: Props) {
       <style>{`
         details summary::-webkit-details-marker { display: none; }
         details[open] .faq-arrow { transform: rotate(180deg); }
-        @media (max-width: 600px) { h1 { font-size: 1.35rem !important; } }
+        .brand-head { display: flex; align-items: center; gap: 16px; }
+        @media (max-width: 600px) {
+          .brand-head { align-items: flex-start; gap: 12px; }
+          .brand-head h1 { font-size: 1.3rem !important; }
+        }
       `}</style>
     </div>
   )

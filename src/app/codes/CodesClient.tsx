@@ -34,17 +34,7 @@ function BrandLogo({ slug, brand }: { slug: string; brand: string }) {
   if (error) return <div className="brand-logo brand-logo-fallback">{brand[0]?.toUpperCase()}</div>;
   return (
     <div className="brand-logo">
-      <img src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`} alt={brand} onError={() => setError(true)} style={{ width:"100%", height:"100%", objectFit:"contain", borderRadius:8, padding:3 }} />
-    </div>
-  );
-}
-
-function Particles() {
-  return (
-    <div className="particles-container" aria-hidden="true">
-      {Array.from({ length: 18 }).map((_, i) => (
-        <span key={i} className="particle" style={{ left:`${Math.random()*100}%`, animationDelay:`${Math.random()*8}s`, animationDuration:`${6+Math.random()*8}s`, opacity:0.15+Math.random()*0.2, width:`${2+Math.random()*3}px`, height:`${2+Math.random()*3}px` }} />
-      ))}
+      <img src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`} alt="" onError={() => setError(true)} style={{ width:"100%", height:"100%", objectFit:"contain", borderRadius:8, padding:3 }} />
     </div>
   );
 }
@@ -478,9 +468,6 @@ export default function CodesClient() {
       <style>{`
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
-        .particles-container{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-        .particle{position:absolute;bottom:-10px;border-radius:50%;background:#7c3aed;animation:floatUp linear infinite}
-        @keyframes floatUp{0%{transform:translateY(0) scale(1);opacity:0}10%{opacity:1}90%{opacity:.5}100%{transform:translateY(-100vh) scale(.3);opacity:0}}
         .page-wrapper{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:3rem 1.5rem 6rem}
         .page-header{margin-bottom:2.5rem}
         .header-label{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#7c3aed;margin-bottom:.75rem}
@@ -557,10 +544,20 @@ export default function CodesClient() {
         .skeleton{background:var(--border-md);border-radius:8px;animation:shimmer 1.5s ease-in-out infinite}
         @keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
         @keyframes spin{to{transform:rotate(360deg)}}
-        @media(max-width:600px){.page-wrapper{padding:2rem 1rem 4rem}.card-footer{flex-direction:column;align-items:flex-start}}
+        @media(max-width:600px){
+          .page-wrapper{padding:1.5rem 1rem 4rem}
+          .code-card{padding:1.125rem}
+          .card-top{flex-direction:column;align-items:stretch;gap:.625rem}
+          .reward-pill{white-space:normal;align-self:flex-start}
+          .brand-desc{word-break:break-word}
+          .code-row{flex-wrap:wrap;gap:.625rem}
+          .code-text{word-break:break-all;font-size:.9rem}
+          .card-footer{flex-direction:column;align-items:flex-start}
+          .card-actions{flex-wrap:wrap}
+          .search-input{font-size:16px}
+        }
       `}</style>
 
-      <Particles />
       <Navbar activePage="codes" />
 
       <main className="page-wrapper">
@@ -569,7 +566,7 @@ export default function CodesClient() {
           <h1 className="page-title">Codes de parrainage</h1>
           <p className="page-subtitle">
             <span className="live-dot" />
-            <span className="count-num">{count}</span>&nbsp;codes disponibles — mis à jour en temps réel
+            <span className="count-num">{count}</span>&nbsp;codes publiés par des membres inscrits
           </p>
         </header>
 
@@ -629,7 +626,6 @@ export default function CodesClient() {
           </div>
         ) : (
           <div className="empty-state">
-            <div className="empty-icon">🔍</div>
             <p>Aucun code trouvé pour cette recherche.</p>
           </div>
         )}

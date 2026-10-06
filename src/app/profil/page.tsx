@@ -284,7 +284,7 @@ const NAV_GROUPS = [
 
 function Sidebar({ active, setActive, user }: { active:NavSection; setActive:(s:NavSection)=>void; user:UserProfile|null }) {
   return (
-    <aside style={{ width:220, flexShrink:0, display:"flex", flexDirection:"column", gap:"1.5rem", position:"sticky", top:80, alignSelf:"flex-start" }}>
+    <aside className="profil-sidebar">
       <div style={{ display:"flex", flexDirection:"column", gap:"1.5rem" }}>
         {NAV_GROUPS.map(group => (
           <div key={group.label}>
@@ -350,7 +350,7 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
         </div>
       </div>
 
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"0.875rem" }}>
+      <div className="g3">
         <div className="action-card">
           <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 0%,rgba(124,58,237,.15),transparent 65%)", pointerEvents:"none", borderRadius:"inherit" }} />
           <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,#7c3aed,transparent)" }} />
@@ -377,7 +377,7 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
         </div>
       </div>
 
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"0.75rem" }}>
+      <div className="g4">
         {[
           { v: annonces.length,          l:"Annonces" },
           { v: `${user.streak_days} 🔥`, l:"Streak" },
@@ -534,7 +534,7 @@ function SectionBadges({ xp, annoncesCount, isTop3 }: { xp:number; annoncesCount
   return (
     <div className="sc">
       <div className="sh"><div><h2 className="st">Badges</h2><p className="ss">{badges.filter(b=>b.unlocked).length}/{badges.length} débloqués</p></div></div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"0.875rem" }}>
+      <div className="g3">
         {badges.map(b => (
           <div key={b.id} style={{ position:"relative", background:b.unlocked?"rgba(124,58,237,.07)":"rgba(255,255,255,.03)", border:`1px solid ${b.unlocked?"rgba(124,58,237,.3)":"rgba(255,255,255,.07)"}`, borderRadius:16, padding:"1.4rem 1rem", textAlign:"center", opacity:b.unlocked?1:.42 }}>
             {!b.unlocked && <div style={{ position:"absolute", top:10, right:10, fontSize:"0.75rem" }}>🔒</div>}
@@ -597,7 +597,7 @@ function SectionCredits() {
           <a href="/boost" className="btn-o">Booster une annonce</a>
         </div>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.875rem" }}>
+      <div className="g2">
         <div style={{ position:"relative", overflow:"hidden", background:"rgba(124,58,237,.08)", border:"1px solid rgba(124,58,237,.25)", borderRadius:18, padding:"1.75rem" }}>
           <div style={{ position:"relative", zIndex:1 }}>
             <p style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.4)", marginBottom:4 }}>Solde actuel</p>
@@ -1268,7 +1268,20 @@ export default function ProfilPage() {
         .btn-ghost-sm:hover{color:#fff;border-color:rgba(255,255,255,.18)}
         .btn-ghost-sm.danger:hover{color:#f87171;border-color:rgba(248,113,113,.3)}
         .btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:10px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
-        @media(max-width:768px){.layout{flex-direction:column;padding:1rem}.main{width:100%}}
+        .profil-sidebar{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:1.5rem;position:sticky;top:80px;align-self:flex-start}
+        .g2{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
+        .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem}
+        .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem}
+        @media(max-width:768px){
+          .layout{flex-direction:column;padding:1rem}
+          .main{width:100%}
+          .profil-sidebar{width:100%;position:static}
+          .g3{grid-template-columns:1fr 1fr}
+        }
+        @media(max-width:520px){
+          .g2,.g3{grid-template-columns:1fr}
+          .g4{grid-template-columns:1fr 1fr}
+        }
       `}</style>
 
       <Navbar activePage="profil" />

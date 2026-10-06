@@ -108,3 +108,36 @@ h1, h2, h3 {
 [data-theme="light"] #hp-nav {
   box-shadow: 0 1px 8px rgba(0,0,0,0.06);
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Mobile & accessibilité
+   ═══════════════════════════════════════════════════════════════════ */
+/* Les images ne débordent jamais de leur conteneur */
+img { max-width: 100%; }
+
+/* Particules : décor coûteux sur mobile (20 animations permanentes) et
+   inutile pour qui a demandé moins d'animations */
+@media (max-width: 768px) {
+  .particles-bg { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .particles-bg { display: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Réserve la hauteur de la bannière d'inscription fixée en bas d'écran
+   (classe posée par StickyBanner) pour qu'elle ne recouvre pas le footer */
+body.has-sticky-banner { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+@media (max-width: 600px) {
+  body.has-sticky-banner { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+}
+
+/* Zones tactiles : les boutons et liens-boutons restent atteignables au pouce */
+@media (pointer: coarse) {
+  button, [role="button"] { min-height: 40px; }
+}
