@@ -1,12 +1,14 @@
 "use client"
 
 import { useState } from "react"
+import { trackCodeCopy } from "@/lib/track-copy"
 
-export default function CopyButton({ code }: { code: string }) {
+export default function CopyButton({ code, announcementId }: { code: string; announcementId?: string }) {
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
     try { await navigator.clipboard.writeText(code) } catch {}
+    trackCodeCopy(announcementId)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
+import { trackCodeCopy } from "@/lib/track-copy";
 import { CategoryIcon } from "@/components/CategoryIcons";
 
 type Category = "Tout" | "banque" | "paris" | "cashback" | "energie" | "telephonie" | "crypto" | "assurance" | "shopping";
@@ -39,10 +40,11 @@ function BrandLogo({ slug, brand }: { slug: string; brand: string }) {
   );
 }
 
-function CopyButton({ code }: { code: string }) {
+function CopyButton({ code, announcementId }: { code: string; announcementId?: string }) {
   const [state, setState] = useState<"idle"|"copied">("idle");
   const handleCopy = async () => {
     try { await navigator.clipboard.writeText(code); } catch {}
+    trackCodeCopy(announcementId);
     setState("copied"); setTimeout(() => setState("idle"), 2000);
   };
   return (
@@ -283,7 +285,7 @@ function CodeCardItem({ card, index, onRate, onContact, onEdit, onDelete, curren
           <span className="code-dot" />
           <code className={`code-text ${card.code.startsWith("http") ? "code-url" : ""}`}>{card.code}</code>
         </div>
-        <CopyButton code={card.code} />
+        <CopyButton code={card.code} announcementId={card.id} />
       </div>
     </div>
   );

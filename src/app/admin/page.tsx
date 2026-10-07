@@ -57,6 +57,9 @@ export default function AdminPage() {
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [users, setUsers]             = useState<any[]>([])
   const [usersError, setUsersError]   = useState('')
+  // Suivi des copies de codes (scripts/code-copies.sql). `installed` distingue
+  // « personne n'a copié » de « la table n'existe pas encore ».
+  const [copyStats, setCopyStats] = useState<{ installed: boolean; error?: string; rows: any[]; totals: { total: number; last_7d: number; last_24h: number } } | null>(null)
   const [loading, setLoading]         = useState(true)
 
   const [searchAnn, setSearchAnn]     = useState('')
@@ -95,7 +98,7 @@ export default function AdminPage() {
     }
     // Les emails ne sont plus lisibles via l'API publique : la liste des
     // utilisateurs (avec email) passe par la route serveur admin /api/admin/users.
-    const [comp, { data: ann }, usersRes] = await Promise.all([
+    const [comp, { data: ann }, usersRes, copiesRes] = await Promise.all([
       loadAllCompanies(),
       supabase.from('announcements').select('*, user_id, users(id,pseudo), companies(name), boosts(active, ends_at)').order('created_at', { ascending: false }),
       fetch('/api/admin/users').then(async r => {
@@ -103,11 +106,15 @@ export default function AdminPage() {
         console.error('/api/admin/users a répondu', r.status)
         return { users: [], loadError: r.status }
       }).catch(() => ({ users: [], loadError: 'réseau' })),
+      fetch('/api/admin/code-copies')
+        .then(r => r.json())
+        .catch(() => ({ installed: false, rows: [], totals: { total: 0, last_7d: 0, last_24h: 0 } })),
     ])
     setCompanies(comp)
     setAnnouncements(ann ?? [])
     setUsers(usersRes.users ?? [])
     if (usersRes.loadError) setUsersError(String(usersRes.loadError))
+    setCopyStats(copiesRes)
     setLoading(false)
   }
 
@@ -385,12 +392,59 @@ export default function AdminPage() {
                   { val: announcements.length,            label: 'Annonces publiées',           icon: '📢' },
                   { val: companies.length,                label: 'Entreprises référencées',     icon: '🏢' },
                   { val: totalCredits.toFixed(2) + ' cr.',label: 'Crédits en circulation',      icon: '⚡' },
+                  { val: copyStats?.installed ? copyStats.totals.total : '—', label: 'Codes copiés (total)', icon: '📋' },
+                  { val: copyStats?.installed ? copyStats.totals.last_7d : '—', label: 'Codes copiés (7 jours)', icon: '📈' },
                 ].map(({ val, label, icon }) => (
                   <div key={label} style={{ background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.18)', borderRadius: 20, padding: '2rem' }}>
                     <div style={{ fontSize: '2.5rem', fontWeight: 800, color: '#a78bfa', lineHeight: 1, fontFamily: "'Syne',sans-serif" }}>{val}</div>
                     <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>{icon} {label}</div>
                   </div>
                 ))}
+
+                {/* Détail des codes les plus copiés */}
+                <div style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '1.5rem' }}>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', marginBottom: 4 }}>Codes les plus copiés</div>
+                  <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', marginBottom: 16 }}>
+                    Une copie par visiteur et par session. Aucune donnée personnelle n&apos;est enregistrée.
+                  </div>
+
+                  {!copyStats ? (
+                    <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Chargement…</div>
+                  ) : !copyStats.installed ? (
+                    <div style={{ fontSize: '0.8rem', color: '#fbbf24', lineHeight: 1.6 }}>
+                      Suivi non installé. Exécuter <code style={{ background: 'rgba(255,255,255,0.08)', padding: '2px 6px', borderRadius: 5 }}>scripts/code-copies.sql</code> dans le SQL Editor Supabase, puis recharger cette page.
+                    </div>
+                  ) : copyStats.rows.length === 0 ? (
+                    <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>Aucune copie enregistrée pour l&apos;instant.</div>
+                  ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                        <thead>
+                          <tr style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'left' }}>
+                            <th style={{ padding: '6px 10px 6px 0', fontWeight: 600 }}>Marque</th>
+                            <th style={{ padding: '6px 10px', fontWeight: 600 }}>Code</th>
+                            <th style={{ padding: '6px 10px', fontWeight: 600 }}>Membre</th>
+                            <th style={{ padding: '6px 10px', fontWeight: 600, textAlign: 'right' }}>24 h</th>
+                            <th style={{ padding: '6px 10px', fontWeight: 600, textAlign: 'right' }}>7 j</th>
+                            <th style={{ padding: '6px 0 6px 10px', fontWeight: 600, textAlign: 'right' }}>Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {copyStats.rows.slice(0, 25).map((r: any) => (
+                            <tr key={r.announcement_id} style={{ borderTop: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.75)' }}>
+                              <td style={{ padding: '8px 10px 8px 0' }}>{r.company ?? <span style={{ color: 'rgba(255,255,255,0.3)' }}>annonce supprimée</span>}</td>
+                              <td style={{ padding: '8px 10px', fontFamily: 'monospace', color: '#a78bfa' }}>{r.code ?? '—'}</td>
+                              <td style={{ padding: '8px 10px', color: 'rgba(255,255,255,0.45)' }}>{r.pseudo ?? '—'}</td>
+                              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{r.last_24h}</td>
+                              <td style={{ padding: '8px 10px', textAlign: 'right' }}>{r.last_7d}</td>
+                              <td style={{ padding: '8px 0 8px 10px', textAlign: 'right', fontWeight: 700, color: '#fff' }}>{r.total}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

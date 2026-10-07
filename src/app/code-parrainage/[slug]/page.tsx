@@ -318,7 +318,7 @@ export default async function CompanyPage({ params }: Props) {
                         {ann.code}
                       </code>
                     </div>
-                    <CopyButton code={ann.code} />
+                    <CopyButton code={ann.code} announcementId={ann.id} />
                   </div>
 
                   {/* Gain custom (préfixe __gain__) parsé — plus jamais rendu brut */}

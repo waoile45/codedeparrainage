@@ -269,7 +269,10 @@ export default function Navbar({ activePage }: NavbarProps) {
           <div className="nav-center">
             <Link href="/codes"      className={`nav-link ${activePage==="codes"      ? "active" : ""}`}>Codes</Link>
             <Link href="/classement" className={`nav-link ${activePage==="classement" ? "active" : ""}`}>Classement</Link>
-            <Link href="/forum"      className={`nav-link ${activePage==="forum"      ? "active" : ""}`}>Communauté</Link>
+            {/* Lien « Communauté » retiré : la table forum_posts n'a jamais été créée,
+                la page affichait donc un forum vide impossible à distinguer d'un forum
+                désert. Pour le réactiver : exécuter scripts/forum-tables.sql, remettre
+                ce lien et celui du menu mobile, et retirer le noindex de forum/layout.tsx. */}
             {isLoggedIn && (
               <Link href="/profil?tab=messages" className={`nav-link ${activePage==="messages" ? "active" : ""}`}>
                 Messages
@@ -361,7 +364,7 @@ export default function Navbar({ activePage }: NavbarProps) {
         <div id="nav-mobile-menu" className={`nav-mobile ${menuOpen ? "open" : ""}`}>
           <Link href="/codes"      className={`nav-mobile-link ${activePage==="codes"      ? "active":""}`}>Codes de parrainage</Link>
           <Link href="/classement" className={`nav-mobile-link ${activePage==="classement" ? "active":""}`}>Classement</Link>
-          <Link href="/forum"      className={`nav-mobile-link ${activePage==="forum"      ? "active":""}`}>Communauté</Link>
+          {/* Voir le commentaire du menu bureau : lien « Communauté » retiré. */}
           {isLoggedIn && (
             <>
               <Link href="/profil?tab=messages" className={`nav-mobile-link ${activePage==="messages" ? "active":""}`}>

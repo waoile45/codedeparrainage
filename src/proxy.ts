@@ -36,6 +36,9 @@ const RATE_LIMITED_PATHS = [
   '/api/stripe/checkout',
   '/api/proposer-entreprise',
   '/api/verify-turnstile',
+  // Endpoint public appelé à chaque copie de code : sans limite, le compteur
+  // se gonfle en boucle depuis un simple script.
+  '/api/code-copy',
 ]
 
 export async function proxy(req: NextRequest) {

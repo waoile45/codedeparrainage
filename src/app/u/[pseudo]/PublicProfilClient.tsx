@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
+import { trackCodeCopy } from "@/lib/track-copy";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface PublicUser {
@@ -99,10 +100,10 @@ function Avatar({ pseudo, avatarUrl, size=72 }: { pseudo:string; avatarUrl:strin
   );
 }
 
-function CopyButton({ code }: { code:string }) {
+function CopyButton({ code, announcementId }: { code:string; announcementId?:string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <button onClick={async () => { try { await navigator.clipboard.writeText(code); } catch {} setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+    <button onClick={async () => { try { await navigator.clipboard.writeText(code); } catch {} trackCodeCopy(announcementId); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
       style={{ display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", background:copied?"rgba(34,197,94,.15)":"rgba(124,58,237,.15)", border:`1px solid ${copied?"rgba(34,197,94,.35)":"rgba(124,58,237,.35)"}`, borderRadius:8, color:copied?"#4ade80":"#a78bfa", fontSize:".78rem", fontWeight:600, cursor:"pointer", transition:"all .2s", fontFamily:"'DM Sans',sans-serif", flexShrink:0 }}>
       {copied
         ? <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Copié !</>
@@ -331,7 +332,7 @@ export default function PublicProfilClient() {
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                           </a>
                         )}
-                        <CopyButton code={a.code} />
+                        <CopyButton code={a.code} announcementId={a.id} />
                       </div>
                     </div>
                   ))}
