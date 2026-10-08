@@ -35,44 +35,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Metadata manquante' }, { status: 400 })
     }
 
-    // Idempotence : Stripe peut renvoyer le même événement plusieurs fois.
-    // Si ce paiement a déjà été traité, on ne recrédite pas une seconde fois.
-    const { data: alreadyProcessed } = await supabase
-      .from('credit_purchases')
-      .select('id')
-      .eq('stripe_session_id', session.id)
-      .maybeSingle()
+    // Crédit atomique, côté base (scripts/credits-atomiques.sql).
+    //
+    // L'ancienne version enchaînait trois requêtes : un select pour vérifier
+    // que la session n'avait pas déjà été traitée, puis un select du solde,
+    // puis un update à « valeur lue + montant ». Deux livraisons simultanées
+    // de Stripe pouvaient donc franchir ensemble le contrôle d'idempotence,
+    // et deux paiements arrivant en même temps faisaient perdre un crédit au
+    // client. grant_purchased_credits s'appuie sur l'index unique de
+    // stripe_session_id comme verrou et incrémente le solde en relatif.
+    const { data: credited, error: creditError } = await supabase.rpc(
+      'grant_purchased_credits',
+      {
+        p_user_id: userId,
+        p_credits: credits,
+        p_session_id: session.id,
+        p_amount: session.amount_total,
+      }
+    )
 
-    if (alreadyProcessed) {
-      return NextResponse.json({ received: true })
+    if (creditError) {
+      console.error('[stripe/webhook] grant_purchased_credits:', creditError)
+      // 500 → Stripe réessaiera, ce qui est le comportement voulu tant que
+      // le crédit n'a pas abouti.
+      return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
     }
 
-    await supabase.from('credit_purchases').insert({
-      user_id: userId,
-      stripe_session_id: session.id,
-      credits_bought: credits,
-      amount_paid: session.amount_total,
-      status: 'completed',
-    })
-
-    const { data: existing } = await supabase
-      .from('credits')
-      .select('balance')
-      .eq('user_id', userId)
-      .single()
-
-    if (existing) {
-      await supabase
-        .from('credits')
-        .update({ 
-          balance: existing.balance + credits, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq('user_id', userId)
-    } else {
-      await supabase
-        .from('credits')
-        .insert({ user_id: userId, balance: credits })
+    if (credited === false) {
+      // Événement déjà traité : rien à faire, surtout pas recréditer.
+      return NextResponse.json({ received: true })
     }
 
     console.log(`✅ ${credits} crédits ajoutés à l'utilisateur ${userId}`)
