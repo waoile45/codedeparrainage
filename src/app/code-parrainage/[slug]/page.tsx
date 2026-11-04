@@ -181,6 +181,11 @@ export default async function CompanyPage({ params }: Props) {
 
   const { company, announcements } = data
   const name = formatBrandName(company.name)
+  // Bouton « Publier » : la marque arrive présélectionnée dans le formulaire
+  // (companies.slug = clé de recherche utilisée par /publier).
+  const publishHref = company.slug
+    ? `/publier?marque=${encodeURIComponent(company.slug)}&nom=${encodeURIComponent(name)}`
+    : '/publier'
   const bonus: string | null = company.referral_bonus_description ?? null
   const codesCount = announcements.length
   const parrainsCount = new Set(announcements.map((a: any) => a.user_id).filter(Boolean)).size
@@ -197,7 +202,7 @@ export default async function CompanyPage({ params }: Props) {
   const tagline: string =
     company.description ??
     pickVariant(slug, [
-      `Codes de parrainage ${name} partagés et vérifiés par la communauté.`,
+      `Codes de parrainage ${name} partagés par la communauté.`,
       `Les codes parrainage ${name} publiés par nos parrains, mis à jour en continu.`,
       `Trouve un parrain ${name} actif et récupère son code en un clic.`,
     ], 20)
@@ -299,7 +304,7 @@ export default async function CompanyPage({ params }: Props) {
           <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: 0, color: 'var(--text-strong)' }}>
             {codesCount} code{codesCount > 1 ? 's' : ''} parrainage {name} disponible{codesCount > 1 ? 's' : ''}
           </h2>
-          <a href="/publier" style={{ fontSize: '.78rem', color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}>
+          <a href={publishHref} rel="nofollow" style={{ fontSize: '.78rem', color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}>
             + Publier le mien
           </a>
         </div>
@@ -360,7 +365,7 @@ export default async function CompanyPage({ params }: Props) {
                 `Pas encore de code ${name} publié par la communauté.`,
               ], 21)}
             </p>
-            <a href="/publier" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#7c3aed', color: '#fff', fontWeight: 700, fontSize: '.875rem', padding: '.7rem 1.5rem', borderRadius: 12, textDecoration: 'none' }}>
+            <a href={publishHref} rel="nofollow" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#7c3aed', color: '#fff', fontWeight: 700, fontSize: '.875rem', padding: '.7rem 1.5rem', borderRadius: 12, textDecoration: 'none' }}>
               Publier le premier code
             </a>
           </div>

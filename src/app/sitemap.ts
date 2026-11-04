@@ -15,12 +15,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // vides sont noindex) → elles seules entrent au sitemap, avec un lastmod RÉEL
   // (dernière annonce publiée/bumpée), pas un new Date() mensonger.
   const supabase = createAnonSupabase()
-  const { data: anns, error } = await supabase
-    .from('announcements')
-    .select('last_bumped_at, created_at, companies (url_slug)')
-    .limit(5000)
-  // Échouer plutôt que publier un sitemap sans aucune page marque.
-  if (error) throw new Error('sitemap: lecture des annonces impossible')
+  // Pagination obligatoire : PostgREST plafonne chaque réponse à 1 000 lignes
+  // (max_rows), quel que soit .limit(). Sans boucle, au-delà de 1 000 annonces
+  // des marques sortiraient du sitemap en silence.
+  const PAGE = 1000
+  const anns: any[] = []
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from('announcements')
+      .select('last_bumped_at, created_at, companies (url_slug)')
+      .order('id')
+      .range(from, from + PAGE - 1)
+    // Échouer plutôt que publier un sitemap amputé de ses pages marque.
+    if (error) throw new Error('sitemap: lecture des annonces impossible')
+    anns.push(...(data ?? []))
+    if (!data || data.length < PAGE) break
+  }
 
   const bySlug = new Map<string, string>() // url_slug → lastmod ISO max
   for (const a of (anns ?? []) as any[]) {

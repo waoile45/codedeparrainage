@@ -8,7 +8,7 @@ export const revalidate = 1800
 
 export const metadata = {
   title: 'Codes de parrainage — Annuaire complet',
-  description: 'Parcours tous les codes de parrainage disponibles : banque, paris sportifs, crypto, cashback. Codes vérifiés par la communauté et mis à jour en temps réel.',
+  description: 'Parcours tous les codes de parrainage disponibles : banque, paris sportifs, crypto, cashback. Codes publiés par la communauté et mis à jour en temps réel.',
   alternates: {
     canonical: 'https://www.codedeparrainage.com/codes',
   },

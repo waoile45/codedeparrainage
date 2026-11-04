@@ -1,8 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import { safeNext } from '@/lib/safe-next'
 import { Turnstile } from '@marsidev/react-turnstile'
+
+/** Destination après inscription (?next=), validée : chemin interne seulement. */
+function readNext(): string {
+  return safeNext(new URLSearchParams(window.location.search).get('next'))
+}
+
+function callbackUrl(): string {
+  return `${window.location.origin}/auth/callback?next=${encodeURIComponent(readNext())}`
+}
 
 export default function RegisterPage() {
   const [email, setEmail]               = useState('')
@@ -14,13 +24,20 @@ export default function RegisterPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [success, setSuccess]           = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [loginHref, setLoginHref]       = useState('/login')
   const supabase = createClient()
+
+  useEffect(() => {
+    const next = readNext()
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- lecture de l'URL côté client uniquement
+    if (next !== '/profil') setLoginHref(`/login?next=${encodeURIComponent(next)}`)
+  }, [])
 
   async function handleGoogleRegister() {
     setGoogleLoading(true)
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: callbackUrl() },
     })
   }
 
@@ -66,12 +83,19 @@ export default function RegisterPage() {
       password,
       options: {
         data: { pseudo: pseudo.trim() },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: callbackUrl(),
       },
     })
 
     if (signUpError) {
-      setError('Erreur : ' + signUpError.message)
+      // Pas de message interne Supabase côté visiteur.
+      setError(
+        /already registered|already exists/i.test(signUpError.message)
+          ? 'Un compte existe déjà avec cet email. Connecte-toi.'
+          : /password/i.test(signUpError.message)
+            ? 'Mot de passe refusé : choisis-en un plus long (8 caractères minimum).'
+            : "L'inscription a échoué. Réessaie dans quelques instants."
+      )
       setLoading(false)
       return
     }
@@ -269,7 +293,7 @@ export default function RegisterPage() {
                 </p>
               </form>
 
-              <p className="auth-switch">Déjà un compte ?{' '}<a href="/login">Se connecter</a></p>
+              <p className="auth-switch">Déjà un compte ?{' '}<a href={loginHref}>Se connecter</a></p>
             </>
           )}
         </div>

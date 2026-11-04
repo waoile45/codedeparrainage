@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import { ENTREPRISES, type Entreprise } from "@/data/entreprises";
@@ -103,6 +103,37 @@ export default function PublierPage() {
   const [proposalSent, setProposalSent]         = useState(false);
   // Honeypot anti-bot : champ invisible, un humain ne le remplit jamais
   const [proposalWebsite, setProposalWebsite]   = useState("");
+  // « loading » tant que la session n'est pas lue : on affiche le formulaire
+  // (pas de clignotement pour les membres connectés, les plus nombreux ici).
+  const [authState, setAuthState]               = useState<"loading"|"in"|"out">("loading");
+  const [returnPath, setReturnPath]             = useState("/publier");
+
+  // Arrivée depuis une page marque : /publier?marque=<domaine>. La marque est
+  // présélectionnée et on passe directement à l'étape « Ton code ».
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const marque = params.get("marque");
+    /* eslint-disable react-hooks/set-state-in-effect -- lecture de l'URL et de la session côté client */
+    if (marque) {
+      // La liste locale ne couvre que ~1 900 des ~2 750 marques en base : modz,
+      // caravel, genybet-turf… avaient une page mais restaient impubliables.
+      // Pour une marque absente, on reconstruit l'entrée depuis l'URL. Aucun
+      // risque d'injection : handleSubmit retrouve la marque EN BASE par son
+      // slug et refuse si elle n'existe pas (pas de création automatique).
+      const nom = (params.get("nom") ?? "").trim().slice(0, 80);
+      const found = ENTREPRISES.find(e => e.domain === marque)
+        ?? (nom && /^[a-z0-9.-]{2,100}$/i.test(marque)
+          ? { nom, domain: marque, logo: `https://www.google.com/s2/favicons?domain=${encodeURIComponent(marque)}&sz=64` }
+          : undefined);
+      if (found) { setSelectedEntreprise(found); setStep(2); }
+      else setSearch(nom);
+      // `nom` doit survivre au détour par la connexion : sans lui, une marque
+      // absente de la liste locale ne pourrait plus être reconstruite au retour.
+      setReturnPath(`/publier?marque=${encodeURIComponent(marque)}${nom ? `&nom=${encodeURIComponent(nom)}` : ""}`);
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
+    createClient().auth.getUser().then(({ data: { user } }) => setAuthState(user ? "in" : "out"));
+  }, []);
 
   // Filtre sur les données locales (max MAX_DISPLAY affichés)
   const filtered = useMemo(() => {
@@ -336,8 +367,25 @@ export default function PublierPage() {
 
         <div className="form-card">
 
+          {/* Non connecté : on le dit AVANT la saisie, pas au clic final. Le
+              retour après connexion ramène ici, marque déjà choisie. */}
+          {authState === "out" && (
+            <div style={{ textAlign:"center", padding:"1rem .5rem" }}>
+              <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.15rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
+                {selectedEntreprise ? `Publie ton code ${selectedEntreprise.nom}` : "Publie ton code de parrainage"}
+              </p>
+              <p style={{ color:"var(--text-muted)", fontSize:".875rem", marginBottom:"1.5rem", lineHeight:1.6 }}>
+                Un compte gratuit suffit. Ton code apparaît sur la page de la marque dès sa publication, avec ton pseudo.
+              </p>
+              <div className="success-actions">
+                <a className="btn-success-primary" href={`/register?next=${encodeURIComponent(returnPath)}`}>Créer mon compte</a>
+                <a className="btn-success-ghost" href={`/login?next=${encodeURIComponent(returnPath)}`}>J&apos;ai déjà un compte</a>
+              </div>
+            </div>
+          )}
+
           {/* ── Step 1 : choisir l'entreprise ── */}
-          {step === 1 && (
+          {authState !== "out" && step === 1 && (
             <div>
               {/* Populaires */}
               {!search.trim() && (
@@ -475,7 +523,7 @@ export default function PublierPage() {
           )}
 
           {/* ── Step 2 : saisir le code ── */}
-          {step === 2 && (
+          {authState !== "out" && step === 2 && (
             <div>
               <button className="btn-back" onClick={() => setStep(1)}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
@@ -619,7 +667,7 @@ export default function PublierPage() {
           )}
 
           {/* ── Step 3 : succès ── */}
-          {step === 3 && (
+          {authState !== "out" && step === 3 && (
             <div className="success-wrap">
               <div className="success-icon">🎉</div>
               <h2 className="success-title">Annonce publiée !</h2>

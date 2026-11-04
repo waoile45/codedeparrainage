@@ -28,11 +28,11 @@ export const CATEGORIES: CategoryDef[] = [
     short: 'Banque',
     title: 'Code parrainage banque 2026 : primes à l\'ouverture',
     metaDescription:
-      'Codes parrainage banque en ligne et néobanques vérifiés : Revolut, BoursoBank, Fortuneo… Compare les primes de bienvenue et parraine-toi en 2 minutes.',
+      'Codes parrainage banque en ligne et néobanques : Revolut, BoursoBank, Fortuneo… Compare les primes de bienvenue et parraine-toi en 2 minutes.',
     h1: 'Codes parrainage banque & néobanques 2026',
     intro: [
       'Les banques en ligne sont le secteur où le parrainage rapporte le plus : la plupart versent une prime en euros au filleul comme au parrain dès l\'ouverture du compte. Le principe est simple : tu récupères un code (ou un lien) auprès d\'un parrain existant, tu l\'indiques dans le formulaire d\'inscription, et la prime est créditée une fois les conditions remplies (souvent un premier dépôt ou l\'activation de la carte).',
-      'Ci-dessous, les banques et néobanques pour lesquelles notre communauté partage des codes. Les montants affichés viennent de notre base et sont vérifiés par les parrains eux-mêmes — vérifie toujours les conditions exactes sur le site de la banque avant de t\'inscrire.',
+      'Ci-dessous, les banques et néobanques pour lesquelles notre communauté partage des codes. Les montants affichés sont ceux indiqués par les parrains eux-mêmes — vérifie toujours les conditions exactes sur le site de la banque avant de t\'inscrire.',
     ],
     faq: [
       {
@@ -68,7 +68,7 @@ export const CATEGORIES: CategoryDef[] = [
     short: 'Cashback',
     title: 'Code parrainage cashback 2026 : iGraal, Poulpeo…',
     metaDescription:
-      'Codes parrainage cashback vérifiés : iGraal, Poulpeo, TopCashback, Joko… Bonus de bienvenue à l\'inscription et argent récupéré sur tes achats en ligne.',
+      'Codes parrainage cashback : iGraal, Poulpeo, TopCashback, Joko… Bonus de bienvenue à l\'inscription et argent récupéré sur tes achats en ligne.',
     h1: 'Codes parrainage cashback & applis rémunératrices 2026',
     intro: [
       'Les plateformes de cashback te reversent un pourcentage de tes achats en ligne. En t\'inscrivant avec un code parrainage, tu démarres généralement avec un bonus de bienvenue crédité directement sur ta cagnotte — et ton parrain touche une commission, sans rien te coûter.',
@@ -109,7 +109,7 @@ export const CATEGORIES: CategoryDef[] = [
     short: 'Paris sportifs',
     title: 'Code parrainage paris sportifs 2026 : Betclic, Winamax…',
     metaDescription:
-      'Codes parrainage paris sportifs vérifiés : Betclic, Winamax, Unibet, PMU. Offres de bienvenue et freebets en t\'inscrivant avec le code d\'un parrain actif.',
+      'Codes parrainage paris sportifs : Betclic, Winamax, Unibet, PMU. Offres de bienvenue et freebets en t\'inscrivant avec le code d\'un parrain actif.',
     h1: 'Codes parrainage paris sportifs 2026',
     intro: [
       'Les bookmakers français récompensent le parrainage avec des freebets ou des paris remboursés. Le code s\'entre au moment de la création du compte — impossible de l\'ajouter après coup, donc choisis ton code avant de t\'inscrire.',
@@ -137,7 +137,7 @@ export const CATEGORIES: CategoryDef[] = [
     short: 'Crypto',
     title: 'Code parrainage crypto 2026 : Binance, Coinbase…',
     metaDescription:
-      'Codes parrainage crypto vérifiés : Binance, Coinbase, Waltio… Réduction de frais ou bonus à l\'inscription avec le code d\'un parrain de la communauté.',
+      'Codes parrainage crypto : Binance, Coinbase, Waltio… Réduction de frais ou bonus à l\'inscription avec le code d\'un parrain de la communauté.',
     h1: 'Codes parrainage crypto & exchanges 2026',
     intro: [
       'Sur les plateformes crypto, le parrainage prend deux formes : une réduction permanente sur les frais de trading (le modèle Binance) ou un bonus ponctuel crédité à l\'inscription. Dans les deux cas, le code doit être renseigné à la création du compte.',
@@ -146,7 +146,7 @@ export const CATEGORIES: CategoryDef[] = [
     faq: [
       {
         q: 'Que rapporte un code parrainage crypto ?',
-        a: 'Selon la plateforme : une réduction sur les frais de trading (souvent à vie) ou un bonus en crypto crédité après un premier achat. Le détail de chaque offre est affiché sur la page de la marque quand la donnée est vérifiée.',
+        a: 'Selon la plateforme : une réduction sur les frais de trading (souvent à vie) ou un bonus en crypto crédité après un premier achat. Le détail de chaque offre est affiché sur la page de la marque quand elle est renseignée.',
       },
       {
         q: 'Peut-on ajouter un code parrainage après l\'inscription sur un exchange ?',
@@ -193,7 +193,7 @@ export const CATEGORIES: CategoryDef[] = [
     short: 'Énergie',
     title: 'Code parrainage énergie 2026 : EDF, Engie…',
     metaDescription:
-      'Codes parrainage électricité et gaz : EDF, Engie, Hello Watt. Prime de bienvenue à la souscription d\'un contrat d\'énergie avec le code d\'un parrain vérifié.',
+      'Codes parrainage électricité et gaz : EDF, Engie, Hello Watt. Prime de bienvenue à la souscription d\'un contrat d\'énergie avec le code d\'un parrain.',
     h1: 'Codes parrainage énergie 2026',
     intro: [
       'Changer de fournisseur d\'électricité ou de gaz est gratuit, sans coupure et sans engagement — et avec un code parrainage, la souscription déclenche une prime pour le filleul comme pour le parrain.',
@@ -221,7 +221,7 @@ export const CATEGORIES: CategoryDef[] = [
     short: 'Shopping',
     title: 'Code parrainage shopping 2026 : Vinted, Temu, AliExpress…',
     metaDescription:
-      'Codes parrainage shopping vérifiés : Vinted, Temu, AliExpress, Veepee… Bons d\'achat et réductions de bienvenue en t\'inscrivant avec le code d\'un membre.',
+      'Codes parrainage shopping : Vinted, Temu, AliExpress, Veepee… Bons d\'achat et réductions de bienvenue en t\'inscrivant avec le code d\'un membre.',
     h1: 'Codes parrainage shopping & e-commerce 2026',
     intro: [
       'Les sites e-commerce utilisent le parrainage pour attirer de nouveaux clients : bons d\'achat, réductions sur la première commande ou crédits offerts. Le code s\'applique à l\'inscription ou au moment du premier achat selon les enseignes.',
