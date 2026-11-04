@@ -1,12 +1,12 @@
 import type { MetadataRoute } from 'next'
 import { createAnonSupabase } from '@/lib/supabase-server'
-import { USE_CASE_KEYS } from '@/data/comparatifs/vpn'
-import { BANQUE_CAS_KEYS } from '@/data/comparatifs/banque'
 import { CATEGORIES } from '@/data/categories'
 
-// Regénéré toutes les heures : une page marque qui gagne/perd son dernier code
-// entre/sort du sitemap sans attendre le prochain déploiement.
-export const revalidate = 3600
+// Généré à chaque requête. Avec `revalidate = 3600`, le sitemap servi en prod
+// était resté figé sur les données de juillet 2026 (87 marques, lastmod max
+// 30 juin) alors que la base en comptait ~240 : les marques ajoutées ensuite
+// n'existaient pas pour Google. Une requête Supabase par crawl est négligeable.
+export const dynamic = 'force-dynamic'
 
 const BASE = 'https://www.codedeparrainage.com'
 
@@ -15,10 +15,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // vides sont noindex) → elles seules entrent au sitemap, avec un lastmod RÉEL
   // (dernière annonce publiée/bumpée), pas un new Date() mensonger.
   const supabase = createAnonSupabase()
-  const { data: anns } = await supabase
+  const { data: anns, error } = await supabase
     .from('announcements')
     .select('last_bumped_at, created_at, companies (url_slug)')
     .limit(5000)
+  // Échouer plutôt que publier un sitemap sans aucune page marque.
+  if (error) throw new Error('sitemap: lecture des annonces impossible')
 
   const bySlug = new Map<string, string>() // url_slug → lastmod ISO max
   for (const a of (anns ?? []) as any[]) {
@@ -52,20 +54,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/cgu`,                 changeFrequency: 'yearly'  as const, priority: 0.1 },
     { url: `${BASE}/confidentialite`,     changeFrequency: 'yearly'  as const, priority: 0.1 },
     { url: `${BASE}/mentions-legales`,    changeFrequency: 'yearly'  as const, priority: 0.1 },
-    // Comparatifs VPN
-    { url: `${BASE}/meilleur-vpn`,        changeFrequency: 'weekly'  as const, priority: 0.85 },
-    ...USE_CASE_KEYS.map((cas) => ({
-      url: `${BASE}/meilleur-vpn/${cas}`,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    })),
-    // Comparatifs banques
-    { url: `${BASE}/meilleure-banque`,    changeFrequency: 'weekly'  as const, priority: 0.85 },
-    ...BANQUE_CAS_KEYS.map((cas) => ({
-      url: `${BASE}/meilleure-banque/${cas}`,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    })),
+    // Comparatifs VPN et banque : noindex (voir leurs layout.tsx), donc hors sitemap.
     ...companyPages,
   ]
 }

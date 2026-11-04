@@ -5,7 +5,6 @@ import { createAnonSupabase } from '@/lib/supabase-server'
 import Navbar from '@/components/Navbar'
 import CopyButton from '@/components/CopyButton'
 import CompanyLogo from '@/components/CompanyLogo'
-import { FraicheurCode } from '@/components/FraicheurCode'
 import { safeJsonLd } from '@/lib/sanitize'
 import {
   SITE_URL,
@@ -347,11 +346,6 @@ export default async function CompanyPage({ params }: Props) {
                     <span style={{ fontSize: '.75rem', color: 'var(--text-faint)', marginLeft: 'auto' }}>
                       {new Date(ann.last_bumped_at ?? ann.created_at).toLocaleDateString('fr-FR')}
                     </span>
-                  </div>
-                  {/* Fraîcheur du code : la seule donnée du site qu'un moteur
-                      génératif ne peut pas restituer, puisqu'elle périme. */}
-                  <div style={{ marginTop: '.6rem', paddingTop: '.6rem', borderTop: '1px solid var(--border)' }}>
-                    <FraicheurCode stats={ann} />
                   </div>
                 </div>
               )

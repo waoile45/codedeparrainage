@@ -193,7 +193,13 @@ export default function PublierPage() {
       });
 
     if (insertError) {
-      setError("Erreur lors de la publication : " + insertError.message);
+      // Pas de message interne de la base côté visiteur. La limite de
+      // publication (trigger scripts/limite-publications.sql) a son propre texte.
+      setError(
+        insertError.message?.includes("limite_publications")
+          ? "Tu as atteint la limite de 10 codes publiés en 24 h. Reviens demain pour publier les suivants."
+          : "La publication a échoué. Réessaie dans quelques instants."
+      );
       setSubmitting(false);
       return;
     }
