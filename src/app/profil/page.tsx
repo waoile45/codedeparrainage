@@ -588,6 +588,16 @@ function SectionQuetes({ user, annonces, hasReview }: { user:UserProfile; annonc
 
 // ── Section Crédits ────────────────────────────────────────────────────────────
 function SectionCredits() {
+  // Solde réel du membre (la section affichait un « 0 » écrit en dur).
+  const [balance, setBalance] = useState<number | null>(null);
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const { data } = await supabase.from("credits").select("balance").eq("user_id", user.id).maybeSingle();
+      setBalance(Number(data?.balance ?? 0));
+    });
+  }, []);
   return (
     <div className="sc">
       <div className="sh">
@@ -601,7 +611,7 @@ function SectionCredits() {
         <div style={{ position:"relative", overflow:"hidden", background:"rgba(124,58,237,.08)", border:"1px solid rgba(124,58,237,.25)", borderRadius:18, padding:"1.75rem" }}>
           <div style={{ position:"relative", zIndex:1 }}>
             <p style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.4)", marginBottom:4 }}>Solde actuel</p>
-            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"2.75rem", color:"#a78bfa", lineHeight:1, marginBottom:4 }}>0</p>
+            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"2.75rem", color:"#a78bfa", lineHeight:1, marginBottom:4 }}>{balance === null ? "…" : balance.toFixed(2).replace(".", ",")}</p>
             <p style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>crédits disponibles</p>
           </div>
           <div style={{ position:"absolute", right:"1.5rem", bottom:"1rem", fontSize:"3rem", animation:"float 3s ease-in-out infinite" }}>⚡</div>
