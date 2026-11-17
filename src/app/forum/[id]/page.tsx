@@ -30,8 +30,8 @@ interface Post {
 }
 
 const CAT_COLORS: Record<string, string> = {
-  Général: "#6366f1", Banque: "#3b82f6", "Paris Sportifs": "#10b981",
-  Crypto: "#f59e0b", Cashback: "#ec4899", Téléphonie: "#8b5cf6", Astuce: "#14b8a6",
+  Général: "#A39E93", Banque: "#3b82f6", "Paris Sportifs": "#10b981",
+  Crypto: "#f59e0b", Cashback: "#ec4899", Téléphonie: "var(--accent)", Astuce: "#14b8a6",
 };
 
 function timeAgo(iso: string) {
@@ -46,7 +46,7 @@ function timeAgo(iso: string) {
 
 function Avatar({ pseudo, size = 32 }: { pseudo: string; size?: number }) {
   return (
-    <div style={{ width: size, height: size, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.35, fontWeight: 800, color: "#fff", flexShrink: 0, fontFamily: "var(--font-syne),Syne,sans-serif" }}>
+    <div style={{ width: size, height: size, borderRadius: "50%", background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.35, fontWeight: 800, color: "var(--accent-ink)", flexShrink: 0, fontFamily: "var(--font-display)" }}>
       {(pseudo?.[0] ?? "?").toUpperCase()}
     </div>
   );
@@ -174,25 +174,25 @@ export default function ForumPostPage() {
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "4rem 1.5rem", textAlign: "center" }}>
           <div style={{ fontSize: "2rem", marginBottom: 12 }}>😕</div>
           <div style={{ color: "var(--text-muted)" }}>Post introuvable</div>
-          <a href="/forum" style={{ color: "#a78bfa", fontSize: ".875rem", display: "block", marginTop: 12 }}>← Retour au forum</a>
+          <a href="/forum" style={{ color: "var(--accent-text)", fontSize: ".875rem", display: "block", marginTop: 12 }}>← Retour au forum</a>
         </div>
       </>
     );
   }
 
-  const color = CAT_COLORS[post.category] ?? "#6366f1";
+  const color = CAT_COLORS[post.category] ?? "#A39E93";
 
   return (
     <>
       <style>{`
         .reply-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;margin-bottom:.625rem}
-        .like-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:1px solid var(--border-md);border-radius:8px;padding:3px 10px;cursor:pointer;color:var(--text-dim);font-size:.78rem;transition:all .18s;font-family:'DM Sans',sans-serif}
-        .like-btn:hover,.like-btn.liked{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.35);color:#a78bfa}
-        .level-badge{font-size:.65rem;font-weight:700;background:rgba(124,58,237,.2);color:#a78bfa;padding:1px 7px;border-radius:100px;border:1px solid rgba(124,58,237,.3)}
-        .reply-input{width:100%;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:12px;padding:.75rem 1rem;color:var(--text-strong);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .18s;resize:vertical;min-height:80px;box-sizing:border-box;line-height:1.6}
-        .reply-input:focus{border-color:rgba(124,58,237,.5)}
-        .submit-btn{background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:.5rem 1.25rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
-        .submit-btn:hover{background:#6d28d9;transform:translateY(-1px)}
+        .like-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:1px solid var(--border-md);border-radius:8px;padding:3px 10px;cursor:pointer;color:var(--text-dim);font-size:.78rem;transition:all .18s;font-family:var(--font-text)}
+        .like-btn:hover,.like-btn.liked{background:rgba(255,212,59,.12);border-color:rgba(255,212,59,.35);color:var(--accent-text)}
+        .level-badge{font-size:.65rem;font-weight:700;background:rgba(255,212,59,.2);color:var(--accent-text);padding:1px 7px;border-radius:100px;border:1px solid rgba(255,212,59,.3)}
+        .reply-input{width:100%;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:12px;padding:.75rem 1rem;color:var(--text-strong);font-family:var(--font-text);font-size:.9rem;outline:none;transition:border-color .18s;resize:vertical;min-height:80px;box-sizing:border-box;line-height:1.6}
+        .reply-input:focus{border-color:rgba(255,212,59,.5)}
+        .submit-btn{background:var(--accent);color:var(--accent-ink);border:none;border-radius:10px;padding:.5rem 1.25rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
+        .submit-btn:hover{background:var(--accent-hover);transform:translateY(-1px)}
         .submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
       `}</style>
 
@@ -201,7 +201,7 @@ export default function ForumPostPage() {
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "2rem 1.5rem 5rem" }}>
 
         {/* Retour */}
-        <a href="/forum" style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "var(--text-dim)", fontSize: ".82rem", textDecoration: "none", marginBottom: "1.25rem", fontFamily: "'DM Sans',sans-serif" }}>
+        <a href="/forum" style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "var(--text-dim)", fontSize: ".82rem", textDecoration: "none", marginBottom: "1.25rem", fontFamily: "var(--font-text)" }}>
           ← Retour au forum
         </a>
 
@@ -210,7 +210,7 @@ export default function ForumPostPage() {
           <div style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: ".72rem", fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: `${color}18`, color, border: `1px solid ${color}30`, marginBottom: ".75rem" }}>
             <CategoryIcon name={post.category} size={14} /> {post.category}
           </div>
-          <h1 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: "1.35rem", color: "var(--text-strong)", margin: "0 0 .875rem", lineHeight: 1.3 }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.35rem", color: "var(--text-strong)", margin: "0 0 .875rem", lineHeight: 1.3 }}>
             {post.title}
           </h1>
           <p style={{ color: "var(--text-muted)", fontSize: ".9rem", lineHeight: 1.7, margin: "0 0 1.25rem", whiteSpace: "pre-wrap" }}>
@@ -229,7 +229,7 @@ export default function ForumPostPage() {
 
         {/* Réponses */}
         <div style={{ marginBottom: "1rem" }}>
-          <div style={{ fontSize: ".82rem", fontWeight: 700, color: "var(--text-dim)", marginBottom: ".875rem", fontFamily: "var(--font-syne),Syne,sans-serif" }}>
+          <div style={{ fontSize: ".82rem", fontWeight: 700, color: "var(--text-dim)", marginBottom: ".875rem", fontFamily: "var(--font-display)" }}>
             {replies.length} réponse{replies.length !== 1 ? "s" : ""}
           </div>
 
@@ -259,8 +259,8 @@ export default function ForumPostPage() {
 
         {/* Formulaire de réponse */}
         {userId ? (
-          <form onSubmit={handleReply} style={{ background: "var(--bg-card)", border: "1px solid rgba(124,58,237,.2)", borderRadius: 16, padding: "1.25rem" }}>
-            <div style={{ fontSize: ".82rem", fontWeight: 700, color: "var(--text-strong)", marginBottom: ".75rem", fontFamily: "var(--font-syne),Syne,sans-serif" }}>
+          <form onSubmit={handleReply} style={{ background: "var(--bg-card)", border: "1px solid rgba(255,212,59,.2)", borderRadius: 16, padding: "1.25rem" }}>
+            <div style={{ fontSize: ".82rem", fontWeight: 700, color: "var(--text-strong)", marginBottom: ".75rem", fontFamily: "var(--font-display)" }}>
               Votre réponse
             </div>
             <textarea
@@ -278,9 +278,9 @@ export default function ForumPostPage() {
             </button>
           </form>
         ) : (
-          <div style={{ background: "rgba(124,58,237,.05)", border: "1px solid rgba(124,58,237,.2)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+          <div style={{ background: "rgba(255,212,59,.05)", border: "1px solid rgba(255,212,59,.2)", borderRadius: 14, padding: "1rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
             <span style={{ color: "var(--text-muted)", fontSize: ".875rem" }}>Connecte-toi pour répondre</span>
-            <a href="/login" style={{ background: "#7c3aed", color: "#fff", borderRadius: 10, padding: ".4rem .875rem", fontSize: ".82rem", fontWeight: 600, textDecoration: "none" }}>Se connecter</a>
+            <a href="/login" style={{ background: "var(--accent)", color: "var(--accent-ink)", borderRadius: 10, padding: ".4rem .875rem", fontSize: ".82rem", fontWeight: 600, textDecoration: "none" }}>Se connecter</a>
           </div>
         )}
       </div>

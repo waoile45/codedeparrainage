@@ -62,10 +62,10 @@ export function CashbackIcon({ size = 22 }: IconProps) {
 export function TelephonieIcon({ size = 22 }: IconProps) {
   return (
     <svg viewBox="0 0 40 40" width={size} height={size} fill="none">
-      <rect x="12" y="4" width="16" height="32" rx="4.5" fill="#a78bfa" />
-      <rect x="14.6" y="9" width="10.8" height="18" rx="1.6" fill="#0A0A0F" opacity=".55" />
-      <rect x="17.6" y="6.6" width="4.8" height="1.5" rx=".75" fill="#0A0A0F" opacity=".4" />
-      <circle cx="20" cy="31.5" r="1.7" fill="#0A0A0F" opacity=".45" />
+      <rect x="12" y="4" width="16" height="32" rx="4.5" fill="var(--accent-text)" />
+      <rect x="14.6" y="9" width="10.8" height="18" rx="1.6" fill="var(--bg)" opacity=".55" />
+      <rect x="17.6" y="6.6" width="4.8" height="1.5" rx=".75" fill="var(--bg)" opacity=".4" />
+      <circle cx="20" cy="31.5" r="1.7" fill="var(--bg)" opacity=".45" />
       <path d="M16 12 L20 12" stroke="#c9b8ff" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
@@ -89,7 +89,7 @@ export function AssuranceIcon({ size = 22 }: IconProps) {
     <svg viewBox="0 0 40 40" width={size} height={size} fill="none">
       <path d="M20 4 L33 9 V19 C33 27 27 33 20 36 C13 33 7 27 7 19 V9 Z" fill="#fb923c" />
       <path d="M20 4 L7 9 V19 C7 27 13 33 20 36 Z" fill="#fdba74" opacity=".45" />
-      <path d="M13.5 20 L18.5 25.5 L27 14.5" fill="none" stroke="#0A0A0F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity=".75" />
+      <path d="M13.5 20 L18.5 25.5 L27 14.5" fill="none" stroke="var(--bg)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity=".75" />
     </svg>
   );
 }
@@ -100,8 +100,8 @@ export function ShoppingIcon({ size = 22 }: IconProps) {
       <path d="M15 15 V11 a5 5 0 0 1 10 0 V15" fill="none" stroke="#5eead4" strokeWidth="2.6" strokeLinecap="round" />
       <path d="M9 13 H31 L29.5 33.5 a2.2 2.2 0 0 1 -2.2 2 H12.7 a2.2 2.2 0 0 1 -2.2 -2 Z" fill="#2dd4bf" />
       <path d="M9 13 H31 L30.5 18 H9.5 Z" fill="#5eead4" opacity=".4" />
-      <circle cx="15.5" cy="21" r="1.5" fill="#0A0A0F" opacity=".35" />
-      <circle cx="24.5" cy="21" r="1.5" fill="#0A0A0F" opacity=".35" />
+      <circle cx="15.5" cy="21" r="1.5" fill="var(--bg)" opacity=".35" />
+      <circle cx="24.5" cy="21" r="1.5" fill="var(--bg)" opacity=".35" />
     </svg>
   );
 }
@@ -112,8 +112,8 @@ export function ToutIcon({ size = 22 }: IconProps) {
   return (
     <svg viewBox="0 0 40 40" width={size} height={size} fill="none">
       <rect x="6" y="6" width="12" height="12" rx="3.2" fill="#c9b8ff" />
-      <rect x="22" y="6" width="12" height="12" rx="3.2" fill="#a78bfa" />
-      <rect x="6" y="22" width="12" height="12" rx="3.2" fill="#a78bfa" />
+      <rect x="22" y="6" width="12" height="12" rx="3.2" fill="var(--accent-text)" />
+      <rect x="6" y="22" width="12" height="12" rx="3.2" fill="var(--accent-text)" />
       <rect x="22" y="22" width="12" height="12" rx="3.2" fill="#c9b8ff" />
     </svg>
   );
@@ -122,10 +122,10 @@ export function ToutIcon({ size = 22 }: IconProps) {
 export function GeneralIcon({ size = 22 }: IconProps) {
   return (
     <svg viewBox="0 0 40 40" width={size} height={size} fill="none">
-      <path d="M7 8 H33 a3 3 0 0 1 3 3 V25 a3 3 0 0 1 -3 3 H17 L10 34 V28 H7 a3 3 0 0 1 -3 -3 V11 a3 3 0 0 1 3 -3 Z" fill="#a78bfa" />
-      <circle cx="14" cy="18" r="2" fill="#ede9fe" />
-      <circle cx="20" cy="18" r="2" fill="#ede9fe" />
-      <circle cx="26" cy="18" r="2" fill="#ede9fe" />
+      <path d="M7 8 H33 a3 3 0 0 1 3 3 V25 a3 3 0 0 1 -3 3 H17 L10 34 V28 H7 a3 3 0 0 1 -3 -3 V11 a3 3 0 0 1 3 -3 Z" fill="var(--accent-text)" />
+      <circle cx="14" cy="18" r="2" fill="var(--accent-tint)" />
+      <circle cx="20" cy="18" r="2" fill="var(--accent-tint)" />
+      <circle cx="26" cy="18" r="2" fill="var(--accent-tint)" />
     </svg>
   );
 }

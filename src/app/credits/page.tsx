@@ -7,8 +7,8 @@ import { createClient } from "@/lib/supabase";
 // ── Packs ──────────────────────────────────────────────────────────────────────
 const PACKS = [
   { id:"starter",   label:"Starter",   credits:5,   price:5,  perCredit:1.00, popular:false, color:"rgba(99,102,241,.8)" },
-  { id:"standard",  label:"Standard",  credits:20,  price:19, perCredit:0.95, popular:false, color:"rgba(124,58,237,.8)" },
-  { id:"pro",       label:"Pro",       credits:50,  price:45, perCredit:0.90, popular:true,  color:"rgba(139,92,246,.9)" },
+  { id:"standard",  label:"Standard",  credits:20,  price:19, perCredit:0.95, popular:false, color:"rgba(255,212,59,.8)" },
+  { id:"pro",       label:"Pro",       credits:50,  price:45, perCredit:0.90, popular:true,  color:"rgba(255,212,59,.9)" },
   { id:"expert",    label:"Expert",    credits:100, price:80, perCredit:0.80, popular:false, color:"rgba(168,85,247,.8)" },
   { id:"legendaire",label:"Légendaire",credits:300, price:210,perCredit:0.70, popular:false, color:"rgba(217,70,239,.8)" },
 ];
@@ -74,25 +74,25 @@ export default function CreditsPage() {
         @keyframes fadeIn  { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
         @keyframes spin    { to{transform:rotate(360deg)} }
         *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-        body { background:#0A0A0F; color:#e2e8f0; font-family:'DM Sans',sans-serif; min-height:100vh; }
+        body { background:var(--bg); color:#e2e8f0; font-family:var(--font-text); min-height:100vh; }
 
         .page { max-width:900px; margin:0 auto; padding:3rem 1.5rem 6rem; }
 
         /* Header */
         .page-header { text-align:center; margin-bottom:3rem; }
-        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#7c3aed; margin-bottom:.75rem; }
-        .header-label::before,.header-label::after { content:''; width:18px; height:1px; background:#7c3aed; display:block; }
-        .page-title { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(1.75rem,4vw,2.5rem); color:#fff; letter-spacing:-.03em; margin-bottom:.5rem; }
+        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:.75rem; }
+        .header-label::before,.header-label::after { content:''; width:18px; height:1px; background:var(--accent); display:block; }
+        .page-title { font-family:var(--font-display); font-weight:800; font-size:clamp(1.75rem,4vw,2.5rem); color:#fff; letter-spacing:-.03em; margin-bottom:.5rem; }
         .page-sub { color:rgba(255,255,255,.35); font-size:.9rem; margin-bottom:1.5rem; }
 
         /* Solde pill */
         .solde-pill {
           display:inline-flex; align-items:center; gap:8px;
-          background:rgba(124,58,237,.1); border:1px solid rgba(124,58,237,.25);
+          background:rgba(255,212,59,.1); border:1px solid rgba(255,212,59,.25);
           border-radius:100px; padding:.5rem 1.25rem;
           font-size:.875rem; color:rgba(255,255,255,.7);
         }
-        .solde-val { font-family:'Syne',sans-serif; font-weight:800; color:#a78bfa; }
+        .solde-val { font-family:var(--font-display); font-weight:800; color:var(--accent-text); }
         .solde-icon { animation:float 3s ease-in-out infinite; }
 
         /* Grid */
@@ -120,18 +120,18 @@ export default function CreditsPage() {
           transition:all .2s; animation:fadeIn .3s ease;
           cursor:default;
         }
-        .pack-card:hover { transform:translateY(-3px); border-color:rgba(124,58,237,.3); box-shadow:0 12px 32px rgba(0,0,0,.3); }
+        .pack-card:hover { transform:translateY(-3px); border-color:rgba(255,212,59,.3); box-shadow:0 12px 32px rgba(0,0,0,.3); }
         .pack-card.popular {
-          background:rgba(124,58,237,.08);
-          border-color:rgba(124,58,237,.4);
-          box-shadow:0 0 40px rgba(124,58,237,.12);
+          background:rgba(255,212,59,.08);
+          border-color:rgba(255,212,59,.4);
+          box-shadow:0 0 40px rgba(255,212,59,.12);
         }
-        .pack-card.popular::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,#7c3aed,transparent); }
+        .pack-card.popular::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:var(--border-md); }
 
         /* Popular badge */
         .popular-badge {
           position:absolute; top:-1px; left:50%; transform:translateX(-50%);
-          background:#7c3aed; color:#fff;
+          background:var(--accent); color:var(--accent-ink);
           font-size:.65rem; font-weight:700; letter-spacing:.05em;
           padding:3px 12px; border-radius:0 0 10px 10px;
           display:flex; align-items:center; gap:4px;
@@ -141,13 +141,13 @@ export default function CreditsPage() {
         /* Card top */
         .pack-label { font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-top:.5rem; }
         .pack-credits { display:flex; align-items:baseline; gap:4px; }
-        .pack-credits-num { font-family:'Syne',sans-serif; font-weight:800; font-size:2.5rem; color:#fff; line-height:1; }
+        .pack-credits-num { font-family:var(--font-display); font-weight:800; font-size:2.5rem; color:#fff; line-height:1; }
         .pack-credits-lbl { font-size:.85rem; color:rgba(255,255,255,.4); }
         .pack-per-credit { font-size:.72rem; color:rgba(255,255,255,.3); margin-top:2px; }
 
         /* Price */
         .pack-price-row { display:flex; align-items:baseline; gap:5px; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.06); }
-        .pack-price { font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color:#fff; }
+        .pack-price { font-family:var(--font-display); font-weight:800; font-size:1.5rem; color:#fff; }
         .pack-price-ttc { font-size:.75rem; color:rgba(255,255,255,.3); }
         .pack-savings {
           margin-left:auto;
@@ -159,7 +159,7 @@ export default function CreditsPage() {
         /* Features */
         .pack-features { display:flex; flex-direction:column; gap:6px; flex:1; }
         .pack-feature { display:flex; align-items:center; gap:7px; font-size:.78rem; color:rgba(255,255,255,.55); }
-        .pack-feature-check { width:16px; height:16px; border-radius:50%; background:rgba(124,58,237,.2); border:1px solid rgba(124,58,237,.35); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .pack-feature-check { width:16px; height:16px; border-radius:50%; background:rgba(255,212,59,.2); border:1px solid rgba(255,212,59,.35); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
         /* Buy button */
         .buy-btn {
@@ -168,20 +168,20 @@ export default function CreditsPage() {
           border:1px solid rgba(255,255,255,.1);
           border-radius:12px; padding:.65rem;
           color:#fff; font-size:.855rem; font-weight:600;
-          cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif;
+          cursor:pointer; transition:all .2s; font-family:var(--font-text);
           margin-top:auto;
         }
         .buy-btn:hover { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.2); }
-        .buy-btn.popular-btn { background:#7c3aed; border-color:#7c3aed; }
-        .buy-btn.popular-btn:hover { background:#6d28d9; box-shadow:0 4px 20px rgba(124,58,237,.4); }
+        .buy-btn.popular-btn { background:var(--accent); border-color:var(--accent); }
+        .buy-btn.popular-btn:hover { background:var(--accent-hover); box-shadow:0 4px 20px rgba(255,212,59,.4); }
         .buy-btn:disabled { opacity:.5; cursor:not-allowed; }
 
         /* How it works */
         .how-section { margin-bottom:3rem; }
-        .section-title { font-family:'Syne',sans-serif; font-weight:800; font-size:1.1rem; color:#fff; margin-bottom:1.25rem; text-align:center; }
+        .section-title { font-family:var(--font-display); font-weight:800; font-size:1.1rem; color:#fff; margin-bottom:1.25rem; text-align:center; }
         .how-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.875rem; }
         .how-card { background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:1.25rem; text-align:center; }
-        .how-step { width:28px; height:28px; border-radius:50%; background:rgba(124,58,237,.15); border:1px solid rgba(124,58,237,.3); color:#a78bfa; font-family:'Syne',sans-serif; font-weight:800; font-size:.82rem; display:flex; align-items:center; justify-content:center; margin:0 auto .75rem; }
+        .how-step { width:28px; height:28px; border-radius:50%; background:rgba(255,212,59,.15); border:1px solid rgba(255,212,59,.3); color:var(--accent-text); font-family:var(--font-display); font-weight:800; font-size:.82rem; display:flex; align-items:center; justify-content:center; margin:0 auto .75rem; }
         .how-title { font-weight:700; font-size:.855rem; color:#fff; margin-bottom:4px; }
         .how-desc { font-size:.75rem; color:rgba(255,255,255,.35); line-height:1.5; }
 
@@ -252,7 +252,7 @@ export default function CreditsPage() {
                 {FEATURES.map((f,i) => (
                   <div key={i} className="pack-feature">
                     <div className="pack-feature-check">
-                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--accent-text)" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     {f}
                   </div>
@@ -294,7 +294,7 @@ export default function CreditsPage() {
                 {FEATURES.map((f,i) => (
                   <div key={i} className="pack-feature">
                     <div className="pack-feature-check">
-                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--accent-text)" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     {f}
                   </div>

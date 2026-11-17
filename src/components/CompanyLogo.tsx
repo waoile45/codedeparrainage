@@ -18,11 +18,11 @@ export default function CompanyLogo({ domain, name }: { domain: string; name: st
       <div style={{
         width: 36, height: 36,
         borderRadius: 10,
-        background: "rgba(124,58,237,.2)",
-        border: "1px solid rgba(124,58,237,.3)",
+        background: "rgba(255,212,59,.2)",
+        border: "1px solid rgba(255,212,59,.3)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontFamily: "var(--font-syne),Syne,sans-serif",
-        fontWeight: 800, fontSize: "1.1rem", color: "#a78bfa",
+        fontFamily: "var(--font-display)",
+        fontWeight: 800, fontSize: "1.1rem", color: "var(--accent-text)",
       }}>
         {name[0]?.toUpperCase()}
       </div>

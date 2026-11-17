@@ -19,12 +19,12 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
           style={{
             width: `${(value / 10) * 100}%`,
             height: '100%',
-            background: 'linear-gradient(90deg, #7c3aed, #a78bfa)',
+            background: 'var(--accent)',
             borderRadius: 4,
           }}
         />
       </div>
-      <span style={{ fontSize: '.75rem', fontWeight: 700, color: '#a78bfa', minWidth: 28, textAlign: 'right' }}>
+      <span style={{ fontSize: '.75rem', fontWeight: 700, color: 'var(--accent-text)', minWidth: 28, textAlign: 'right' }}>
         {value.toFixed(1)}
       </span>
     </div>
@@ -61,7 +61,7 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
     <article
       style={{
         background: 'var(--bg-card)',
-        border: rank === 1 ? '1px solid rgba(124,58,237,.35)' : '1px solid var(--border)',
+        border: rank === 1 ? '1px solid rgba(255,212,59,.35)' : '1px solid var(--border)',
         borderRadius: 20,
         overflow: 'hidden',
       }}
@@ -77,7 +77,7 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
                 background: rankStyle.bg,
                 color: rankStyle.color,
                 borderRadius: 10,
-                fontFamily: "var(--font-syne),Syne,sans-serif",
+                fontFamily: "var(--font-display)",
                 fontWeight: 800,
                 fontSize: '1rem',
                 width: 40,
@@ -103,7 +103,7 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span
                   style={{
-                    fontFamily: "var(--font-syne),Syne,sans-serif",
+                    fontFamily: "var(--font-display)",
                     fontWeight: 800,
                     fontSize: '1.15rem',
                     color: 'var(--text-strong)',
@@ -118,9 +118,9 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
                       fontWeight: 700,
                       letterSpacing: '.06em',
                       textTransform: 'uppercase',
-                      color: '#a78bfa',
-                      background: 'rgba(124,58,237,.12)',
-                      border: '1px solid rgba(124,58,237,.25)',
+                      color: 'var(--accent-text)',
+                      background: 'rgba(255,212,59,.12)',
+                      border: '1px solid rgba(255,212,59,.25)',
                       borderRadius: 100,
                       padding: '2px 8px',
                     }}
@@ -136,7 +136,7 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
           {/* Right: score */}
           <div
             style={{
-              background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+              background: 'var(--accent)',
               borderRadius: 14,
               padding: '.75rem 1.25rem',
               textAlign: 'center',
@@ -145,7 +145,7 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
           >
             <div
               style={{
-                fontFamily: "var(--font-syne),Syne,sans-serif",
+                fontFamily: "var(--font-display)",
                 fontWeight: 800,
                 fontSize: '1.75rem',
                 color: '#fff',
@@ -279,7 +279,7 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
         >
           <div>
             <div style={{ fontSize: '.75rem', color: 'var(--text-faint)', marginBottom: 2 }}>Meilleure offre</div>
-            <div style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-strong)' }}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-strong)' }}>
               {vpn.bestPrice.toFixed(2)}€
               <span style={{ fontWeight: 400, fontSize: '.8rem', color: 'var(--text-muted)' }}>/mois</span>
             </div>
@@ -295,8 +295,8 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
-                background: '#7c3aed',
-                color: '#fff',
+                background: 'var(--accent)',
+                color: 'var(--accent-ink)',
                 fontWeight: 700,
                 fontSize: '.875rem',
                 padding: '.65rem 1.25rem',
@@ -412,7 +412,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
       style={{
         background: 'var(--bg)',
         minHeight: '100vh',
-        fontFamily: "var(--font-dm-sans),'DM Sans',sans-serif",
+        fontFamily: "var(--font-text)",
         color: 'var(--text-strong)',
       }}
     >
@@ -433,9 +433,9 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
                 fontWeight: 700,
                 letterSpacing: '.08em',
                 textTransform: 'uppercase',
-                color: '#a78bfa',
-                background: 'rgba(124,58,237,.12)',
-                border: '1px solid rgba(124,58,237,.25)',
+                color: 'var(--accent-text)',
+                background: 'rgba(255,212,59,.12)',
+                border: '1px solid rgba(255,212,59,.25)',
                 borderRadius: 100,
                 padding: '3px 10px',
               }}
@@ -449,7 +449,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
 
           <h1
             style={{
-              fontFamily: "var(--font-syne),Syne,sans-serif",
+              fontFamily: "var(--font-display)",
               fontWeight: 800,
               fontSize: 'clamp(1.6rem,4vw,2.4rem)',
               lineHeight: 1.1,
@@ -482,7 +482,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
                 padding: '.35rem .875rem',
                 borderRadius: 8,
                 textDecoration: 'none',
-                background: !currentCas ? '#7c3aed' : 'var(--bg-card-md)',
+                background: !currentCas ? 'var(--accent)' : 'var(--bg-card-md)',
                 color: !currentCas ? '#fff' : 'var(--text-dim)',
                 border: !currentCas ? 'none' : '1px solid var(--border)',
               }}
@@ -499,7 +499,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
                   padding: '.35rem .875rem',
                   borderRadius: 8,
                   textDecoration: 'none',
-                  background: currentCas === key ? '#7c3aed' : 'var(--bg-card-md)',
+                  background: currentCas === key ? 'var(--accent)' : 'var(--bg-card-md)',
                   color: currentCas === key ? '#fff' : 'var(--text-dim)',
                   border: currentCas === key ? 'none' : '1px solid var(--border)',
                 }}
@@ -527,7 +527,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
               letterSpacing: '.08em',
               textTransform: 'uppercase',
               color: 'var(--text-faint)',
-              fontFamily: "var(--font-syne),Syne,sans-serif",
+              fontFamily: "var(--font-display)",
               marginBottom: '.75rem',
             }}
           >
@@ -547,7 +547,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
               >
                 <span
                   style={{
-                    fontFamily: "var(--font-syne),Syne,sans-serif",
+                    fontFamily: "var(--font-display)",
                     fontWeight: 800,
                     fontSize: '.9rem',
                     color: i === 0 ? '#F59E0B' : i === 1 ? '#94A3B8' : '#CD7C4A',
@@ -567,10 +567,10 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
                 <span style={{ fontSize: '.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>{vpn.tagline}</span>
                 <span
                   style={{
-                    fontFamily: "var(--font-syne),Syne,sans-serif",
+                    fontFamily: "var(--font-display)",
                     fontWeight: 800,
                     fontSize: '.875rem',
-                    color: '#a78bfa',
+                    color: 'var(--accent-text)',
                     minWidth: 36,
                     textAlign: 'right',
                   }}
@@ -585,7 +585,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
         {/* ── Classement détaillé ── */}
         <h2
           style={{
-            fontFamily: "var(--font-syne),Syne,sans-serif",
+            fontFamily: "var(--font-display)",
             fontWeight: 700,
             fontSize: '1.1rem',
             margin: '0 0 1rem',
@@ -612,7 +612,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
         >
           <h2
             style={{
-              fontFamily: "var(--font-syne),Syne,sans-serif",
+              fontFamily: "var(--font-display)",
               fontWeight: 700,
               fontSize: '1rem',
               margin: '0 0 .875rem',
@@ -640,7 +640,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
         >
           <h2
             style={{
-              fontFamily: "var(--font-syne),Syne,sans-serif",
+              fontFamily: "var(--font-display)",
               fontWeight: 700,
               fontSize: '1rem',
               margin: '0 0 .875rem',
@@ -681,8 +681,8 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
         {/* ── Disclaimer affilié ── */}
         <div
           style={{
-            background: 'rgba(124,58,237,.05)',
-            border: '1px solid rgba(124,58,237,.15)',
+            background: 'rgba(255,212,59,.05)',
+            border: '1px solid rgba(255,212,59,.15)',
             borderRadius: 12,
             padding: '1rem 1.25rem',
             marginBottom: '2rem',
@@ -707,7 +707,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
               textTransform: 'uppercase',
               color: 'var(--text-faint)',
               marginBottom: '.875rem',
-              fontFamily: "var(--font-syne),Syne,sans-serif",
+              fontFamily: "var(--font-display)",
             }}
           >
             Autres comparatifs VPN

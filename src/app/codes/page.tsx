@@ -45,9 +45,9 @@ export default async function CodesPage() {
       {/* ── Annuaire crawlable : marques avec codes actifs + hubs catégorie ── */}
       <section
         aria-label="Toutes les marques avec codes actifs"
-        style={{ position: 'relative', zIndex: 1, maxWidth: 860, margin: '0 auto', padding: '0 1.5rem 5rem', fontFamily: "var(--font-dm-sans),'DM Sans',sans-serif" }}
+        style={{ position: 'relative', zIndex: 1, maxWidth: 860, margin: '0 auto', padding: '0 1.5rem 5rem', fontFamily: "var(--font-text)" }}
       >
-        <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', color: 'var(--text-strong)', margin: '0 0 1rem' }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: 'var(--text-strong)', margin: '0 0 1rem' }}>
           Toutes les marques avec codes actifs
         </h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: '2rem' }}>
@@ -62,7 +62,7 @@ export default async function CodesPage() {
           ))}
         </div>
 
-        <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', color: 'var(--text-strong)', margin: '0 0 1rem' }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: 'var(--text-strong)', margin: '0 0 1rem' }}>
           Parcourir par catégorie
         </h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -70,7 +70,7 @@ export default async function CodesPage() {
             <a
               key={c.slug}
               href={`/code-parrainage/categorie/${c.slug}`}
-              style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'rgba(124,58,237,.1)', border: '1px solid rgba(124,58,237,.25)', color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}
+              style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'rgba(255,212,59,.1)', border: '1px solid rgba(255,212,59,.25)', color: 'var(--accent-text)', textDecoration: 'none', fontWeight: 600 }}
             >
               {c.label}
             </a>

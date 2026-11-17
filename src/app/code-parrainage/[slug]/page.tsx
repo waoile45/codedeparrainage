@@ -240,7 +240,7 @@ export default async function CompanyPage({ params }: Props) {
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-dm-sans),'DM Sans',sans-serif", color: 'var(--text-strong)' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-text)", color: 'var(--text-strong)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
 
       <Navbar />
@@ -263,11 +263,11 @@ export default async function CompanyPage({ params }: Props) {
         {/* ── En-tête entreprise ── */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.75rem', marginBottom: '1.25rem' }}>
           <div className="brand-head" style={{ marginBottom: bonus || codesCount > 0 ? '1.25rem' : 0 }}>
-            <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(124,58,237,.12)', border: '1px solid rgba(124,58,237,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+            <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(255,212,59,.12)', border: '1px solid rgba(255,212,59,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
               <CompanyLogo domain={domain} name={name} />
             </div>
             <div>
-              <h1 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: 'clamp(1.4rem,3vw,1.9rem)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+              <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.4rem,3vw,1.9rem)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                 Code parrainage {name} {year}
               </h1>
               <p style={{ color: 'var(--text-dim)', fontSize: '.85rem', margin: '4px 0 0' }}>{tagline}</p>
@@ -276,9 +276,9 @@ export default async function CompanyPage({ params }: Props) {
 
           {/* Offre — UNIQUEMENT si la donnée existe en base (fini le « null ») */}
           {bonus && (
-            <div style={{ background: 'rgba(124,58,237,.1)', border: '1px solid rgba(124,58,237,.25)', borderRadius: 14, padding: '1rem 1.25rem', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <div style={{ background: 'rgba(255,212,59,.1)', border: '1px solid rgba(255,212,59,.25)', borderRadius: 14, padding: '1rem 1.25rem', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
               <div>
-                <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#a78bfa', marginBottom: 4 }}>Offre de parrainage</div>
+                <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--accent-text)', marginBottom: 4 }}>Offre de parrainage</div>
                 <div style={{ color: 'var(--text-strong)', fontWeight: 600, fontSize: '.95rem' }}>{bonus}</div>
               </div>
             </div>
@@ -296,10 +296,10 @@ export default async function CompanyPage({ params }: Props) {
 
         {/* ── Liste des codes ── */}
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: '1rem' }}>
-          <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: 0, color: 'var(--text-strong)' }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', margin: 0, color: 'var(--text-strong)' }}>
             {codesCount} code{codesCount > 1 ? 's' : ''} parrainage {name} disponible{codesCount > 1 ? 's' : ''}
           </h2>
-          <a href="/publier" style={{ fontSize: '.78rem', color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}>
+          <a href="/publier" style={{ fontSize: '.78rem', color: 'var(--accent-text)', textDecoration: 'none', fontWeight: 600 }}>
             + Publier le mien
           </a>
         </div>
@@ -310,9 +310,9 @@ export default async function CompanyPage({ params }: Props) {
               const { gain, description } = parseAnnouncementDescription(ann.description)
               return (
                 <div key={ann.id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 18, padding: '1.25rem 1.375rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-code,rgba(124,58,237,.07))', border: '1px solid var(--border)', borderRadius: 12, padding: '.75rem 1rem', marginBottom: '0.875rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-code,rgba(255,212,59,.07))', border: '1px solid var(--border)', borderRadius: 12, padding: '.75rem 1rem', marginBottom: '0.875rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#7c3aed', boxShadow: '0 0 6px #7c3aed', display: 'inline-block', flexShrink: 0 }} />
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 6px var(--accent)', display: 'inline-block', flexShrink: 0 }} />
                       <code style={{ fontFamily: "'Courier New',monospace", fontSize: '.95rem', fontWeight: 700, color: 'var(--text-strong)', letterSpacing: '.08em', wordBreak: 'break-all' }}>
                         {ann.code}
                       </code>
@@ -332,14 +332,14 @@ export default async function CompanyPage({ params }: Props) {
                   )}
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(124,58,237,.2)', border: '1px solid rgba(124,58,237,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.72rem', fontWeight: 700, color: '#a78bfa', flexShrink: 0 }}>
+                    <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,212,59,.2)', border: '1px solid rgba(255,212,59,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.72rem', fontWeight: 700, color: 'var(--accent-text)', flexShrink: 0 }}>
                       {ann.users?.pseudo?.slice(0, 1).toUpperCase()}
                     </div>
                     <a href={`/u/${encodeURIComponent(ann.users?.pseudo ?? '')}`} style={{ fontSize: '.8rem', color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 500 }}>
                       {ann.users?.pseudo}
                     </a>
                     {ann.users?.level && (
-                      <span style={{ fontSize: '.7rem', fontWeight: 600, color: '#a78bfa', background: 'rgba(124,58,237,.12)', border: '1px solid rgba(124,58,237,.25)', borderRadius: 100, padding: '1px 8px' }}>
+                      <span style={{ fontSize: '.7rem', fontWeight: 600, color: 'var(--accent-text)', background: 'rgba(255,212,59,.12)', border: '1px solid rgba(255,212,59,.25)', borderRadius: 100, padding: '1px 8px' }}>
                         {ann.users.level}
                       </span>
                     )}
@@ -360,7 +360,7 @@ export default async function CompanyPage({ params }: Props) {
                 `Pas encore de code ${name} publié par la communauté.`,
               ], 21)}
             </p>
-            <a href="/publier" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#7c3aed', color: '#fff', fontWeight: 700, fontSize: '.875rem', padding: '.7rem 1.5rem', borderRadius: 12, textDecoration: 'none' }}>
+            <a href="/publier" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--accent)', color: 'var(--accent-ink)', fontWeight: 700, fontSize: '.875rem', padding: '.7rem 1.5rem', borderRadius: 12, textDecoration: 'none' }}>
               Publier le premier code
             </a>
           </div>
@@ -368,7 +368,7 @@ export default async function CompanyPage({ params }: Props) {
 
         {/* ── Comment utiliser ── */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginTop: '1.5rem', marginBottom: '1.25rem' }}>
-          <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
             Comment utiliser un code parrainage {name} ?
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -381,7 +381,7 @@ export default async function CompanyPage({ params }: Props) {
                 : `Valide ton inscription : si ${name} prévoit un bonus de parrainage, il est crédité une fois les conditions remplies.`,
             ].map((step, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(124,58,237,.2)', border: '1px solid rgba(124,58,237,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.7rem', fontWeight: 800, color: '#a78bfa', flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,212,59,.2)', border: '1px solid rgba(255,212,59,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.7rem', fontWeight: 800, color: 'var(--accent-text)', flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
                 <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.55 }}>{step}</p>
               </div>
             ))}
@@ -390,7 +390,7 @@ export default async function CompanyPage({ params }: Props) {
 
         {/* ── FAQ : questions dont la réponse dépend des données de la page ── */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
             Questions fréquentes — parrainage {name}
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -410,15 +410,15 @@ export default async function CompanyPage({ params }: Props) {
         <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
           {category && (
             <div style={{ marginBottom: '1.5rem' }}>
-              <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '0.875rem', fontFamily: "var(--font-syne),Syne,sans-serif" }}>
+              <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '0.875rem', fontFamily: "var(--font-display)" }}>
                 {category.label}
               </div>
-              <a href={`/code-parrainage/categorie/${category.slug}`} style={{ fontSize: '.8rem', color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}>
+              <a href={`/code-parrainage/categorie/${category.slug}`} style={{ fontSize: '.8rem', color: 'var(--accent-text)', textDecoration: 'none', fontWeight: 600 }}>
                 Voir tous les codes {category.short.toLowerCase()} →
               </a>
             </div>
           )}
-          <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '0.875rem', fontFamily: "var(--font-syne),Syne,sans-serif" }}>
+          <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '0.875rem', fontFamily: "var(--font-display)" }}>
             Autres codes populaires
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -427,7 +427,7 @@ export default async function CompanyPage({ params }: Props) {
                 Code parrainage {r.name}
               </a>
             ))}
-            <a href="/codes" style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'rgba(124,58,237,.1)', border: '1px solid rgba(124,58,237,.25)', color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}>
+            <a href="/codes" style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'rgba(255,212,59,.1)', border: '1px solid rgba(255,212,59,.25)', color: 'var(--accent-text)', textDecoration: 'none', fontWeight: 600 }}>
               Tous les codes →
             </a>
           </div>

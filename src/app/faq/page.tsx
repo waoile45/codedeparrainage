@@ -42,13 +42,13 @@ export default function FaqPage() {
         details[open] .faq-arrow { transform:rotate(180deg); }
       `}</style>
       <Navbar />
-      <main style={{ maxWidth:720, margin:"0 auto", padding:"3rem 1.5rem 6rem", fontFamily:"var(--font-dm-sans),'DM Sans',sans-serif" }}>
+      <main style={{ maxWidth:720, margin:"0 auto", padding:"3rem 1.5rem 6rem", fontFamily:"var(--font-text)" }}>
         <div style={{ marginBottom:"2rem" }}>
-          <div style={{ display:"inline-flex", alignItems:"center", gap:6, fontSize:".72rem", fontWeight:600, letterSpacing:".1em", textTransform:"uppercase", color:"#7c3aed", marginBottom:".75rem" }}>
-            <span style={{ width:18, height:1, background:"#7c3aed", display:"block" }} />
+          <div style={{ display:"inline-flex", alignItems:"center", gap:6, fontSize:".72rem", fontWeight:600, letterSpacing:".1em", textTransform:"uppercase", color:"var(--accent)", marginBottom:".75rem" }}>
+            <span style={{ width:18, height:1, background:"var(--accent)", display:"block" }} />
             FAQ
           </div>
-          <h1 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"clamp(1.5rem,3.5vw,2rem)", color:"var(--text-strong)", letterSpacing:"-.03em", marginBottom:".375rem" }}>
+          <h1 style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"clamp(1.5rem,3.5vw,2rem)", color:"var(--text-strong)", letterSpacing:"-.03em", marginBottom:".375rem" }}>
             Comment gagner de l&apos;XP ?
           </h1>
           <p style={{ color:"var(--text-dim)", fontSize:".875rem" }}>Tout ce qu&apos;il faut savoir pour progresser sur codedeparrainage.com</p>
@@ -66,13 +66,13 @@ export default function FaqPage() {
           ))}
         </div>
 
-        <div style={{ background:"rgba(124,58,237,.1)", border:"1px solid rgba(124,58,237,.3)", borderRadius:20, padding:"1.75rem", textAlign:"center" }}>
+        <div style={{ background:"rgba(255,212,59,.1)", border:"1px solid rgba(255,212,59,.3)", borderRadius:20, padding:"1.75rem", textAlign:"center" }}>
           <div style={{ fontSize:"2rem", marginBottom:".75rem" }}>🚀</div>
-          <h2 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.25rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
+          <h2 style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.25rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
             Prêt à gagner de l&apos;XP ?
           </h2>
           <p style={{ fontSize:".875rem", color:"var(--text-muted)", marginBottom:"1.25rem" }}>Publie ton premier code de parrainage et commence à grimper dans le classement.</p>
-          <a href="/publier" style={{ display:"inline-flex", alignItems:"center", gap:7, background:"#7c3aed", color:"#fff", fontWeight:700, fontSize:".875rem", padding:".75rem 1.5rem", borderRadius:13, textDecoration:"none" }}>
+          <a href="/publier" style={{ display:"inline-flex", alignItems:"center", gap:7, background:"var(--accent)", color:"var(--accent-ink)", fontWeight:700, fontSize:".875rem", padding:".75rem 1.5rem", borderRadius:13, textDecoration:"none" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Publier mon code
           </a>

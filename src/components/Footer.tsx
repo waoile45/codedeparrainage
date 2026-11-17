@@ -1,154 +1,96 @@
-"use client";
-
 import Link from "next/link";
+import Logo from "./Logo";
+import { CATEGORIES } from "@/data/categories";
 
+// Pied de page : le nom, une phrase sur ce qu'est le site, l'action principale,
+// puis les liens. Les comparatifs VPN/banque (noindex, hors sujet) n'y sont plus.
 const COLUMNS = [
   {
-    title: "Plateforme",
+    title: "Le site",
     links: [
-      { label: "Parcourir les codes", href: "/codes" },
-      { label: "Publier un code",     href: "/publier" },
-      { label: "Classement",          href: "/classement" },
-      { label: "Boost & Visibilité",  href: "/boost" },
-      { label: "Crédits",             href: "/credits" },
+      { label: "Tous les codes", href: "/codes" },
+      { label: "Publier un code", href: "/publier" },
+      { label: "Classement des parrains", href: "/classement" },
+      { label: "Booster une annonce", href: "/boost" },
+      { label: "Questions fréquentes", href: "/faq" },
     ],
   },
   {
     title: "Catégories",
+    links: CATEGORIES.map((c) => ({ label: c.short, href: `/code-parrainage/categorie/${c.slug}` })),
+  },
+  {
+    title: "Ton compte",
     links: [
-      { label: "Parrainage banque",         href: "/code-parrainage/categorie/banque" },
-      { label: "Parrainage cashback",       href: "/code-parrainage/categorie/cashback" },
-      { label: "Parrainage paris sportifs", href: "/code-parrainage/categorie/paris-sportifs" },
-      { label: "Parrainage crypto",         href: "/code-parrainage/categorie/crypto" },
-      { label: "Parrainage téléphonie",     href: "/code-parrainage/categorie/telephonie" },
-      { label: "Parrainage énergie",        href: "/code-parrainage/categorie/energie" },
-      { label: "Parrainage shopping",       href: "/code-parrainage/categorie/shopping" },
-      { label: "Parrainage covoiturage",    href: "/code-parrainage/categorie/mobilite" },
+      { label: "Mon profil", href: "/profil" },
+      { label: "Mes annonces", href: "/profil?tab=annonces" },
+      { label: "Crédits", href: "/credits" },
+      { label: "Messages", href: "/profil?tab=messages" },
     ],
   },
   {
-    title: "Comparatifs",
+    title: "Informations",
     links: [
-      { label: "Meilleur VPN",              href: "/meilleur-vpn" },
-      { label: "VPN pour Netflix",          href: "/meilleur-vpn/netflix" },
-      { label: "VPN pour Gaming",           href: "/meilleur-vpn/gaming" },
-      { label: "Meilleure banque",          href: "/meilleure-banque" },
-      { label: "Banque pour freelance",     href: "/meilleure-banque/freelance" },
-    ],
-  },
-  {
-    title: "Compte",
-    links: [
-      { label: "Mon profil",     href: "/profil" },
-      { label: "Mes annonces",   href: "/profil?tab=annonces" },
-      { label: "Mes badges",     href: "/profil?tab=badges" },
-      { label: "Messages",       href: "/messages" },
-      { label: "Paramètres",     href: "/profil?tab=parametres" },
-    ],
-  },
-  {
-    title: "Légal",
-    links: [
-      { label: "Conditions d'utilisation",    href: "/cgu" },
-      { label: "Politique de confidentialité", href: "/confidentialite" },
-      { label: "Mentions légales",            href: "/mentions-legales" },
-      { label: "Cookies",                     href: "/cookies" },
+      { label: "Conditions d'utilisation", href: "/cgu" },
+      { label: "Confidentialité", href: "/confidentialite" },
+      { label: "Mentions légales", href: "/mentions-legales" },
+      { label: "Cookies", href: "/cookies" },
     ],
   },
 ];
 
 export default function Footer() {
   return (
-    <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", marginTop: "4rem" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "3rem 2rem 2rem" }}>
-
-        {/* Top */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr", gap: "2rem", marginBottom: "2.5rem" }}>
-
-          {/* Brand */}
-          <div>
-            <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: "0.875rem" }}>
-              <img src="/logo-96.png" alt="" width={78} height={96} loading="lazy" style={{ width: "auto", height: 40, objectFit: "contain", flexShrink: 0 }} />
-              <span style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: "1rem", color: "#fff" }}>
-                codedeparrainage<span style={{ color: "#7c3aed" }}>.com</span>
-              </span>
+    <footer className="cdp-footer">
+      <div className="wrap">
+        <div className="cdp-footer-top">
+          <div className="cdp-footer-brand">
+            <Link href="/" aria-label="codedeparrainage.com, accueil" style={{ textDecoration: "none" }}>
+              <Logo />
             </Link>
-            <p style={{ fontSize: "0.83rem", color: "rgba(255,255,255,0.38)", lineHeight: 1.65, maxWidth: 260, margin: 0 }}>
-              Codes de parrainage publiés par de vrais clients, datés et notés par la communauté. Publie le tien, il apparaît sur la page de la marque.
+            <p>
+              Des codes de parrainage publiés par des clients des marques. Tu copies un code, tu le colles à
+              l&apos;inscription, la prime de bienvenue est pour toi.
             </p>
+            <Link href="/publier" className="btn btn-accent">Publier mon code</Link>
           </div>
 
-          {/* Link columns */}
-          {COLUMNS.map(col => (
-            <div key={col.title}>
-              <p style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: "0.78rem", color: "rgba(255,255,255,0.55)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "0.875rem" }}>
-                {col.title}
-              </p>
-              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {col.links.map(l => (
-                  <li key={l.href}>
-                    <Link href={l.href} style={{ fontSize: "0.83rem", color: "rgba(255,255,255,0.38)", textDecoration: "none", transition: "color 0.15s" }}
-                      onMouseEnter={e => (e.currentTarget.style.color = "#fff")}
-                      onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.38)")}
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <nav className="cdp-footer-cols" aria-label="Plan du site">
+            {COLUMNS.map((col) => (
+              <div key={col.title}>
+                <p className="cdp-footer-title">{col.title}</p>
+                <ul>
+                  {col.links.map((l) => (
+                    <li key={l.href}>
+                      <Link href={l.href}>{l.label}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
 
-        {/* Divider */}
-        <div style={{ height: 1, background: "rgba(255,255,255,0.06)", marginBottom: "1.5rem" }} />
-
-        {/* Bottom */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem" }}>
-          <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.25)", margin: 0 }}>
-            © {new Date().getFullYear()} codedeparrainage.com — Tous droits réservés
-          </p>
-          <Link href="/faq" style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>Comment fonctionne le site ?</Link>
+        <div className="cdp-footer-bottom">
+          <p>© {new Date().getFullYear()} codedeparrainage.com</p>
+          <p>Les primes sont versées par les marques, selon leurs conditions. Vérifie-les avant de t&apos;inscrire.</p>
         </div>
-
       </div>
 
-      {/* Mobile */}
       <style>{`
-        @media (max-width: 768px) {
-          footer > div > div:first-child {
-            grid-template-columns: 1fr 1fr !important;
-          }
-          footer > div > div:first-child > div:first-child {
-            grid-column: 1 / -1;
-          }
-        }
-        @media (max-width: 480px) {
-          footer > div > div:first-child {
-            grid-template-columns: 1fr !important;
-          }
-        }
-        [data-theme="light"] footer {
-          border-top-color: rgba(0,0,0,0.08) !important;
-          background: transparent !important;
-        }
-        [data-theme="light"] footer p,
-        [data-theme="light"] footer span,
-        [data-theme="light"] footer a {
-          color: rgba(15,15,26,0.5) !important;
-        }
-        [data-theme="light"] footer a:hover {
-          color: #0f0f1a !important;
-        }
-        [data-theme="light"] footer .brand-name,
-        [data-theme="light"] footer [style*="font-weight: 700"][style*="1rem"] {
-          color: #0f0f1a !important;
-        }
-        [data-theme="light"] footer [style*="textTransform"] {
-          color: rgba(15,15,26,0.45) !important;
-        }
-        [data-theme="light"] footer [style*="height: 1"] {
-          background: rgba(0,0,0,0.08) !important;
+        .cdp-footer { border-top: 1px solid var(--border); margin-top: 0; padding: 4rem 0 2rem; background: var(--bg); }
+        .cdp-footer-top { display: grid; grid-template-columns: minmax(260px, 1fr) 2.2fr; gap: 3rem; }
+        .cdp-footer-brand p { color: var(--text-muted); font-size: .95rem; line-height: 1.6; max-width: 34ch; margin: 1rem 0 1.5rem; }
+        .cdp-footer-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem; }
+        .cdp-footer-title { font-family: var(--font-display), sans-serif; font-stretch: 112%; font-weight: 800; font-size: 1rem; color: var(--text-strong); margin: 0 0 1rem; }
+        .cdp-footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .65rem; }
+        .cdp-footer ul a { color: var(--text-muted); text-decoration: none; font-size: .93rem; }
+        .cdp-footer ul a:hover { color: var(--text-strong); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 4px; text-decoration-thickness: 2px; }
+        .cdp-footer-bottom { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-top: 1px solid var(--border); margin-top: 3rem; padding-top: 1.5rem; }
+        .cdp-footer-bottom p { margin: 0; color: var(--text-dim); font-size: .85rem; }
+        @media (max-width: 900px) {
+          .cdp-footer-top { grid-template-columns: 1fr; gap: 2.5rem; }
+          .cdp-footer-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
       `}</style>
     </footer>

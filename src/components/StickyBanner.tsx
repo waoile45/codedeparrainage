@@ -45,23 +45,23 @@ export default function StickyBanner() {
           position: fixed; bottom: 0; left: 0; right: 0;
           /* Sous les modales (z 1000) et la navbar (z 200) : la bannière ne doit jamais recouvrir une action en cours */
           z-index: 100;
-          background: #11091f;
-          border-top: 1px solid rgba(124,58,237,0.4);
+          background: var(--bg-raised);
+          border-top: 1px solid rgba(255,212,59,0.4);
           padding: 0.75rem 1.25rem;
           padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
           display: flex; align-items: center; justify-content: space-between; gap: 12px;
           box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
-          font-family: 'DM Sans', sans-serif;
+          font-family: var(--font-text);
         }
         .sb-text { min-width: 0; }
-        .sb-title { margin: 0; font-size: 0.9rem; font-weight: 700; color: #fff; font-family: 'Syne', sans-serif; line-height: 1.3; }
+        .sb-title { margin: 0; font-size: 0.9rem; font-weight: 700; color: #fff; font-family: var(--font-display); line-height: 1.3; }
         .sb-sub { margin: 2px 0 0; font-size: 0.78rem; color: rgba(255,255,255,0.5); }
         .sb-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
         .sb-cta {
-          background: #7c3aed; color: #fff; text-decoration: none;
+          background: var(--accent); color: var(--accent-ink); text-decoration: none;
           padding: 0.55rem 1rem; border-radius: 10px;
           font-size: 0.82rem; font-weight: 700; white-space: nowrap;
-          box-shadow: 0 4px 16px rgba(124,58,237,0.4);
+          box-shadow: 0 4px 16px rgba(255,212,59,0.4);
         }
         .sb-close {
           background: none; border: none; cursor: pointer;

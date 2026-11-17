@@ -26,7 +26,7 @@ interface CodeCard {
 
 const CATEGORIES = ["Tout","banque","paris","cashback","energie","telephonie","crypto","assurance","shopping"];
 const CATEGORY_LABELS: Record<string,string> = { Tout:"Tout", banque:"Banque", paris:"Paris", cashback:"Cashback", energie:"Énergie", telephonie:"Téléphonie", crypto:"Crypto", assurance:"Assurance", shopping:"Shopping" };
-const NIVEAU_COLORS: Record<string,string> = { Débutant:"#6366f1", "Parrain Bronze":"#cd7f32", "Parrain Argent":"#8b5cf6", "Parrain Or":"#f59e0b", "Super Parrain":"#a855f7", "Parrain Légendaire":"#ec4899" };
+const NIVEAU_COLORS: Record<string,string> = { Débutant:"#A39E93", "Parrain Bronze":"#cd7f32", "Parrain Argent":"var(--accent)", "Parrain Or":"#f59e0b", "Super Parrain":"var(--accent)", "Parrain Légendaire":"#ec4899" };
 
 function BrandLogo({ slug, brand }: { slug: string; brand: string }) {
   const [error, setError] = useState(false);
@@ -143,19 +143,19 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
 
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", backdropFilter:"blur(4px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={onClose}>
-      <div style={{ background:"var(--bg-card)", border:"1px solid rgba(124,58,237,.3)", borderRadius:24, padding:"1.75rem", maxWidth:460, width:"100%", position:"relative", maxHeight:"90vh", overflowY:"auto" }} onClick={e=>e.stopPropagation()}>
+      <div style={{ background:"var(--bg-card)", border:"1px solid rgba(255,212,59,.3)", borderRadius:24, padding:"1.75rem", maxWidth:460, width:"100%", position:"relative", maxHeight:"90vh", overflowY:"auto" }} onClick={e=>e.stopPropagation()}>
         <button onClick={onClose} style={{ position:"absolute", top:14, right:14, background:"none", border:"none", color:"rgba(255,255,255,.3)", cursor:"pointer", fontSize:"1.25rem", lineHeight:1 }}>×</button>
 
         {done ? (
           <div style={{ textAlign:"center", padding:"1rem 0" }}>
             <div style={{ fontSize:"2.5rem", marginBottom:".75rem" }}>⭐</div>
-            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Avis envoyé !</p>
+            <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Avis envoyé !</p>
             <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem" }}>Merci pour ton retour.</p>
-            <button onClick={onClose} style={{ marginTop:"1.25rem", background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".7rem 1.5rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>Fermer</button>
+            <button onClick={onClose} style={{ marginTop:"1.25rem", background:"var(--accent)", color:"var(--accent-ink)", border:"none", borderRadius:12, padding:".7rem 1.5rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>Fermer</button>
           </div>
         ) : (
           <>
-            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:"rgba(255,255,255,.9)", marginBottom:".2rem" }}>
+            <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1rem", color:"rgba(255,255,255,.9)", marginBottom:".2rem" }}>
               {existing ? "Modifier ton avis" : "Comment s'est passé le parrainage ?"}
             </p>
             <p style={{ color:"rgba(255,255,255,.35)", fontSize:".8rem", marginBottom:"1.5rem" }}>
@@ -169,7 +169,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
                 const active = selectedTags.includes(t.key);
                 return (
                   <button key={t.key} type="button" onClick={() => toggleTag(t.key)}
-                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", borderRadius:100, border:`1px solid ${active?"rgba(34,197,94,.5)":"rgba(255,255,255,.1)"}`, background:active?"rgba(34,197,94,.12)":"rgba(255,255,255,.03)", color:active?"#4ade80":"rgba(255,255,255,.5)", fontSize:".8rem", fontWeight:500, cursor:"pointer", transition:"all .15s", fontFamily:"'DM Sans',sans-serif" }}>
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", borderRadius:100, border:`1px solid ${active?"rgba(34,197,94,.5)":"rgba(255,255,255,.1)"}`, background:active?"rgba(34,197,94,.12)":"rgba(255,255,255,.03)", color:active?"#4ade80":"rgba(255,255,255,.5)", fontSize:".8rem", fontWeight:500, cursor:"pointer", transition:"all .15s", fontFamily:"var(--font-text)" }}>
                     <span>{t.emoji}</span>{t.label}
                   </button>
                 );
@@ -183,7 +183,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
                 const active = selectedTags.includes(t.key);
                 return (
                   <button key={t.key} type="button" onClick={() => toggleTag(t.key)}
-                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", borderRadius:100, border:`1px solid ${active?"rgba(239,68,68,.4)":"rgba(255,255,255,.1)"}`, background:active?"rgba(239,68,68,.1)":"rgba(255,255,255,.03)", color:active?"#f87171":"rgba(255,255,255,.5)", fontSize:".8rem", fontWeight:500, cursor:"pointer", transition:"all .15s", fontFamily:"'DM Sans',sans-serif" }}>
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", borderRadius:100, border:`1px solid ${active?"rgba(239,68,68,.4)":"rgba(255,255,255,.1)"}`, background:active?"rgba(239,68,68,.1)":"rgba(255,255,255,.03)", color:active?"#f87171":"rgba(255,255,255,.5)", fontSize:".8rem", fontWeight:500, cursor:"pointer", transition:"all .15s", fontFamily:"var(--font-text)" }}>
                     <span>{t.emoji}</span>{t.label}
                   </button>
                 );
@@ -206,11 +206,11 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
 
             {/* Commentaire */}
             <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Commentaire (optionnel)…" maxLength={300}
-              style={{ width:"100%", background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.08)", borderRadius:12, padding:".75rem 1rem", color:"rgba(255,255,255,.8)", fontSize:".875rem", fontFamily:"'DM Sans',sans-serif", resize:"vertical", minHeight:72, outline:"none", marginBottom:".75rem" }} />
+              style={{ width:"100%", background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.08)", borderRadius:12, padding:".75rem 1rem", color:"rgba(255,255,255,.8)", fontSize:".875rem", fontFamily:"var(--font-text)", resize:"vertical", minHeight:72, outline:"none", marginBottom:".75rem" }} />
 
             {error && <p style={{ color:"#f87171", fontSize:".8rem", marginBottom:".75rem" }}>{error}</p>}
             <button onClick={submit} disabled={sending}
-              style={{ width:"100%", background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif", opacity:sending?.5:1, transition:"opacity .2s" }}>
+              style={{ width:"100%", background:"var(--accent)", color:"var(--accent-ink)", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)", opacity:sending?.5:1, transition:"opacity .2s" }}>
               {sending ? "Envoi…" : "Envoyer mon avis"}
             </button>
           </>
@@ -228,7 +228,7 @@ function CodeCardItem({ card, index, onRate, onContact, onEdit, onDelete, curren
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
   }, [index]);
-  const niveauColor = NIVEAU_COLORS[card.niveau] ?? "#6366f1";
+  const niveauColor = NIVEAU_COLORS[card.niveau] ?? "#A39E93";
   const isOwn = currentUserId !== null && currentUserId === card.userId;
   return (
     <div ref={ref} className={`code-card ${card.boosted?"boosted":""} ${isOwn?"own":""} ${visible?"visible":""}`}>
@@ -467,56 +467,56 @@ export default function CodesClient() {
     <>
       <style>{`
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+        body{background:var(--bg);color:var(--text);font-family:var(--font-text);min-height:100vh;overflow-x:hidden}
         .page-wrapper{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:3rem 1.5rem 6rem}
         .page-header{margin-bottom:2.5rem}
-        .header-label{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#7c3aed;margin-bottom:.75rem}
-        .header-label::before{content:'';display:block;width:18px;height:1px;background:#7c3aed}
-        .page-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.75rem,4vw,2.5rem);line-height:1.1;color:var(--text-strong);letter-spacing:-.03em;margin-bottom:.5rem}
+        .header-label{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem}
+        .header-label::before{content:'';display:block;width:18px;height:1px;background:var(--accent)}
+        .page-title{font-family:var(--font-display);font-weight:800;font-size:clamp(1.75rem,4vw,2.5rem);line-height:1.1;color:var(--text-strong);letter-spacing:-.03em;margin-bottom:.5rem}
         .page-subtitle{color:var(--text-dim);font-size:.9rem;display:flex;align-items:center;gap:8px}
         .live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;animation:pulse 2s ease-in-out infinite;flex-shrink:0}
         @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
         .count-num{color:var(--text-strong);font-weight:700}
         .search-wrap{position:relative;margin-bottom:1.25rem}
         .search-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-faint);pointer-events:none}
-        .search-input{width:100%;background:var(--bg-input);border:1px solid var(--border-md);border-radius:14px;padding:.875rem 1rem .875rem 2.75rem;color:var(--text-strong);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:all .2s}
+        .search-input{width:100%;background:var(--bg-input);border:1px solid var(--border-md);border-radius:14px;padding:.875rem 1rem .875rem 2.75rem;color:var(--text-strong);font-size:.9rem;font-family:var(--font-text);outline:none;transition:all .2s}
         .search-input::placeholder{color:var(--text-faint)}
-        .search-input:focus{border-color:rgba(124,58,237,.5);background:rgba(124,58,237,.05);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+        .search-input:focus{border-color:rgba(255,212,59,.5);background:rgba(255,212,59,.05);box-shadow:0 0 0 3px rgba(255,212,59,.1)}
         .sort-row{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem}
-        .sort-tab{display:flex;align-items:center;gap:6px;padding:.4rem .875rem;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:10px;color:var(--text-nav);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+        .sort-tab{display:flex;align-items:center;gap:6px;padding:.4rem .875rem;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:10px;color:var(--text-nav);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
         .sort-tab:hover{color:var(--text-strong);border-color:var(--border-lg)}
-        .sort-tab.active{background:rgba(124,58,237,.15);border-color:rgba(124,58,237,.4);color:#a78bfa}
+        .sort-tab.active{background:rgba(255,212,59,.15);border-color:rgba(255,212,59,.4);color:var(--accent-text)}
         .cats-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2.5rem}
-        .cat-pill{display:inline-flex;align-items:center;gap:5px;padding:.4rem .875rem;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:100px;color:var(--text-link);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
-        .cat-pill:hover{color:var(--text-strong);border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.08)}
-        .cat-pill.active{background:#7c3aed;border-color:#7c3aed;color:#fff;box-shadow:0 0 16px rgba(124,58,237,.35)}
+        .cat-pill{display:inline-flex;align-items:center;gap:5px;padding:.4rem .875rem;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:100px;color:var(--text-link);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
+        .cat-pill:hover{color:var(--text-strong);border-color:rgba(255,212,59,.3);background:rgba(255,212,59,.08)}
+        .cat-pill.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 0 16px rgba(255,212,59,.35)}
         .cards-list{display:flex;flex-direction:column;gap:1rem}
         .code-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:1.5rem;opacity:0;transform:translateY(16px);transition:opacity .4s ease,transform .4s ease,border-color .2s,box-shadow .2s;position:relative;overflow:hidden}
-        .code-card:hover{border-color:rgba(124,58,237,.25);box-shadow:0 8px 32px rgba(0,0,0,.15)}
+        .code-card:hover{border-color:rgba(255,212,59,.25);box-shadow:0 8px 32px rgba(0,0,0,.15)}
         .code-card.visible{opacity:1;transform:translateY(0)}
         .code-card.boosted{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03)}
         .code-card.boosted::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#22c55e,transparent)}
-        .code-card:not(.boosted){border-color:rgba(124,58,237,.2);background:rgba(124,58,237,.03)}
-        .code-card.own{border-color:rgba(124,58,237,.55)!important;background:rgba(124,58,237,.08)!important;box-shadow:0 0 0 1px rgba(124,58,237,.2)}
-        .code-card.own .code-dot{background:#a78bfa;box-shadow:0 0 8px #a78bfa}
-        .code-card.own .code-text{color:#c4b5fd!important}
+        .code-card:not(.boosted){border-color:rgba(255,212,59,.2);background:rgba(255,212,59,.03)}
+        .code-card.own{border-color:rgba(255,212,59,.55)!important;background:rgba(255,212,59,.08)!important;box-shadow:0 0 0 1px rgba(255,212,59,.2)}
+        .code-card.own .code-dot{background:var(--accent-text);box-shadow:0 0 8px var(--accent-text)}
+        .code-card.own .code-text{color:var(--accent-text)!important}
         .boost-badge{display:inline-flex;align-items:center;gap:5px;padding:.25rem .625rem;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:100px;font-size:.72rem;font-weight:600;color:#22c55e;margin-bottom:1rem}
         .boost-lightning{animation:flicker 1.5s ease-in-out infinite}
         @keyframes flicker{0%,100%{opacity:1}50%{opacity:.6}}
         .card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem}
         .brand-row{display:flex;align-items:center;gap:12px;flex:1}
         .brand-logo{width:44px;height:44px;border-radius:12px;background:#fff;border:1px solid var(--border-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
-        .brand-logo-fallback{background:rgba(124,58,237,.15)!important;border:1px solid rgba(124,58,237,.2)!important;font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:#a78bfa}
+        .brand-logo-fallback{background:rgba(255,212,59,.15)!important;border:1px solid rgba(255,212,59,.2)!important;font-family:var(--font-display);font-weight:800;font-size:1.1rem;color:var(--accent-text)}
         .brand-info{flex:1}
-        .brand-name{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--text-strong);margin-bottom:2px}
+        .brand-name{font-family:var(--font-display);font-weight:700;font-size:1rem;color:var(--text-strong);margin-bottom:2px}
         .brand-desc{color:var(--text-muted);font-size:.8rem}
         .reward-pill{padding:.3rem .625rem;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:8px;color:#16a34a;font-size:.8rem;font-weight:700;white-space:nowrap;flex-shrink:0}
         .code-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg-code);border:1px solid var(--border);border-radius:12px;padding:.75rem .875rem;margin-bottom:1.25rem}
         .code-display{display:flex;align-items:center;gap:8px}
-        .code-dot{width:6px;height:6px;border-radius:50%;background:#7c3aed;box-shadow:0 0 6px #7c3aed;flex-shrink:0}
+        .code-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);flex-shrink:0}
         .code-text{font-family:'Courier New',monospace;font-size:.95rem;font-weight:700;color:var(--text-strong);letter-spacing:.08em}
-        .copy-btn{display:inline-flex;align-items:center;gap:6px;padding:.4rem .875rem;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);border-radius:8px;color:#a78bfa;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;white-space:nowrap}
-        .copy-btn:hover{background:rgba(124,58,237,.25);color:#fff;transform:scale(1.03)}
+        .copy-btn{display:inline-flex;align-items:center;gap:6px;padding:.4rem .875rem;background:rgba(255,212,59,.15);border:1px solid rgba(255,212,59,.35);border-radius:8px;color:var(--accent-text);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-text);white-space:nowrap}
+        .copy-btn:hover{background:rgba(255,212,59,.25);color:#fff;transform:scale(1.03)}
         .copy-btn.copied{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.35);color:#16a34a}
         .card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
         .parrain-info{display:flex;align-items:center;gap:8px}
@@ -524,18 +524,18 @@ export default function CodesClient() {
         .parrain-name{font-size:.82rem;font-weight:500;color:var(--text-muted)}
         .niveau-badge{font-size:.72rem;font-weight:600;padding:.15rem .5rem;border:1px solid;border-radius:100px}
         .card-actions{display:flex;gap:6px}
-        .action-btn{display:inline-flex;align-items:center;gap:5px;padding:.35rem .75rem;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:8px;color:var(--text-muted);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+        .action-btn{display:inline-flex;align-items:center;gap:5px;padding:.35rem .75rem;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:8px;color:var(--text-muted);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
         .action-btn:hover{color:var(--text-strong);border-color:var(--border-lg);background:var(--bg-btn)}
-        .action-btn-own{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.35);color:#a78bfa}
-        .action-btn-own:hover{background:rgba(124,58,237,.22);color:#c4b5fd}
+        .action-btn-own{background:rgba(255,212,59,.12);border-color:rgba(255,212,59,.35);color:var(--accent-text)}
+        .action-btn-own:hover{background:rgba(255,212,59,.22);color:var(--accent-text)}
         .action-btn-delete{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25);color:#f87171}
         .action-btn-delete:hover{background:rgba(239,68,68,.15);color:#fca5a5}
         .code-url{color:#60a5fa !important;text-decoration:underline;word-break:break-all}
         .results-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
         .results-count{font-size:.8rem;color:var(--text-faint)}
         .results-count strong{color:var(--text-muted)}
-        .load-more-btn{display:inline-flex;align-items:center;gap:8px;padding:.65rem 1.75rem;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);border-radius:12px;color:#a78bfa;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
-        .load-more-btn:hover{background:rgba(124,58,237,.25);color:#fff}
+        .load-more-btn{display:inline-flex;align-items:center;gap:8px;padding:.65rem 1.75rem;background:rgba(255,212,59,.15);border:1px solid rgba(255,212,59,.35);border-radius:12px;color:var(--accent-text);font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
+        .load-more-btn:hover{background:rgba(255,212,59,.25);color:#fff}
         .load-more-btn:disabled{opacity:.5;cursor:not-allowed}
         .empty-state{text-align:center;padding:4rem 2rem;color:var(--text-faint)}
         .empty-icon{font-size:2.5rem;margin-bottom:1rem}
@@ -661,19 +661,19 @@ export default function CodesClient() {
       {/* Modal édition */}
       {editModal && (
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", backdropFilter:"blur(4px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={() => setEditModal(null)}>
-          <div style={{ background:"var(--bg-card)", border:"1px solid rgba(124,58,237,.3)", borderRadius:24, padding:"1.75rem", maxWidth:460, width:"100%", position:"relative" }} onClick={e=>e.stopPropagation()}>
+          <div style={{ background:"var(--bg-card)", border:"1px solid rgba(255,212,59,.3)", borderRadius:24, padding:"1.75rem", maxWidth:460, width:"100%", position:"relative" }} onClick={e=>e.stopPropagation()}>
             <button onClick={() => setEditModal(null)} style={{ position:"absolute", top:14, right:14, background:"none", border:"none", color:"rgba(255,255,255,.3)", cursor:"pointer", fontSize:"1.25rem" }}>×</button>
-            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:"var(--text-strong)", marginBottom:"1.25rem" }}>Modifier mon annonce</p>
+            <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1rem", color:"var(--text-strong)", marginBottom:"1.25rem" }}>Modifier mon annonce</p>
             <div style={{ display:"flex", flexDirection:"column", gap:"1rem" }}>
               <div>
                 <label style={{ fontSize:".78rem", fontWeight:600, color:"var(--text-muted)", display:"block", marginBottom:5 }}>Code de parrainage</label>
-                <input value={editCode} onChange={e=>setEditCode(e.target.value)} style={{ width:"100%", background:"var(--bg-input)", border:"1px solid var(--border-md)", borderRadius:10, padding:".7rem 1rem", color:"var(--text-strong)", fontSize:".9rem", fontFamily:"'DM Sans',sans-serif", outline:"none" }} />
+                <input value={editCode} onChange={e=>setEditCode(e.target.value)} style={{ width:"100%", background:"var(--bg-input)", border:"1px solid var(--border-md)", borderRadius:10, padding:".7rem 1rem", color:"var(--text-strong)", fontSize:".9rem", fontFamily:"var(--font-text)", outline:"none" }} />
               </div>
               <div>
                 <label style={{ fontSize:".78rem", fontWeight:600, color:"var(--text-muted)", display:"block", marginBottom:5 }}>Description</label>
-                <textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} rows={3} style={{ width:"100%", background:"var(--bg-input)", border:"1px solid var(--border-md)", borderRadius:10, padding:".7rem 1rem", color:"var(--text-strong)", fontSize:".875rem", fontFamily:"'DM Sans',sans-serif", outline:"none", resize:"vertical" }} />
+                <textarea value={editDesc} onChange={e=>setEditDesc(e.target.value)} rows={3} style={{ width:"100%", background:"var(--bg-input)", border:"1px solid var(--border-md)", borderRadius:10, padding:".7rem 1rem", color:"var(--text-strong)", fontSize:".875rem", fontFamily:"var(--font-text)", outline:"none", resize:"vertical" }} />
               </div>
-              <button onClick={handleEditSave} disabled={editSaving || !editCode.trim()} style={{ background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif", opacity:editSaving?.5:1 }}>
+              <button onClick={handleEditSave} disabled={editSaving || !editCode.trim()} style={{ background:"var(--accent)", color:"var(--accent-ink)", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)", opacity:editSaving?.5:1 }}>
                 {editSaving ? "Sauvegarde…" : "Enregistrer"}
               </button>
             </div>
@@ -686,11 +686,11 @@ export default function CodesClient() {
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", backdropFilter:"blur(4px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={() => setDeleteConfirm(null)}>
           <div style={{ background:"var(--bg-card)", border:"1px solid rgba(239,68,68,.3)", borderRadius:24, padding:"1.75rem", maxWidth:400, width:"100%", textAlign:"center" }} onClick={e=>e.stopPropagation()}>
             <div style={{ fontSize:"2rem", marginBottom:".75rem" }}>🗑️</div>
-            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1rem", color:"var(--text-strong)", marginBottom:".5rem" }}>Supprimer cette annonce ?</p>
+            <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1rem", color:"var(--text-strong)", marginBottom:".5rem" }}>Supprimer cette annonce ?</p>
             <p style={{ fontSize:".875rem", color:"var(--text-muted)", marginBottom:"1.5rem" }}>Cette action est irréversible.</p>
             <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
-              <button onClick={() => setDeleteConfirm(null)} style={{ background:"none", border:"1px solid var(--border-md)", borderRadius:10, padding:".65rem 1.25rem", color:"var(--text-muted)", fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>Annuler</button>
-              <button onClick={() => handleDelete(deleteConfirm)} style={{ background:"rgba(239,68,68,.9)", color:"#fff", border:"none", borderRadius:10, padding:".65rem 1.25rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>Supprimer</button>
+              <button onClick={() => setDeleteConfirm(null)} style={{ background:"none", border:"1px solid var(--border-md)", borderRadius:10, padding:".65rem 1.25rem", color:"var(--text-muted)", fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>Annuler</button>
+              <button onClick={() => handleDelete(deleteConfirm)} style={{ background:"rgba(239,68,68,.9)", color:"#fff", border:"none", borderRadius:10, padding:".65rem 1.25rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>Supprimer</button>
             </div>
           </div>
         </div>

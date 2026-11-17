@@ -1,22 +1,32 @@
 import type { Metadata } from "next";
-import { Syne, DM_Sans } from "next/font/google";
+import { Archivo, Hanken_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import Footer from "@/components/Footer";
-import ParticlesBackground from "@/components/ParticlesBackground";
+import RevealObserver from "@/components/RevealObserver";
 import StickyBanner from "@/components/StickyBanner";
 import { safeJsonLd } from "@/lib/sanitize";
 
-const syne = Syne({
-  variable: "--font-syne",
+// Titres : Archivo, variable en largeur (axe wdth) pour la coupe élargie des
+// étiquettes de prix. Texte : Hanken Grotesk. Codes à recopier : IBM Plex Mono.
+const archivo = Archivo({
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+  axes: ["wdth"],
+  display: "swap",
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const hanken = Hanken_Grotesk({
+  variable: "--font-text",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-code",
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -31,7 +41,7 @@ export const metadata: Metadata = {
   description:
     'Codes de parrainage publiés par de vrais parrains : banques en ligne, paris sportifs, crypto, cashback, télécom. Copie le code, inscris-toi, touche la prime de bienvenue.',
   icons: {
-    icon: '/logo-192.png',
+    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }, { url: '/logo-192.png', sizes: '192x192' }],
     apple: '/logo-192.png',
   },
   // L'image de partage vient de src/app/opengraph-image.tsx (1200×630).
@@ -78,13 +88,18 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${syne.variable} ${dmSans.variable} h-full antialiased`}
+      className={`${archivo.variable} ${hanken.variable} ${plexMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-<body className="min-h-full flex flex-col bg-[#0A0A0F] font-sans">
+      <head>
+        {/* Arme les apparitions au défilement ; sans JS, tout reste visible. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
+      <body className="min-h-full flex flex-col font-sans" style={{ background: "var(--bg)" }}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationJsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }} />
         <ThemeProvider>
-          <ParticlesBackground />
+          <RevealObserver />
           {children}
           <Footer />
           <StickyBanner />

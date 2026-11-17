@@ -19,8 +19,8 @@ interface Post {
 
 const CATS = ["Tout", "Général", "Banque", "Paris Sportifs", "Crypto", "Cashback", "Téléphonie", "Astuce"];
 const CAT_COLORS: Record<string, string> = {
-  Général: "#6366f1", Banque: "#3b82f6", "Paris Sportifs": "#10b981",
-  Crypto: "#f59e0b", Cashback: "#ec4899", Téléphonie: "#8b5cf6", Astuce: "#14b8a6",
+  Général: "#A39E93", Banque: "#3b82f6", "Paris Sportifs": "#10b981",
+  Crypto: "#f59e0b", Cashback: "#ec4899", Téléphonie: "var(--accent)", Astuce: "#14b8a6",
 };
 
 function timeAgo(iso: string) {
@@ -137,24 +137,24 @@ export default function ForumPage() {
         .forum-wrap{max-width:860px;margin:0 auto;padding:2rem 1.5rem 4rem}
         .forum-header{margin-bottom:2rem}
         .forum-cats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.75rem}
-        .forum-cat-btn{display:inline-flex;align-items:center;gap:5px;padding:.35rem .75rem;border-radius:10px;border:1px solid var(--border-md);background:var(--bg-card-md);color:var(--text-muted);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif}
-        .forum-cat-btn:hover,.forum-cat-btn.active{background:rgba(124,58,237,.15);border-color:rgba(124,58,237,.35);color:#c4b5fd}
+        .forum-cat-btn{display:inline-flex;align-items:center;gap:5px;padding:.35rem .75rem;border-radius:10px;border:1px solid var(--border-md);background:var(--bg-card-md);color:var(--text-muted);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .18s;font-family:var(--font-text)}
+        .forum-cat-btn:hover,.forum-cat-btn.active{background:rgba(255,212,59,.15);border-color:rgba(255,212,59,.35);color:var(--accent-text)}
         .forum-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:.75rem;transition:border-color .18s,box-shadow .18s;cursor:pointer}
-        .forum-card:hover{border-color:rgba(124,58,237,.3);box-shadow:0 4px 24px rgba(0,0,0,.15)}
+        .forum-card:hover{border-color:rgba(255,212,59,.3);box-shadow:0 4px 24px rgba(0,0,0,.15)}
         .forum-cat-tag{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:6px;margin-bottom:.5rem}
-        .forum-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text-strong);margin-bottom:.4rem;line-height:1.3}
+        .forum-title{font-family:var(--font-display);font-weight:700;font-size:1.05rem;color:var(--text-strong);margin-bottom:.4rem;line-height:1.3}
         .forum-content{color:var(--text-muted);font-size:.875rem;line-height:1.6;margin-bottom:.875rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
         .forum-meta{display:flex;align-items:center;gap:12px;font-size:.78rem;color:var(--text-dim)}
-        .forum-like-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:1px solid var(--border-md);border-radius:8px;padding:3px 10px;cursor:pointer;color:var(--text-dim);font-size:.78rem;transition:all .18s;font-family:'DM Sans',sans-serif}
-        .forum-like-btn:hover,.forum-like-btn.liked{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.35);color:#a78bfa}
-        .forum-new-btn{display:inline-flex;align-items:center;gap:6px;background:#7c3aed;color:#fff;border:none;border-radius:12px;padding:.55rem 1.25rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
-        .forum-new-btn:hover{background:#6d28d9;transform:translateY(-1px);box-shadow:0 4px 16px rgba(124,58,237,.4)}
-        .forum-form{background:var(--bg-card);border:1px solid rgba(124,58,237,.25);border-radius:18px;padding:1.5rem;margin-bottom:1.5rem}
-        .forum-input{width:100%;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:10px;padding:.65rem .875rem;color:var(--text-strong);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .18s;box-sizing:border-box}
-        .forum-input:focus{border-color:rgba(124,58,237,.5)}
+        .forum-like-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:1px solid var(--border-md);border-radius:8px;padding:3px 10px;cursor:pointer;color:var(--text-dim);font-size:.78rem;transition:all .18s;font-family:var(--font-text)}
+        .forum-like-btn:hover,.forum-like-btn.liked{background:rgba(255,212,59,.12);border-color:rgba(255,212,59,.35);color:var(--accent-text)}
+        .forum-new-btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:var(--accent-ink);border:none;border-radius:12px;padding:.55rem 1.25rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
+        .forum-new-btn:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,212,59,.4)}
+        .forum-form{background:var(--bg-card);border:1px solid rgba(255,212,59,.25);border-radius:18px;padding:1.5rem;margin-bottom:1.5rem}
+        .forum-input{width:100%;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:10px;padding:.65rem .875rem;color:var(--text-strong);font-family:var(--font-text);font-size:.9rem;outline:none;transition:border-color .18s;box-sizing:border-box}
+        .forum-input:focus{border-color:rgba(255,212,59,.5)}
         .forum-textarea{min-height:100px;resize:vertical;line-height:1.6}
         .forum-empty{text-align:center;padding:3rem 1rem;color:var(--text-dim);font-size:.95rem}
-        .level-badge{font-size:.65rem;font-weight:700;background:rgba(124,58,237,.2);color:#a78bfa;padding:1px 7px;border-radius:100px;border:1px solid rgba(124,58,237,.3)}
+        .level-badge{font-size:.65rem;font-weight:700;background:rgba(255,212,59,.2);color:var(--accent-text);padding:1px 7px;border-radius:100px;border:1px solid rgba(255,212,59,.3)}
       `}</style>
 
       <Navbar activePage="home" />
@@ -163,7 +163,7 @@ export default function ForumPage() {
         {/* Header */}
         <div className="forum-header" style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
           <div>
-            <h1 style={{ fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:800, fontSize:"1.75rem", color:"var(--text-strong)", margin:0, marginBottom:6 }}>
+            <h1 style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.75rem", color:"var(--text-strong)", margin:0, marginBottom:6 }}>
               Communauté
             </h1>
             <p style={{ color:"var(--text-muted)", fontSize:".9rem", margin:0 }}>
@@ -181,12 +181,12 @@ export default function ForumPage() {
         {/* New post form */}
         {showForm && userId && (
           <form className="forum-form" onSubmit={handleSubmit}>
-            <div style={{ marginBottom:".75rem", fontFamily:"var(--font-syne),Syne,sans-serif", fontWeight:700, fontSize:"1rem", color:"var(--text-strong)" }}>Nouveau post</div>
+            <div style={{ marginBottom:".75rem", fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1rem", color:"var(--text-strong)" }}>Nouveau post</div>
             <div style={{ display:"flex", gap:8, marginBottom:".75rem", flexWrap:"wrap" }}>
               {CATS.filter(c => c !== "Tout").map(c => (
                 <button key={c} type="button"
                   onClick={() => setNewCat(c)}
-                  style={{ padding:".3rem .7rem", borderRadius:9, border:`1px solid ${newCat===c ? "rgba(124,58,237,.5)" : "var(--border-md)"}`, background:newCat===c ? "rgba(124,58,237,.15)" : "var(--bg-card-md)", color:newCat===c ? "#c4b5fd" : "var(--text-muted)", fontSize:".78rem", fontWeight:600, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
+                  style={{ padding:".3rem .7rem", borderRadius:9, border:`1px solid ${newCat===c ? "rgba(255,212,59,.5)" : "var(--border-md)"}`, background:newCat===c ? "rgba(255,212,59,.15)" : "var(--bg-card-md)", color:newCat===c ? "var(--accent-text)" : "var(--text-muted)", fontSize:".78rem", fontWeight:600, cursor:"pointer", fontFamily:"var(--font-text)" }}>
                   <CategoryIcon name={c} size={15} /> {c}
                 </button>
               ))}
@@ -198,7 +198,7 @@ export default function ForumPage() {
               <button type="submit" disabled={submitting} className="forum-new-btn" style={{ opacity:submitting?.5:1 }}>
                 {submitting ? "Publication..." : "Publier"}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} style={{ padding:".55rem 1rem", borderRadius:12, border:"1px solid var(--border-md)", background:"none", color:"var(--text-muted)", cursor:"pointer", fontFamily:"'DM Sans',sans-serif", fontSize:".875rem" }}>
+              <button type="button" onClick={() => setShowForm(false)} style={{ padding:".55rem 1rem", borderRadius:12, border:"1px solid var(--border-md)", background:"none", color:"var(--text-muted)", cursor:"pointer", fontFamily:"var(--font-text)", fontSize:".875rem" }}>
                 Annuler
               </button>
             </div>
@@ -206,9 +206,9 @@ export default function ForumPage() {
         )}
 
         {!userId && (
-          <div style={{ background:"rgba(124,58,237,.05)", border:"1px solid rgba(124,58,237,.2)", borderRadius:14, padding:"1rem 1.25rem", marginBottom:"1.5rem", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
+          <div style={{ background:"rgba(255,212,59,.05)", border:"1px solid rgba(255,212,59,.2)", borderRadius:14, padding:"1rem 1.25rem", marginBottom:"1.5rem", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
             <span style={{ color:"var(--text-muted)", fontSize:".875rem" }}>Connecte-toi pour participer à la communauté</span>
-            <a href="/login" style={{ background:"#7c3aed", color:"#fff", borderRadius:10, padding:".4rem .875rem", fontSize:".82rem", fontWeight:600, textDecoration:"none" }}>Se connecter</a>
+            <a href="/login" style={{ background:"var(--accent)", color:"var(--accent-ink)", borderRadius:10, padding:".4rem .875rem", fontSize:".82rem", fontWeight:600, textDecoration:"none" }}>Se connecter</a>
           </div>
         )}
 
@@ -230,7 +230,7 @@ export default function ForumPage() {
           </div>
         ) : (
           filtered.map(post => {
-            const color = CAT_COLORS[post.category] ?? "#6366f1";
+            const color = CAT_COLORS[post.category] ?? "#A39E93";
             return (
               <a key={post.id} className="forum-card" href={`/forum/${post.id}`} style={{ display:"block", textDecoration:"none", color:"inherit" }}>
                 <div className="forum-cat-tag" style={{ background:`${color}18`, color, border:`1px solid ${color}30` }}>
@@ -240,7 +240,7 @@ export default function ForumPage() {
                 <div className="forum-content">{post.content}</div>
                 <div className="forum-meta">
                   <span style={{ display:"flex", alignItems:"center", gap:5 }}>
-                    <span style={{ width:22, height:22, borderRadius:"50%", background:"linear-gradient(135deg,#7c3aed,#4f46e5)", display:"inline-flex", alignItems:"center", justifyContent:"center", fontSize:".7rem", color:"#fff", fontWeight:800, flexShrink:0 }}>
+                    <span style={{ width:22, height:22, borderRadius:"50%", background:"var(--accent)", display:"inline-flex", alignItems:"center", justifyContent:"center", fontSize:".7rem", color:"var(--accent-ink)", fontWeight:800, flexShrink:0 }}>
                       {(post.users?.pseudo?.[0] ?? "?").toUpperCase()}
                     </span>
                     <span style={{ color:"var(--text-muted)", fontWeight:500 }}>{post.users?.pseudo ?? "Utilisateur"}</span>

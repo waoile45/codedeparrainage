@@ -1,127 +1,168 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { max-width: 100%; overflow-x: hidden; }
 
-@keyframes particleFall {
-  0%   { transform: translateY(-20px); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translateY(110vh); opacity: 0; }
-}
-
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-@keyframes floatCard0 { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
-@keyframes floatCard1 { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
 
 /* ═══════════════════════════════════════════════════════════════════
-   CSS VARIABLES — dark (défaut) et light
+   Palette (DIRECTION.md) : noir chaud, papier, un seul accent jaune
+   « étiquette promo ». Le jaune est un APLAT (bouton, ticket, surlignage)
+   avec du texte encre dessus ; en texte, il n'apparaît que sur fond sombre.
+   Thème sombre par défaut : toutes les pages connectées sont dessinées pour.
    ═══════════════════════════════════════════════════════════════════ */
 :root {
-  --bg:              #0A0A0F;
-  --step-num:        rgba(124,58,237,0.12);
-  --bg-card:         rgba(255,255,255,.03);
-  --bg-card-md:      rgba(255,255,255,.04);
-  --bg-card-hover:   rgba(255,255,255,.055);
-  --bg-input:        rgba(255,255,255,.04);
-  --bg-code:         rgba(0,0,0,.25);
-  --bg-nav:          rgba(10,10,15,.9);
-  --bg-dropdown:     #111118;
-  --bg-btn:          rgba(255,255,255,.06);
-  --border:          rgba(255,255,255,.07);
-  --border-md:       rgba(255,255,255,.08);
-  --border-lg:       rgba(255,255,255,.1);
-  --text:            #e2e8f0;
-  --text-strong:     #fff;
-  --text-muted:      rgba(255,255,255,.45);
-  --text-dim:        rgba(255,255,255,.35);
-  --text-faint:      rgba(255,255,255,.25);
-  --text-link:       rgba(255,255,255,.55);
-  --text-nav:        rgba(255,255,255,.5);
-  --text-btn-ghost:  rgba(255,255,255,.55);
-  --border-btn-ghost:rgba(255,255,255,.1);
+  --paper:           #FAF8F3;
+  --paper-2:         #F1EEE6;
+  --ink:             #141414;
+  --ink-soft:        #4A4842;
+
+  --accent:          #FFD43B;
+  --accent-hover:    #FFC800;
+  --accent-ink:      #141414;
+  --accent-text:     #FFD43B;
+  --accent-tint:     rgba(255,212,59,.12);
+
+  --ok:              #4CC38A;
+  --danger:          #F2665A;
+
+  --bg:              #121211;
+  --bg-raised:       #1A1A18;
+  --step-num:        rgba(255,212,59,0.12);
+  --bg-card:         rgba(250,248,243,.035);
+  --bg-card-md:      rgba(250,248,243,.05);
+  --bg-card-hover:   rgba(250,248,243,.07);
+  --bg-input:        rgba(250,248,243,.05);
+  --bg-code:         rgba(0,0,0,.3);
+  --bg-nav:          #121211;
+  --bg-dropdown:     #1A1A18;
+  --bg-btn:          rgba(250,248,243,.07);
+  --border:          rgba(250,248,243,.08);
+  --border-md:       rgba(250,248,243,.11);
+  --border-lg:       rgba(250,248,243,.16);
+  --text:            #E8E5DD;
+  --text-strong:     #FAF8F3;
+  --text-muted:      rgba(250,248,243,.66);
+  --text-dim:        rgba(250,248,243,.54);
+  --text-faint:      rgba(250,248,243,.4);
+  --text-link:       rgba(250,248,243,.72);
+  --text-nav:        rgba(250,248,243,.72);
+  --text-btn-ghost:  rgba(250,248,243,.78);
+  --border-btn-ghost:rgba(250,248,243,.18);
+
+  --wrap:            1180px;
+  --gutter:          clamp(16px, 4vw, 40px);
 }
 
+/* Thème clair : défini pour plus tard, pas encore proposé dans l'interface. */
 [data-theme="light"] {
-  --bg:              #ddd5f5;
-  --step-num:        rgba(109,40,217,0.12);
-  --bg-card:         #ffffff;
-  --bg-card-md:      #f0f1f5;
-  --bg-card-hover:   #ede8fb;
-  --bg-input:        #f8f8fb;
-  --bg-code:         rgba(124,58,237,.06);
-  --bg-nav:          rgba(255,255,255,.92);
-  --bg-dropdown:     #ffffff;
-  --bg-btn:          rgba(0,0,0,.06);
-  --border:          rgba(0,0,0,.08);
-  --border-md:       rgba(0,0,0,.11);
-  --border-lg:       rgba(0,0,0,.17);
-  --text:            #1c1c2e;
-  --text-strong:     #0f0f1a;
-  --text-muted:      rgba(15,15,26,.6);
-  --text-dim:        rgba(15,15,26,.45);
-  --text-faint:      rgba(15,15,26,.3);
-  --text-link:       rgba(15,15,26,.6);
-  --text-nav:        rgba(15,15,26,.6);
-  --text-btn-ghost:  rgba(15,15,26,.65);
-  --border-btn-ghost:rgba(0,0,0,.14);
+  --accent-text:     #6B5200;
+  --accent-tint:     rgba(255,212,59,.28);
+  --ok:              #1E7A4C;
+  --danger:          #B42318;
+  --bg:              #FAF8F3;
+  --bg-raised:       #FFFFFF;
+  --step-num:        rgba(255,212,59,0.3);
+  --bg-card:         #FFFFFF;
+  --bg-card-md:      #F1EEE6;
+  --bg-card-hover:   #F1EEE6;
+  --bg-input:        #FFFFFF;
+  --bg-code:         #F1EEE6;
+  --bg-nav:          #FAF8F3;
+  --bg-dropdown:     #FFFFFF;
+  --bg-btn:          rgba(20,20,20,.06);
+  --border:          rgba(20,20,20,.09);
+  --border-md:       rgba(20,20,20,.13);
+  --border-lg:       rgba(20,20,20,.2);
+  --text:            #2A2925;
+  --text-strong:     #141414;
+  --text-muted:      rgba(20,20,20,.68);
+  --text-dim:        rgba(20,20,20,.56);
+  --text-faint:      rgba(20,20,20,.42);
+  --text-link:       rgba(20,20,20,.72);
+  --text-nav:        rgba(20,20,20,.72);
+  --text-btn-ghost:  rgba(20,20,20,.75);
+  --border-btn-ghost:rgba(20,20,20,.18);
 }
 
 body {
   background: var(--bg);
   color: var(--text-strong);
-  font-family: var(--font-dm-sans), sans-serif;
+  font-family: var(--font-text), system-ui, sans-serif;
+  font-size: 1rem;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3 {
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
   color: var(--text-strong);
+  font-family: var(--font-display), system-ui, sans-serif;
 }
+
+/* Archivo est une variable à axe de largeur : les titres prennent la coupe
+   élargie, celle des étiquettes de prix. Les composants existants posent la
+   police en style en ligne, d'où le sélecteur d'attribut. */
+h1, h2, h3, .display, [style*="var(--font-display)"] { font-stretch: 112%; }
+.display-wide { font-stretch: 125%; }
+
+/* Code à recopier : chasse fixe pour distinguer 0/O et 1/I. */
+.code-str { font-family: var(--font-code), ui-monospace, monospace; letter-spacing: .04em; }
+
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* Fond accent : le texte passe à l'encre, quel que soit le style en ligne
+   hérité de l'ancien thème (blanc sur violet). */
+[style*="background:var(--accent)"],
+[style*="background:var(--accent-hover)"],
+[style*="background-color:var(--accent)"] { color: var(--accent-ink) !important; }
+
+::selection { background: var(--accent); color: var(--accent-ink); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   Ombres légères en mode jour pour améliorer les contrastes
+   Mise en page commune aux pages refaites
    ═══════════════════════════════════════════════════════════════════ */
-[data-theme="light"] [style*="bg-card"],
-[data-theme="light"] .forum-card,
-[data-theme="light"] .row-card,
-[data-theme="light"] .sc,
-[data-theme="light"] .action-card,
-[data-theme="light"] .reply-card,
-[data-theme="light"] .top-code-card {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05) !important;
-}
+.wrap { width: 100%; max-width: var(--wrap); margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter); }
 
-[data-theme="light"] [style*="border-radius: 18px"],
-[data-theme="light"] [style*="border-radius: 20px"],
-[data-theme="light"] [style*="border-radius: 16px"],
-[data-theme="light"] [style*="border-radius: 14px"],
-[data-theme="light"] [style*="border-radius:18px"],
-[data-theme="light"] [style*="border-radius:20px"],
-[data-theme="light"] [style*="border-radius:16px"],
-[data-theme="light"] [style*="border-radius:14px"] {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 48px; padding: 0 1.4rem; border-radius: 12px;
+  font-family: var(--font-text), sans-serif; font-weight: 700; font-size: 1rem;
+  text-decoration: none; cursor: pointer; border: 0;
+  transition: transform .15s ease, background-color .15s ease;
 }
+.btn:active { transform: translateY(1px); }
+.btn-accent { background-color: var(--accent); color: var(--accent-ink); }
+.btn-accent:hover { background-color: var(--accent-hover); }
+.btn-ghost { background-color: transparent; color: var(--text-strong); box-shadow: inset 0 0 0 1.5px var(--border-lg); }
+.btn-ghost:hover { box-shadow: inset 0 0 0 1.5px var(--text-muted); }
+.btn-ink { background-color: var(--ink); color: var(--paper); }
+.btn-ink:hover { background-color: #000; }
 
-[data-theme="light"] nav,
-[data-theme="light"] #hp-nav {
-  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-}
+/* Bandeau papier : alterne avec le noir pour « une idée par écran ». */
+.band-paper { background: var(--paper); color: var(--ink); }
+.band-paper h1, .band-paper h2, .band-paper h3 { color: var(--ink); }
+
+/* Surlignage façon marqueur jaune, derrière un mot. */
+.mark { background: linear-gradient(transparent 58%, var(--accent) 58%, var(--accent) 92%, transparent 92%); padding: 0 .08em; }
+
+/* Apparitions au défilement : l'état final est visible sans JavaScript ;
+   la classe html.js (posée dans le <head>) arme l'animation. */
+html.js .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+html.js .reveal.in { opacity: 1; transform: none; }
+html.js .reveal[data-delay="1"] { transition-delay: .08s; }
+html.js .reveal[data-delay="2"] { transition-delay: .16s; }
+html.js .reveal[data-delay="3"] { transition-delay: .24s; }
 
 /* ═══════════════════════════════════════════════════════════════════
    Mobile & accessibilité
    ═══════════════════════════════════════════════════════════════════ */
-/* Les images ne débordent jamais de leur conteneur */
 img { max-width: 100%; }
 
-/* Particules : décor coûteux sur mobile (20 animations permanentes) et
-   inutile pour qui a demandé moins d'animations */
-@media (max-width: 768px) {
-  .particles-bg { display: none; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .particles-bg { display: none; }
+  html.js .reveal { opacity: 1; transform: none; transition: none; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;

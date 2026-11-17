@@ -65,8 +65,8 @@ function timeAgo(dateStr: string) {
 }
 
 const NIVEAU_COLORS: Record<string, string> = {
-  Débutant:"#6366f1", "Parrain Bronze":"#cd7f32", "Parrain Argent":"#8b5cf6",
-  "Parrain Or":"#f59e0b", "Super Parrain":"#a855f7", "Parrain Légendaire":"#ec4899",
+  Débutant:"#A39E93", "Parrain Bronze":"#cd7f32", "Parrain Argent":"var(--accent)",
+  "Parrain Or":"#f59e0b", "Super Parrain":"var(--accent)", "Parrain Légendaire":"#ec4899",
 };
 
 const TAGS_INFO: Record<string, { label:string; emoji:string; positive:boolean }> = {
@@ -84,17 +84,17 @@ const TAGS_INFO: Record<string, { label:string; emoji:string; positive:boolean }
 // ── Sub-components ─────────────────────────────────────────────────────────────
 function Avatar({ pseudo, avatarUrl, size=72 }: { pseudo:string; avatarUrl:string|null; size?:number }) {
   const [err, setErr] = useState(false);
-  const niveauColor = "#7c3aed";
+  const niveauColor = "var(--accent)";
   if (avatarUrl && !err) {
     return (
-      <div style={{ width:size, height:size, borderRadius:"50%", border:"3px solid rgba(124,58,237,.4)", overflow:"hidden", flexShrink:0 }}>
+      <div style={{ width:size, height:size, borderRadius:"50%", border:"3px solid rgba(255,212,59,.4)", overflow:"hidden", flexShrink:0 }}>
         <img src={avatarUrl} alt={pseudo} style={{ width:"100%", height:"100%", objectFit:"cover" }} onError={() => setErr(true)} />
       </div>
     );
   }
   return (
-    <div style={{ width:size, height:size, borderRadius:"50%", background:`linear-gradient(135deg,${niveauColor},${niveauColor}99)`, border:"3px solid rgba(124,58,237,.4)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-      <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:size*.4, color:"#fff" }}>{pseudo[0]?.toUpperCase()}</span>
+    <div style={{ width:size, height:size, borderRadius:"50%", background:`linear-gradient(135deg,${niveauColor},${niveauColor}99)`, border:"3px solid rgba(255,212,59,.4)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+      <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:size*.4, color:"#fff" }}>{pseudo[0]?.toUpperCase()}</span>
     </div>
   );
 }
@@ -103,7 +103,7 @@ function CopyButton({ code }: { code:string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button onClick={async () => { try { await navigator.clipboard.writeText(code); } catch {} setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-      style={{ display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", background:copied?"rgba(34,197,94,.15)":"rgba(124,58,237,.15)", border:`1px solid ${copied?"rgba(34,197,94,.35)":"rgba(124,58,237,.35)"}`, borderRadius:8, color:copied?"#4ade80":"#a78bfa", fontSize:".78rem", fontWeight:600, cursor:"pointer", transition:"all .2s", fontFamily:"'DM Sans',sans-serif", flexShrink:0 }}>
+      style={{ display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", background:copied?"rgba(34,197,94,.15)":"rgba(255,212,59,.15)", border:`1px solid ${copied?"rgba(34,197,94,.35)":"rgba(255,212,59,.35)"}`, borderRadius:8, color:copied?"#4ade80":"var(--accent-text)", fontSize:".78rem", fontWeight:600, cursor:"pointer", transition:"all .2s", fontFamily:"var(--font-text)", flexShrink:0 }}>
       {copied
         ? <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Copié !</>
         : <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</>
@@ -115,7 +115,7 @@ function CopyButton({ code }: { code:string }) {
 function BrandLogo({ slug, brand }: { slug:string; brand:string }) {
   const [error, setError] = useState(false);
   const domain = slug.includes(".") ? slug : `${slug}.com`;
-  if (error) return <div style={{ width:36, height:36, borderRadius:10, background:"rgba(124,58,237,.15)", border:"1px solid rgba(124,58,237,.2)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:".875rem", color:"#a78bfa", flexShrink:0 }}>{brand[0]?.toUpperCase()}</div>;
+  if (error) return <div style={{ width:36, height:36, borderRadius:10, background:"rgba(255,212,59,.15)", border:"1px solid rgba(255,212,59,.2)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"var(--font-display)", fontWeight:800, fontSize:".875rem", color:"var(--accent-text)", flexShrink:0 }}>{brand[0]?.toUpperCase()}</div>;
   return (
     <div style={{ width:36, height:36, borderRadius:10, background:"#fff", border:"1px solid rgba(255,255,255,.15)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, overflow:"hidden" }}>
       <img src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`} alt={brand} onError={() => setError(true)} style={{ width:"100%", height:"100%", objectFit:"contain", borderRadius:8, padding:2 }} />
@@ -209,7 +209,7 @@ export default function PublicProfilClient() {
     setLoading(false);
   }
 
-  const niveauColor = NIVEAU_COLORS[user?.level ?? ""] ?? "#6366f1";
+  const niveauColor = NIVEAU_COLORS[user?.level ?? ""] ?? "#A39E93";
   const { xpNext, xpPct } = user ? getXpInfo(user.xp) : { xpNext: 100, xpPct: 0 };
   const withRating = reviews.filter(r => r.rating !== null);
   const avgRating  = withRating.length ? withRating.reduce((s,r) => s+(r.rating??0),0)/withRating.length : null;
@@ -219,15 +219,15 @@ export default function PublicProfilClient() {
     <>
       <style>{`
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{background:#0A0A0F;color:#e2e8f0;font-family:'DM Sans',sans-serif;min-height:100vh}
+        body{background:var(--bg);color:#e2e8f0;font-family:var(--font-text);min-height:100vh}
         .wrap{max-width:760px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
         .hero{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
-        .hero::before{content:'';position:absolute;top:-60px;left:-60px;width:240px;height:240px;background:radial-gradient(circle,rgba(124,58,237,.14),transparent 70%);pointer-events:none}
+        .hero::before{content:'';position:absolute;top:-60px;left:-60px;width:240px;height:240px;background:none;pointer-events:none}
         .section{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:1.5rem;margin-bottom:1.25rem}
-        .section-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;letter-spacing:-.02em;margin-bottom:.25rem}
+        .section-title{font-family:var(--font-display);font-weight:800;font-size:1rem;color:#fff;letter-spacing:-.02em;margin-bottom:.25rem}
         .section-sub{font-size:.78rem;color:rgba(255,255,255,.3);margin-bottom:1.25rem}
         .code-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem 1.125rem;display:flex;align-items:center;gap:12px;transition:border-color .2s}
-        .code-card:hover{border-color:rgba(124,58,237,.25)}
+        .code-card:hover{border-color:rgba(255,212,59,.25)}
         .code-mono{font-family:'Courier New',monospace;font-size:.9rem;font-weight:700;color:#fff;letter-spacing:.06em}
         .tag-pill{font-size:.7rem;padding:2px 8px;border-radius:100px;border:1px solid;display:inline-flex;align-items:center;gap:3px}
         .review-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.875rem 1rem;margin-bottom:8px}
@@ -244,16 +244,16 @@ export default function PublicProfilClient() {
         ) : notFound ? (
           <div className="not-found">
             <div style={{ fontSize:"2.5rem", marginBottom:"1rem" }}>👤</div>
-            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:"1.1rem", color:"rgba(255,255,255,.5)", marginBottom:".5rem" }}>Profil introuvable</p>
+            <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1.1rem", color:"rgba(255,255,255,.5)", marginBottom:".5rem" }}>Profil introuvable</p>
             <p style={{ fontSize:".875rem" }}>Aucun utilisateur avec le pseudo &laquo;&nbsp;{pseudo}&nbsp;&raquo;</p>
-            <a href="/codes" style={{ display:"inline-flex", marginTop:"1.5rem", padding:".6rem 1.25rem", background:"rgba(124,58,237,.15)", border:"1px solid rgba(124,58,237,.3)", borderRadius:10, color:"#a78bfa", fontSize:".82rem", fontWeight:600, textDecoration:"none" }}>← Parcourir les codes</a>
+            <a href="/codes" style={{ display:"inline-flex", marginTop:"1.5rem", padding:".6rem 1.25rem", background:"rgba(255,212,59,.15)", border:"1px solid rgba(255,212,59,.3)", borderRadius:10, color:"var(--accent-text)", fontSize:".82rem", fontWeight:600, textDecoration:"none" }}>← Parcourir les codes</a>
           </div>
         ) : user && (
           <>
             {/* ── Hero ── */}
             <div className="hero">
               {isOwnProfile && (
-                <a href="/profil" style={{ position:"absolute", top:16, right:16, display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", background:"rgba(124,58,237,.15)", border:"1px solid rgba(124,58,237,.3)", borderRadius:8, color:"#a78bfa", fontSize:".75rem", fontWeight:600, textDecoration:"none" }}>
+                <a href="/profil" style={{ position:"absolute", top:16, right:16, display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", background:"rgba(255,212,59,.15)", border:"1px solid rgba(255,212,59,.3)", borderRadius:8, color:"var(--accent-text)", fontSize:".75rem", fontWeight:600, textDecoration:"none" }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   Modifier mon profil
                 </a>
@@ -262,18 +262,18 @@ export default function PublicProfilClient() {
                 <Avatar pseudo={user.pseudo} avatarUrl={user.avatar_url} size={76} />
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap", marginBottom:5 }}>
-                    <h1 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.4rem", color:"#fff", letterSpacing:"-.02em" }}>{user.pseudo}</h1>
+                    <h1 style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.4rem", color:"#fff", letterSpacing:"-.02em" }}>{user.pseudo}</h1>
                     <span style={{ fontSize:".72rem", fontWeight:700, padding:"3px 10px", borderRadius:100, background:`${niveauColor}22`, color:niveauColor, border:`1px solid ${niveauColor}44` }}>{user.level}</span>
                   </div>
                   <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", fontSize:".78rem", color:"rgba(255,255,255,.35)", marginBottom:".75rem" }}>
-                    <span style={{ color:"#a78bfa", fontWeight:700 }}>{user.xp} XP</span>
+                    <span style={{ color:"var(--accent-text)", fontWeight:700 }}>{user.xp} XP</span>
                     <span>·</span>
                     <span>Membre depuis {formatDate(user.created_at)}</span>
                     {user.streak_days > 0 && <><span>·</span><span>{user.streak_days} 🔥</span></>}
                   </div>
                   {/* XP bar */}
                   <div style={{ height:4, background:"rgba(255,255,255,.07)", borderRadius:100, overflow:"hidden", maxWidth:280 }}>
-                    <div style={{ height:"100%", width:`${xpPct}%`, background:"linear-gradient(90deg,#7c3aed,#a855f7)", borderRadius:100, transition:"width 1s ease" }} />
+                    <div style={{ height:"100%", width:`${xpPct}%`, background:"var(--accent)", borderRadius:100, transition:"width 1s ease" }} />
                   </div>
                 </div>
               </div>
@@ -285,16 +285,16 @@ export default function PublicProfilClient() {
               {/* Stats */}
               <div style={{ display:"flex", gap:10, marginTop:"1.25rem", flexWrap:"wrap" }}>
                 <div className="stat-box">
-                  <p style={{ fontSize:"1.4rem", fontWeight:800, fontFamily:"'Syne',sans-serif", color:"#fff", lineHeight:1 }}>{annonces.length}</p>
+                  <p style={{ fontSize:"1.4rem", fontWeight:800, fontFamily:"var(--font-display)", color:"#fff", lineHeight:1 }}>{annonces.length}</p>
                   <p style={{ fontSize:".68rem", color:"rgba(255,255,255,.3)", marginTop:4 }}>Annonce{annonces.length>1?"s":""}</p>
                 </div>
                 <div className="stat-box">
-                  <p style={{ fontSize:"1.4rem", fontWeight:800, fontFamily:"'Syne',sans-serif", color:"#fff", lineHeight:1 }}>{reviews.length}</p>
+                  <p style={{ fontSize:"1.4rem", fontWeight:800, fontFamily:"var(--font-display)", color:"#fff", lineHeight:1 }}>{reviews.length}</p>
                   <p style={{ fontSize:".68rem", color:"rgba(255,255,255,.3)", marginTop:4 }}>Avis reçus</p>
                 </div>
                 {avgRating !== null && (
                   <div className="stat-box">
-                    <p style={{ fontSize:"1.4rem", fontWeight:800, fontFamily:"'Syne',sans-serif", color:"#f59e0b", lineHeight:1 }}>{avgRating.toFixed(1)}</p>
+                    <p style={{ fontSize:"1.4rem", fontWeight:800, fontFamily:"var(--font-display)", color:"#f59e0b", lineHeight:1 }}>{avgRating.toFixed(1)}</p>
                     <p style={{ fontSize:".68rem", color:"rgba(255,255,255,.3)", marginTop:4 }}>Note moy.</p>
                   </div>
                 )}
@@ -320,7 +320,7 @@ export default function PublicProfilClient() {
                           )}
                         </div>
                         <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:4 }}>
-                          <span style={{ width:5, height:5, borderRadius:"50%", background:"#7c3aed", boxShadow:"0 0 5px #7c3aed", flexShrink:0 }} />
+                          <span style={{ width:5, height:5, borderRadius:"50%", background:"var(--accent)", boxShadow:"0 0 5px var(--accent)", flexShrink:0 }} />
                           <span className="code-mono">{a.code}</span>
                         </div>
                       </div>
@@ -348,13 +348,13 @@ export default function PublicProfilClient() {
                   {reviews.map(r => (
                     <div key={r.id} className="review-card">
                       <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom: (r.tags.length||r.comment) ? ".5rem" : 0 }}>
-                        <div style={{ width:28, height:28, borderRadius:"50%", background:"rgba(124,58,237,.2)", border:"1px solid rgba(124,58,237,.3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                          <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:".7rem", color:"#a78bfa" }}>{r.raterPseudo[0]?.toUpperCase()}</span>
+                        <div style={{ width:28, height:28, borderRadius:"50%", background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                          <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:".7rem", color:"var(--accent-text)" }}>{r.raterPseudo[0]?.toUpperCase()}</span>
                         </div>
                         <div style={{ flex:1 }}>
                           <div style={{ display:"flex", alignItems:"center", gap:7, flexWrap:"wrap" }}>
                             <span style={{ fontWeight:600, fontSize:".82rem", color:"rgba(255,255,255,.8)" }}>{r.raterPseudo}</span>
-                            {r.companyName && <span style={{ fontSize:".68rem", color:"#a78bfa", background:"rgba(124,58,237,.1)", border:"1px solid rgba(124,58,237,.2)", borderRadius:100, padding:"1px 7px" }}>{r.companyName}</span>}
+                            {r.companyName && <span style={{ fontSize:".68rem", color:"var(--accent-text)", background:"rgba(255,212,59,.1)", border:"1px solid rgba(255,212,59,.2)", borderRadius:100, padding:"1px 7px" }}>{r.companyName}</span>}
                             {r.rating !== null && <ReviewStars value={r.rating} />}
                           </div>
                           <p style={{ fontSize:".68rem", color:"rgba(255,255,255,.2)", marginTop:1 }}>{timeAgo(r.createdAt)}</p>

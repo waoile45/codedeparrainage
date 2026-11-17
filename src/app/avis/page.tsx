@@ -90,21 +90,21 @@ export default function AvisPage() {
         @keyframes pop    { 0%{transform:scale(.8);opacity:0} 60%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
         @keyframes spin   { to{transform:rotate(360deg)} }
         *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-        body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+        body { background:var(--bg); color:var(--text); font-family:var(--font-text); min-height:100vh; }
         .page { max-width:560px; margin:0 auto; padding:3rem 1.5rem 6rem; }
         .page-header { text-align:center; margin-bottom:2.5rem; }
-        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#7c3aed; margin-bottom:.75rem; }
-        .header-label::before,.header-label::after { content:''; display:block; width:18px; height:1px; background:#7c3aed; }
-        .page-title { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(1.5rem,4vw,2rem); color:var(--text-strong); letter-spacing:-.03em; margin-bottom:.5rem; }
+        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:.75rem; }
+        .header-label::before,.header-label::after { content:''; display:block; width:18px; height:1px; background:var(--accent); }
+        .page-title { font-family:var(--font-display); font-weight:800; font-size:clamp(1.5rem,4vw,2rem); color:var(--text-strong); letter-spacing:-.03em; margin-bottom:.5rem; }
         .page-sub { color:var(--text-dim); font-size:.875rem; }
         .card { background:var(--bg-card); border:1px solid var(--border); border-radius:24px; padding:2.5rem 2rem; animation:fadeIn .35s ease; }
-        .btn-primary { display:flex; align-items:center; justify-content:center; gap:7px; width:100%; background:#7c3aed; color:#fff; border:none; border-radius:13px; padding:.875rem; font-size:.9rem; font-weight:700; cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif; margin-top:1.5rem; }
-        .btn-primary:hover:not(:disabled) { background:#6d28d9; transform:translateY(-1px); box-shadow:0 6px 24px rgba(124,58,237,.4); }
+        .btn-primary { display:flex; align-items:center; justify-content:center; gap:7px; width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:13px; padding:.875rem; font-size:.9rem; font-weight:700; cursor:pointer; transition:all .2s; font-family:var(--font-text); margin-top:1.5rem; }
+        .btn-primary:hover:not(:disabled) { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 6px 24px rgba(255,212,59,.4); }
         .btn-primary:disabled { opacity:.4; cursor:not-allowed; transform:none; }
-        .btn-ghost { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; background:none; color:var(--text-muted); border:1px solid var(--border-btn-ghost); border-radius:13px; padding:.8rem; font-size:.875rem; font-weight:600; cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif; margin-top:.75rem; }
+        .btn-ghost { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; background:none; color:var(--text-muted); border:1px solid var(--border-btn-ghost); border-radius:13px; padding:.8rem; font-size:.875rem; font-weight:600; cursor:pointer; transition:all .2s; font-family:var(--font-text); margin-top:.75rem; }
         .btn-ghost:hover { color:var(--text-strong); border-color:var(--border-lg); }
-        .form-input { background:var(--bg-input); border:1px solid var(--border-md); border-radius:12px; padding:.75rem 1rem; color:var(--text-strong); font-size:.875rem; font-family:'DM Sans',sans-serif; outline:none; transition:all .2s; width:100%; resize:vertical; min-height:120px; }
-        .form-input:focus { border-color:rgba(124,58,237,.4); background:rgba(124,58,237,.05); box-shadow:0 0 0 3px rgba(124,58,237,.1); }
+        .form-input { background:var(--bg-input); border:1px solid var(--border-md); border-radius:12px; padding:.75rem 1rem; color:var(--text-strong); font-size:.875rem; font-family:var(--font-text); outline:none; transition:all .2s; width:100%; resize:vertical; min-height:120px; }
+        .form-input:focus { border-color:rgba(255,212,59,.4); background:rgba(255,212,59,.05); box-shadow:0 0 0 3px rgba(255,212,59,.1); }
         .form-input::placeholder { color:var(--text-faint); }
         @media(max-width:600px) { .page{padding:2rem 1rem 5rem;} }
       `}</style>
@@ -123,19 +123,19 @@ export default function AvisPage() {
           {/* ── Step 1 : choix de la note ── */}
           {step === "rate" && (
             <div style={{ textAlign:"center" }}>
-              <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:"1.1rem", color:"var(--text-strong)", marginBottom:"1.75rem" }}>
+              <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1.1rem", color:"var(--text-strong)", marginBottom:"1.75rem" }}>
                 Apprécies-tu codedeparrainage.com ?
               </p>
               <Stars value={rating} onChange={setRating} />
               {rating > 0 && (
-                <p style={{ marginTop:"0.875rem", fontSize:".9rem", color:"#a78bfa", fontWeight:600, animation:"fadeIn .2s ease" }}>
+                <p style={{ marginTop:"0.875rem", fontSize:".9rem", color:"var(--accent-text)", fontWeight:600, animation:"fadeIn .2s ease" }}>
                   {LABELS[rating]}
                 </p>
               )}
               <div style={{ display:"flex", gap:10, marginTop:"1.5rem", justifyContent:"center" }}>
                 <button
                   type="button"
-                  style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:13, padding:".8rem", color:"#f87171", fontSize:".875rem", fontWeight:600, cursor:"pointer", transition:"all .2s", fontFamily:"'DM Sans',sans-serif" }}
+                  style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:13, padding:".8rem", color:"#f87171", fontSize:".875rem", fontWeight:600, cursor:"pointer", transition:"all .2s", fontFamily:"var(--font-text)" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,.15)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "rgba(239,68,68,.08)")}
                   onClick={() => { setRating(r => r || 1); setStep("negative"); }}
@@ -144,7 +144,7 @@ export default function AvisPage() {
                 </button>
                 <button
                   type="button"
-                  style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(34,197,94,.08)", border:"1px solid rgba(34,197,94,.25)", borderRadius:13, padding:".8rem", color:"#4ade80", fontSize:".875rem", fontWeight:600, cursor:"pointer", transition:"all .2s", fontFamily:"'DM Sans',sans-serif" }}
+                  style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(34,197,94,.08)", border:"1px solid rgba(34,197,94,.25)", borderRadius:13, padding:".8rem", color:"#4ade80", fontSize:".875rem", fontWeight:600, cursor:"pointer", transition:"all .2s", fontFamily:"var(--font-text)" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "rgba(34,197,94,.15)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "rgba(34,197,94,.08)")}
                   onClick={() => { setRating(r => r >= 4 ? r : 5); setStep("positive"); }}
@@ -164,7 +164,7 @@ export default function AvisPage() {
           {step === "positive" && (
             <div style={{ textAlign:"center", animation:"fadeIn .3s ease" }}>
               <div style={{ fontSize:"3rem", marginBottom:"1rem", display:"inline-block", animation:"pop .4s ease" }}>🎉</div>
-              <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.25rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
+              <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.25rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
                 Super, merci !
               </p>
               <p style={{ color:"var(--text-muted)", fontSize:".875rem", lineHeight:1.6, marginBottom:"1.75rem" }}>
@@ -179,7 +179,7 @@ export default function AvisPage() {
                 href={GOOGLE_REVIEW_URL || "#"}
                 target={GOOGLE_REVIEW_URL ? "_blank" : undefined}
                 rel="noopener noreferrer"
-                style={{ display:"inline-flex", alignItems:"center", gap:8, background: GOOGLE_REVIEW_URL ? "#4285F4" : "rgba(255,255,255,.1)", color:"#fff", textDecoration:"none", borderRadius:13, padding:".875rem 1.75rem", fontWeight:700, fontSize:".9rem", fontFamily:"'DM Sans',sans-serif", transition:"all .2s", opacity: GOOGLE_REVIEW_URL ? 1 : 0.4, cursor: GOOGLE_REVIEW_URL ? "pointer" : "default" }}
+                style={{ display:"inline-flex", alignItems:"center", gap:8, background: GOOGLE_REVIEW_URL ? "#4285F4" : "rgba(255,255,255,.1)", color:"#fff", textDecoration:"none", borderRadius:13, padding:".875rem 1.75rem", fontWeight:700, fontSize:".9rem", fontFamily:"var(--font-text)", transition:"all .2s", opacity: GOOGLE_REVIEW_URL ? 1 : 0.4, cursor: GOOGLE_REVIEW_URL ? "pointer" : "default" }}
                 onClick={async () => {
                   if (!GOOGLE_REVIEW_URL) return;
                   try {
@@ -210,7 +210,7 @@ export default function AvisPage() {
           {/* ── Step 2b : avis négatif → formulaire interne ── */}
           {step === "negative" && (
             <div style={{ animation:"fadeIn .3s ease" }}>
-              <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:"1.05rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
+              <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1.05rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
                 Désolé que tu n&rsquo;aies pas aimé 😕
               </p>
               <p style={{ color:"var(--text-muted)", fontSize:".875rem", marginBottom:"1.25rem" }}>
@@ -241,13 +241,13 @@ export default function AvisPage() {
           {step === "done" && (
             <div style={{ textAlign:"center", animation:"fadeIn .35s ease" }}>
               <div style={{ fontSize:"3.5rem", marginBottom:"1rem", display:"inline-block", animation:"pop .5s ease" }}>✅</div>
-              <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.25rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
+              <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.25rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
                 Merci pour ton retour !
               </p>
               <p style={{ color:"var(--text-muted)", fontSize:".875rem", marginBottom:"2rem" }}>
                 Ton avis a bien été enregistré.
               </p>
-              <a href="/" style={{ display:"inline-flex", alignItems:"center", gap:6, background:"#7c3aed", color:"#fff", textDecoration:"none", borderRadius:12, padding:".7rem 1.5rem", fontWeight:700, fontSize:".875rem", fontFamily:"'DM Sans',sans-serif" }}>
+              <a href="/" style={{ display:"inline-flex", alignItems:"center", gap:6, background:"var(--accent)", color:"var(--accent-ink)", textDecoration:"none", borderRadius:12, padding:".7rem 1.5rem", fontWeight:700, fontSize:".875rem", fontFamily:"var(--font-text)" }}>
                 Retour à l&rsquo;accueil
               </a>
             </div>

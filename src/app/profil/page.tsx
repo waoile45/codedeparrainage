@@ -71,7 +71,7 @@ function XPBar({ xp, xpNext, mini=false }: { xp:number; xpNext:number; mini?:boo
   useEffect(() => { const t = setTimeout(() => setW(pct), 350); return () => clearTimeout(t); }, [pct]);
   return (
     <div style={{ height:mini?4:6, background:"rgba(255,255,255,.07)", borderRadius:100, overflow:"hidden" }}>
-      <div style={{ height:"100%", width:`${w}%`, background:"linear-gradient(90deg,#7c3aed,#a855f7)", borderRadius:100, transition:"width 1.1s cubic-bezier(.4,0,.2,1)" }} />
+      <div style={{ height:"100%", width:`${w}%`, background:"var(--accent)", borderRadius:100, transition:"width 1.1s cubic-bezier(.4,0,.2,1)" }} />
     </div>
   );
 }
@@ -115,7 +115,7 @@ function AvatarUpload({ letter, avatarUrl, size=72, onUpload }: { letter:string;
     // Overlay ring
     ctx.beginPath();
     ctx.arc(CROP_SIZE / 2, CROP_SIZE / 2, CROP_SIZE / 2 - 1, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(124,58,237,0.7)";
+    ctx.strokeStyle = "rgba(255,212,59,0.7)";
     ctx.lineWidth = 3;
     ctx.stroke();
   }, []);
@@ -175,30 +175,30 @@ function AvatarUpload({ letter, avatarUrl, size=72, onUpload }: { letter:string;
       {/* ── Crop Modal ── */}
       {cropSrc && (
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.82)", backdropFilter:"blur(6px)", zIndex:9999, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:16 }}>
-          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:"1rem", color:"#fff", marginBottom:4 }}>Recadrer la photo</p>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1rem", color:"#fff", marginBottom:4 }}>Recadrer la photo</p>
           <p style={{ fontSize:".78rem", color:"rgba(255,255,255,.4)", marginBottom:8 }}>Glisse pour repositionner · Molette pour zoomer</p>
           <div
-            style={{ width:CROP_SIZE, height:CROP_SIZE, borderRadius:"50%", overflow:"hidden", cursor:dragging?"grabbing":"grab", userSelect:"none", border:"3px solid rgba(124,58,237,.6)", boxShadow:"0 0 40px rgba(124,58,237,.3)" }}
+            style={{ width:CROP_SIZE, height:CROP_SIZE, borderRadius:"50%", overflow:"hidden", cursor:dragging?"grabbing":"grab", userSelect:"none", border:"3px solid rgba(255,212,59,.6)", boxShadow:"0 0 40px rgba(255,212,59,.3)" }}
             onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
             onWheel={e => { e.preventDefault(); const delta = e.deltaY > 0 ? -0.05 : 0.05; const img = imgRef.current; if (!img) return; const minScale = Math.max(CROP_SIZE / img.naturalWidth, CROP_SIZE / img.naturalHeight); setCropScale(s => Math.max(minScale, Math.min(s + delta, 4))); }}
           >
             <canvas ref={canvasRef} width={CROP_SIZE} height={CROP_SIZE} style={{ display:"block" }} />
           </div>
           <div style={{ display:"flex", gap:12, marginTop:8 }}>
-            <input type="range" min={Math.max(CROP_SIZE / (imgRef.current?.naturalWidth ?? 1), CROP_SIZE / (imgRef.current?.naturalHeight ?? 1))} max={4} step={0.01} value={cropScale} onChange={e => setCropScale(+e.target.value)} style={{ width:200, accentColor:"#7c3aed" }} />
+            <input type="range" min={Math.max(CROP_SIZE / (imgRef.current?.naturalWidth ?? 1), CROP_SIZE / (imgRef.current?.naturalHeight ?? 1))} max={4} step={0.01} value={cropScale} onChange={e => setCropScale(+e.target.value)} style={{ width:200, accentColor:"var(--accent)" }} />
           </div>
           <div style={{ display:"flex", gap:10 }}>
-            <button onClick={confirmCrop} style={{ background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".65rem 1.5rem", fontWeight:700, fontSize:".9rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>Valider</button>
-            <button onClick={() => setCropSrc(null)} style={{ background:"rgba(255,255,255,.08)", color:"rgba(255,255,255,.5)", border:"1px solid rgba(255,255,255,.12)", borderRadius:12, padding:".65rem 1.25rem", fontWeight:600, fontSize:".9rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>Annuler</button>
+            <button onClick={confirmCrop} style={{ background:"var(--accent)", color:"var(--accent-ink)", border:"none", borderRadius:12, padding:".65rem 1.5rem", fontWeight:700, fontSize:".9rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>Valider</button>
+            <button onClick={() => setCropSrc(null)} style={{ background:"rgba(255,255,255,.08)", color:"rgba(255,255,255,.5)", border:"1px solid rgba(255,255,255,.12)", borderRadius:12, padding:".65rem 1.25rem", fontWeight:600, fontSize:".9rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>Annuler</button>
           </div>
         </div>
       )}
 
       <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
-        <div style={{ position:"absolute", inset:-3, borderRadius:"50%", background:"conic-gradient(#7c3aed,#a855f7,#6366f1,#7c3aed)", animation:"spin 5s linear infinite" }} />
-        <div style={{ position:"relative", zIndex:1, width:size, height:size, borderRadius:"50%", border:"3px solid #0A0A0F", overflow:"hidden", cursor:"pointer", background:"linear-gradient(135deg,#7c3aed,#4f46e5)", display:"flex", alignItems:"center", justifyContent:"center" }}
+        <div style={{ position:"absolute", inset:-3, borderRadius:"50%", background:"conic-gradient(var(--accent),var(--accent),#A39E93,var(--accent))", animation:"spin 5s linear infinite" }} />
+        <div style={{ position:"relative", zIndex:1, width:size, height:size, borderRadius:"50%", border:"3px solid var(--bg)", overflow:"hidden", cursor:"pointer", background:"var(--accent)", display:"flex", alignItems:"center", justifyContent:"center" }}
           onMouseEnter={()=>setHover(true)} onMouseLeave={()=>setHover(false)} onClick={()=>ref.current?.click()}>
-          {preview ? <img src={preview} alt="avatar" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:size*.38, color:"#fff" }}>{letter}</span>}
+          {preview ? <img src={preview} alt="avatar" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:size*.38, color:"#fff" }}>{letter}</span>}
           <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.55)", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:3, opacity:(hover||uploading)?1:0, transition:"opacity .2s" }}>
             {uploading ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
               : <><span style={{ color:"#fff" }}><I.cam /></span><span style={{ color:"rgba(255,255,255,.8)", fontSize:"0.58rem", fontWeight:600 }}>Modifier</span></>}
@@ -232,7 +232,7 @@ function EditablePseudo({ value, onSave, size="lg" }: { value:string; onSave:(v:
     <div>
       <div style={{ display:"flex", alignItems:"center", gap:6 }}>
         <input ref={iRef} value={draft} onChange={e=>{ setDraft(e.target.value); setErr(""); }} onKeyDown={e=>{ if(e.key==="Enter") confirm(); if(e.key==="Escape") cancel(); }}
-          style={{ background:"rgba(124,58,237,.15)", border:`1px solid ${err?"rgba(239,68,68,.5)":"rgba(124,58,237,.45)"}`, borderRadius:8, padding:"4px 10px", color:"#fff", fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:fs, outline:"none", width:160 }} />
+          style={{ background:"rgba(255,212,59,.15)", border:`1px solid ${err?"rgba(239,68,68,.5)":"rgba(255,212,59,.45)"}`, borderRadius:8, padding:"4px 10px", color:"#fff", fontFamily:"var(--font-display)", fontWeight:800, fontSize:fs, outline:"none", width:160 }} />
         <button onClick={confirm} disabled={saving} style={{ background:"rgba(34,197,94,.15)", border:"1px solid rgba(34,197,94,.3)", borderRadius:7, padding:"5px 8px", color:"#4ade80", cursor:"pointer", display:"flex" }}>
           {saving ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> : <I.check />}
         </button>
@@ -243,7 +243,7 @@ function EditablePseudo({ value, onSave, size="lg" }: { value:string; onSave:(v:
   );
   return (
     <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-      <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:fs, color:"#fff", letterSpacing:"-.03em" }}>{value}</h2>
+      <h2 style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:fs, color:"#fff", letterSpacing:"-.03em" }}>{value}</h2>
       <button onClick={()=>setEditing(true)} style={{ background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)", borderRadius:7, padding:"5px 7px", color:"rgba(255,255,255,.35)", cursor:"pointer", display:"flex" }}><I.edit /></button>
     </div>
   );
@@ -254,18 +254,18 @@ function SidebarMini({ user }: { user: UserProfile | null }) {
   if (!user) return null;
   const { xpNext } = getXpInfo(user.xp);
   return (
-    <div style={{ padding:"1rem", background:"rgba(124,58,237,.08)", border:"1px solid rgba(124,58,237,.18)", borderRadius:16, display:"flex", flexDirection:"column", gap:"0.75rem" }}>
+    <div style={{ padding:"1rem", background:"rgba(255,212,59,.08)", border:"1px solid rgba(255,212,59,.18)", borderRadius:16, display:"flex", flexDirection:"column", gap:"0.75rem" }}>
       <div style={{ display:"flex", alignItems:"center", gap:10 }}>
         <div style={{ position:"relative", width:38, height:38, flexShrink:0 }}>
-          <div style={{ position:"absolute", inset:-2, borderRadius:"50%", background:"conic-gradient(#7c3aed,#a855f7,#7c3aed)", animation:"spin 5s linear infinite" }} />
-          <div style={{ position:"relative", width:38, height:38, borderRadius:"50%", background:"linear-gradient(135deg,#7c3aed,#4f46e5)", border:"2px solid #0A0A0F", display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden" }}>
-            {user.avatar_url ? <img src={user.avatar_url} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"0.95rem", color:"#fff" }}>{user.pseudo[0]?.toUpperCase()}</span>}
+          <div style={{ position:"absolute", inset:-2, borderRadius:"50%", background:"conic-gradient(var(--accent),var(--accent),var(--accent))", animation:"spin 5s linear infinite" }} />
+          <div style={{ position:"relative", width:38, height:38, borderRadius:"50%", background:"var(--accent)", border:"2px solid var(--bg)", display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden" }}>
+            {user.avatar_url ? <img src={user.avatar_url} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"0.95rem", color:"#fff" }}>{user.pseudo[0]?.toUpperCase()}</span>}
           </div>
         </div>
         <div style={{ flex:1, minWidth:0 }}>
-          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:"0.9rem", color:"#fff", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{user.pseudo}</p>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"0.9rem", color:"#fff", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{user.pseudo}</p>
           <div style={{ display:"flex", alignItems:"center", gap:5, marginTop:1 }}>
-            <span style={{ fontSize:"0.65rem", fontWeight:700, background:"rgba(124,58,237,.25)", color:"#a78bfa", padding:"1px 7px", borderRadius:100, border:"1px solid rgba(124,58,237,.3)" }}>{user.level}</span>
+            <span style={{ fontSize:"0.65rem", fontWeight:700, background:"rgba(255,212,59,.25)", color:"var(--accent-text)", padding:"1px 7px", borderRadius:100, border:"1px solid rgba(255,212,59,.3)" }}>{user.level}</span>
             <span style={{ fontSize:"0.68rem", color:"rgba(255,255,255,.3)" }}>{user.xp} XP</span>
           </div>
         </div>
@@ -294,7 +294,7 @@ function Sidebar({ active, setActive, user }: { active:NavSection; setActive:(s:
                 const on = active===item.key;
                 return (
                   <button key={item.key} onClick={()=>setActive(item.key)}
-                    style={{ display:"flex", alignItems:"center", gap:9, padding:"0.55rem 0.875rem", borderRadius:11, background:on?"rgba(124,58,237,.15)":"transparent", border:on?"1px solid rgba(124,58,237,.28)":"1px solid transparent", color:on?"#fff":"rgba(255,255,255,.42)", fontSize:"0.855rem", fontWeight:on?600:500, cursor:"pointer", transition:"all .18s", fontFamily:"'DM Sans',sans-serif", textAlign:"left", width:"100%" }}
+                    style={{ display:"flex", alignItems:"center", gap:9, padding:"0.55rem 0.875rem", borderRadius:11, background:on?"rgba(255,212,59,.15)":"transparent", border:on?"1px solid rgba(255,212,59,.28)":"1px solid transparent", color:on?"#fff":"rgba(255,255,255,.42)", fontSize:"0.855rem", fontWeight:on?600:500, cursor:"pointer", transition:"all .18s", fontFamily:"var(--font-text)", textAlign:"left", width:"100%" }}
                     onMouseEnter={e=>{ if(!on){(e.currentTarget as HTMLElement).style.color="rgba(255,255,255,.75)";(e.currentTarget as HTMLElement).style.background="rgba(255,255,255,.04)";} }}
                     onMouseLeave={e=>{ if(!on){(e.currentTarget as HTMLElement).style.color="rgba(255,255,255,.42)";(e.currentTarget as HTMLElement).style.background="transparent";} }}
                   >
@@ -308,7 +308,7 @@ function Sidebar({ active, setActive, user }: { active:NavSection; setActive:(s:
         ))}
       </div>
       <a href="/publier" style={{ textDecoration:"none" }}>
-        <button style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"0.6rem 0.875rem", background:"rgba(124,58,237,.1)", border:"1px dashed rgba(124,58,237,.35)", borderRadius:11, color:"#a78bfa", fontSize:"0.855rem", fontWeight:600, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
+        <button style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"0.6rem 0.875rem", background:"rgba(255,212,59,.1)", border:"1px dashed rgba(255,212,59,.35)", borderRadius:11, color:"var(--accent-text)", fontSize:"0.855rem", fontWeight:600, cursor:"pointer", fontFamily:"var(--font-text)" }}>
           <I.plus />Publier un code
         </button>
       </a>
@@ -323,14 +323,14 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
   return (
     <div className="sc">
       <div style={{ position:"relative", overflow:"hidden", background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:20, padding:"1.5rem" }}>
-        <div style={{ position:"absolute", top:-50, left:-50, width:200, height:200, background:"radial-gradient(circle,rgba(124,58,237,.12),transparent 70%)", pointerEvents:"none" }} />
+        <div style={{ position:"absolute", top:-50, left:-50, width:200, height:200, background:"none", pointerEvents:"none" }} />
         <div style={{ display:"flex", alignItems:"center", gap:"1.25rem", flexWrap:"wrap" }}>
           <AvatarUpload letter={user.pseudo[0]?.toUpperCase()??"?"} avatarUrl={user.avatar_url} size={72} onUpload={onAvatarUpload} />
           <div style={{ flex:1 }}>
             <EditablePseudo value={user.pseudo} onSave={onPseudoSave} />
             <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:6, flexWrap:"wrap" }}>
-              <span style={{ fontSize:"0.72rem", fontWeight:700, background:"rgba(124,58,237,.2)", color:"#a78bfa", padding:"4px 10px", borderRadius:100, border:"1px solid rgba(124,58,237,.35)", display:"inline-flex", alignItems:"center" }}>{user.level}</span>
-              <span style={{ fontSize:"0.8rem", color:"#a78bfa", fontWeight:700 }}>{user.xp} XP</span>
+              <span style={{ fontSize:"0.72rem", fontWeight:700, background:"rgba(255,212,59,.2)", color:"var(--accent-text)", padding:"4px 10px", borderRadius:100, border:"1px solid rgba(255,212,59,.35)", display:"inline-flex", alignItems:"center" }}>{user.level}</span>
+              <span style={{ fontSize:"0.8rem", color:"var(--accent-text)", fontWeight:700 }}>{user.xp} XP</span>
               <span style={{ color:"rgba(255,255,255,.2)" }}>·</span>
               <span style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>{xpNextLabel} à {xpNext} XP</span>
               <span style={{ color:"rgba(255,255,255,.2)" }}>·</span>
@@ -344,7 +344,7 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
             </div>
           </div>
           <div style={{ textAlign:"right", flexShrink:0 }}>
-            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"2.5rem", color:"#fff", lineHeight:1 }}>{user.xp}</p>
+            <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"2.5rem", color:"#fff", lineHeight:1 }}>{user.xp}</p>
             <p style={{ color:"rgba(255,255,255,.3)", fontSize:"0.72rem", marginTop:2 }}>XP total</p>
           </div>
         </div>
@@ -352,26 +352,26 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
 
       <div className="g3">
         <div className="action-card">
-          <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 0%,rgba(124,58,237,.15),transparent 65%)", pointerEvents:"none", borderRadius:"inherit" }} />
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,#7c3aed,transparent)" }} />
-          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(124,58,237,.2)", border:"1px solid rgba(124,58,237,.4)" }}><I.list /></div><span className="action-label">Annonces publiées</span></div>
-          <p className="action-value" style={{ color:"#a78bfa", position:"relative", zIndex:1 }}>{annonces.length}</p>
+          <div style={{ position:"absolute", inset:0, background:"none", pointerEvents:"none", borderRadius:"inherit" }} />
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"var(--border-md)" }} />
+          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.4)" }}><I.list /></div><span className="action-label">Annonces publiées</span></div>
+          <p className="action-value" style={{ color:"var(--accent-text)", position:"relative", zIndex:1 }}>{annonces.length}</p>
           <p className="action-sub" style={{ position:"relative", zIndex:1 }}>{annonces.length === 0 ? "Publie ton premier code !" : `${annonces.length} code${annonces.length>1?"s":""} actif${annonces.length>1?"s":""}`}</p>
           <a href="/publier" className="action-btn" style={{ position:"relative", zIndex:1 }}>Nouvelle annonce <I.arrow /></a>
         </div>
         <div className="action-card action-card-boost">
-          <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 0%,rgba(124,58,237,.18),transparent 65%)", pointerEvents:"none", borderRadius:"inherit" }} />
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,#7c3aed,transparent)" }} />
-          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(124,58,237,.2)", border:"1px solid rgba(124,58,237,.4)" }}><I.bolt /></div><span className="action-label">Streak</span></div>
-          <p className="action-value" style={{ color:"#a78bfa", position:"relative", zIndex:1 }}>{user.streak_days} 🔥</p>
+          <div style={{ position:"absolute", inset:0, background:"none", pointerEvents:"none", borderRadius:"inherit" }} />
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"var(--border-md)" }} />
+          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.4)" }}><I.bolt /></div><span className="action-label">Streak</span></div>
+          <p className="action-value" style={{ color:"var(--accent-text)", position:"relative", zIndex:1 }}>{user.streak_days} 🔥</p>
           <p className="action-sub" style={{ position:"relative", zIndex:1 }}>jours consécutifs</p>
           <a href="/classement" className="action-btn action-btn-boost" style={{ position:"relative", zIndex:1 }}>Voir le classement <I.arrow /></a>
         </div>
         <div className="action-card">
-          <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 50% 0%,rgba(124,58,237,.15),transparent 65%)", pointerEvents:"none", borderRadius:"inherit" }} />
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,#7c3aed,transparent)" }} />
-          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(124,58,237,.2)", border:"1px solid rgba(124,58,237,.4)" }}><I.msg /></div><span className="action-label">Messages</span></div>
-          <p className="action-value" style={{ color:"#a78bfa", position:"relative", zIndex:1 }}>0</p>
+          <div style={{ position:"absolute", inset:0, background:"none", pointerEvents:"none", borderRadius:"inherit" }} />
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"var(--border-md)" }} />
+          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.4)" }}><I.msg /></div><span className="action-label">Messages</span></div>
+          <p className="action-value" style={{ color:"var(--accent-text)", position:"relative", zIndex:1 }}>0</p>
           <p className="action-sub" style={{ position:"relative", zIndex:1 }}>0 non lu</p>
           <a href="/messages" className="action-btn" style={{ position:"relative", zIndex:1 }}>Messagerie <I.arrow /></a>
         </div>
@@ -383,13 +383,13 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
           { v: `${user.streak_days} 🔥`, l:"Streak" },
           { v: user.xp,                  l:"XP total" },
         ].map((s,i) => (
-          <div key={i} style={{ background:"rgba(124,58,237,.05)", border:"1px solid rgba(124,58,237,.2)", borderRadius:14, padding:"0.9rem 0.75rem", display:"flex", flexDirection:"column", alignItems:"center", gap:3, textAlign:"center" }}>
-            <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.35rem", color:"#fff" }}>{s.v}</span>
+          <div key={i} style={{ background:"rgba(255,212,59,.05)", border:"1px solid rgba(255,212,59,.2)", borderRadius:14, padding:"0.9rem 0.75rem", display:"flex", flexDirection:"column", alignItems:"center", gap:3, textAlign:"center" }}>
+            <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.35rem", color:"#fff" }}>{s.v}</span>
             <span style={{ color:"rgba(255,255,255,.35)", fontSize:"0.72rem" }}>{s.l}</span>
           </div>
         ))}
-        <div style={{ background:"rgba(124,58,237,.05)", border:"1px solid rgba(124,58,237,.2)", borderRadius:14, padding:"0.9rem 0.75rem", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:5, textAlign:"center" }}>
-          <span style={{ fontSize:"0.75rem", fontWeight:700, background:"rgba(124,58,237,.25)", color:"#a78bfa", padding:"3px 10px", borderRadius:100, border:"1px solid rgba(124,58,237,.4)" }}>{user.level}</span>
+        <div style={{ background:"rgba(255,212,59,.05)", border:"1px solid rgba(255,212,59,.2)", borderRadius:14, padding:"0.9rem 0.75rem", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:5, textAlign:"center" }}>
+          <span style={{ fontSize:"0.75rem", fontWeight:700, background:"rgba(255,212,59,.25)", color:"var(--accent-text)", padding:"3px 10px", borderRadius:100, border:"1px solid rgba(255,212,59,.4)" }}>{user.level}</span>
           <span style={{ color:"rgba(255,255,255,.35)", fontSize:"0.72rem" }}>Niveau</span>
         </div>
       </div>
@@ -433,7 +433,7 @@ function SectionAnnonces({ annonces, onDelete, onEdit }: {
       {annonces.length === 0 && (
         <div style={{ textAlign:"center", padding:"3rem", color:"rgba(255,255,255,.25)", fontSize:"0.875rem" }}>
           <div style={{ fontSize:"2rem", marginBottom:"0.75rem" }}>📋</div>
-          <p>Aucune annonce — <a href="/publier" style={{ color:"#a78bfa", textDecoration:"none" }}>publie ton premier code !</a></p>
+          <p>Aucune annonce — <a href="/publier" style={{ color:"var(--accent-text)", textDecoration:"none" }}>publie ton premier code !</a></p>
         </div>
       )}
       {annonces.map(a => {
@@ -470,7 +470,7 @@ function SectionAnnonces({ annonces, onDelete, onEdit }: {
 
           {/* Formulaire de modification inline */}
           {editingId === a.id && (
-            <div style={{ background:"rgba(124,58,237,.07)", border:"1px solid rgba(124,58,237,.2)", borderRadius:12, padding:"1rem", display:"flex", flexDirection:"column", gap:"0.75rem" }}>
+            <div style={{ background:"rgba(255,212,59,.07)", border:"1px solid rgba(255,212,59,.2)", borderRadius:12, padding:"1rem", display:"flex", flexDirection:"column", gap:"0.75rem" }}>
               <div className="form-g">
                 <label className="form-l">CODE DE PARRAINAGE</label>
                 <input
@@ -500,7 +500,7 @@ function SectionAnnonces({ annonces, onDelete, onEdit }: {
                 <button
                   onClick={saveEdit}
                   disabled={saving || !editCode.trim()}
-                  style={{ background:"#7c3aed", color:"#fff", fontWeight:700, fontSize:".82rem", padding:".5rem 1.25rem", borderRadius:10, border:"none", cursor:"pointer", opacity:saving||!editCode.trim()?0.6:1 }}
+                  style={{ background:"var(--accent)", color:"var(--accent-ink)", fontWeight:700, fontSize:".82rem", padding:".5rem 1.25rem", borderRadius:10, border:"none", cursor:"pointer", opacity:saving||!editCode.trim()?0.6:1 }}
                 >
                   {saving ? "Enregistrement…" : "✓ Sauvegarder"}
                 </button>
@@ -536,7 +536,7 @@ function SectionBadges({ xp, annoncesCount, isTop3 }: { xp:number; annoncesCount
       <div className="sh"><div><h2 className="st">Badges</h2><p className="ss">{badges.filter(b=>b.unlocked).length}/{badges.length} débloqués</p></div></div>
       <div className="g3">
         {badges.map(b => (
-          <div key={b.id} style={{ position:"relative", background:b.unlocked?"rgba(124,58,237,.07)":"rgba(255,255,255,.03)", border:`1px solid ${b.unlocked?"rgba(124,58,237,.3)":"rgba(255,255,255,.07)"}`, borderRadius:16, padding:"1.4rem 1rem", textAlign:"center", opacity:b.unlocked?1:.42 }}>
+          <div key={b.id} style={{ position:"relative", background:b.unlocked?"rgba(255,212,59,.07)":"rgba(255,255,255,.03)", border:`1px solid ${b.unlocked?"rgba(255,212,59,.3)":"rgba(255,255,255,.07)"}`, borderRadius:16, padding:"1.4rem 1rem", textAlign:"center", opacity:b.unlocked?1:.42 }}>
             {!b.unlocked && <div style={{ position:"absolute", top:10, right:10, fontSize:"0.75rem" }}>🔒</div>}
             <div style={{ fontSize:"2rem", marginBottom:"0.5rem" }}>{b.icon}</div>
             <p style={{ fontWeight:700, fontSize:"0.85rem", color:"#fff", marginBottom:3 }}>{b.label}</p>
@@ -567,18 +567,18 @@ function SectionQuetes({ user, annonces, hasReview }: { user:UserProfile; annonc
             <p style={{ fontSize:"0.875rem", color:"rgba(255,255,255,.8)", marginBottom:q.done?0:5 }}>{q.label}</p>
             {!q.done && (
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <div style={{ flex:1, height:4, background:"rgba(255,255,255,.07)", borderRadius:100, overflow:"hidden" }}><div style={{ height:"100%", width:`${Math.min((q.progress/q.total)*100,100)}%`, background:"#7c3aed", borderRadius:100 }} /></div>
+                <div style={{ flex:1, height:4, background:"rgba(255,255,255,.07)", borderRadius:100, overflow:"hidden" }}><div style={{ height:"100%", width:`${Math.min((q.progress/q.total)*100,100)}%`, background:"var(--accent)", borderRadius:100 }} /></div>
                 <span style={{ fontSize:"0.7rem", color:"rgba(255,255,255,.3)", whiteSpace:"nowrap" }}>{Math.min(q.progress,q.total)}/{q.total}</span>
               </div>
             )}
           </div>
           <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
             {!q.done && q.link && (
-              <a href={q.link} style={{ fontSize:"0.75rem", fontWeight:600, color:"#a78bfa", background:"rgba(124,58,237,.15)", border:"1px solid rgba(124,58,237,.3)", borderRadius:8, padding:"3px 10px", textDecoration:"none", whiteSpace:"nowrap", transition:"all .2s" }}>
+              <a href={q.link} style={{ fontSize:"0.75rem", fontWeight:600, color:"var(--accent-text)", background:"rgba(255,212,59,.15)", border:"1px solid rgba(255,212,59,.3)", borderRadius:8, padding:"3px 10px", textDecoration:"none", whiteSpace:"nowrap", transition:"all .2s" }}>
                 Faire →
               </a>
             )}
-            <span style={{ fontSize:"0.82rem", fontWeight:700, color:q.done?"#4ade80":"rgba(255,255,255,.3)", whiteSpace:"nowrap", fontFamily:"'Syne',sans-serif" }}>+{q.xp} XP</span>
+            <span style={{ fontSize:"0.82rem", fontWeight:700, color:q.done?"#4ade80":"rgba(255,255,255,.3)", whiteSpace:"nowrap", fontFamily:"var(--font-display)" }}>+{q.xp} XP</span>
           </div>
         </div>
       ))}
@@ -598,10 +598,10 @@ function SectionCredits() {
         </div>
       </div>
       <div className="g2">
-        <div style={{ position:"relative", overflow:"hidden", background:"rgba(124,58,237,.08)", border:"1px solid rgba(124,58,237,.25)", borderRadius:18, padding:"1.75rem" }}>
+        <div style={{ position:"relative", overflow:"hidden", background:"rgba(255,212,59,.08)", border:"1px solid rgba(255,212,59,.25)", borderRadius:18, padding:"1.75rem" }}>
           <div style={{ position:"relative", zIndex:1 }}>
             <p style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.4)", marginBottom:4 }}>Solde actuel</p>
-            <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"2.75rem", color:"#a78bfa", lineHeight:1, marginBottom:4 }}>0</p>
+            <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"2.75rem", color:"var(--accent-text)", lineHeight:1, marginBottom:4 }}>0</p>
             <p style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>crédits disponibles</p>
           </div>
           <div style={{ position:"absolute", right:"1.5rem", bottom:"1rem", fontSize:"3rem", animation:"float 3s ease-in-out infinite" }}>⚡</div>
@@ -715,7 +715,7 @@ function SectionMessages() {
     <div style={{ textAlign: "center", padding: "3rem", color: "rgba(255,255,255,.25)", fontSize: "0.875rem" }}>
       <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>💬</div>
       <p>Aucun message pour l&apos;instant</p>
-      <p style={{ marginTop: 8, fontSize: "0.78rem" }}>Tu peux contacter un parrain depuis la page <a href="/codes" style={{ color: "#a78bfa" }}>Codes</a></p>
+      <p style={{ marginTop: 8, fontSize: "0.78rem" }}>Tu peux contacter un parrain depuis la page <a href="/codes" style={{ color: "var(--accent-text)" }}>Codes</a></p>
     </div>
   );
 
@@ -735,9 +735,9 @@ function SectionMessages() {
         const hasUnread = msgs.some(m => !m.read && m.receiver_id === userId);
         const replyKey = otherId;
         return (
-          <div key={otherId} style={{ background: "rgba(255,255,255,.03)", border: `1px solid ${hasUnread ? "rgba(124,58,237,.4)" : "rgba(255,255,255,.07)"}`, borderRadius: 16, overflow: "hidden" }}>
+          <div key={otherId} style={{ background: "rgba(255,255,255,.03)", border: `1px solid ${hasUnread ? "rgba(255,212,59,.4)" : "rgba(255,255,255,.07)"}`, borderRadius: 16, overflow: "hidden" }}>
             <div style={{ padding: "0.875rem 1rem", borderBottom: "1px solid rgba(255,255,255,.05)", display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(124,58,237,.2)", border: "1px solid rgba(124,58,237,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.85rem", color: "#a78bfa", flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,212,59,.2)", border: "1px solid rgba(255,212,59,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.85rem", color: "var(--accent-text)", flexShrink: 0 }}>
                 {otherPseudo[0]?.toUpperCase()}
               </div>
               <div>
@@ -753,7 +753,7 @@ function SectionMessages() {
                 const isMine = m.sender_id === userId;
                 return (
                   <div key={m.id} style={{ display: "flex", justifyContent: isMine ? "flex-end" : "flex-start" }}>
-                    <div style={{ maxWidth: "75%", background: isMine ? "rgba(124,58,237,.2)" : "rgba(255,255,255,.05)", border: `1px solid ${isMine ? "rgba(124,58,237,.3)" : "rgba(255,255,255,.08)"}`, borderRadius: isMine ? "12px 12px 3px 12px" : "12px 12px 12px 3px", padding: "0.5rem 0.875rem" }}>
+                    <div style={{ maxWidth: "75%", background: isMine ? "rgba(255,212,59,.2)" : "rgba(255,255,255,.05)", border: `1px solid ${isMine ? "rgba(255,212,59,.3)" : "rgba(255,255,255,.08)"}`, borderRadius: isMine ? "12px 12px 3px 12px" : "12px 12px 12px 3px", padding: "0.5rem 0.875rem" }}>
                       <p style={{ fontSize: "0.875rem", color: "#e2e8f0", margin: 0, lineHeight: 1.5 }}>{m.content}</p>
                       <p style={{ fontSize: "0.65rem", color: "rgba(255,255,255,.25)", margin: "4px 0 0", textAlign: isMine ? "right" : "left" }}>
                         {new Date(m.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
@@ -774,7 +774,7 @@ function SectionMessages() {
               <button
                 onClick={() => handleReply(otherId, msgs[0].announcement_id ?? null, replyKey)}
                 disabled={sending === replyKey}
-                style={{ background: "#7c3aed", border: "none", borderRadius: 10, padding: "0.5rem 1rem", color: "#fff", fontWeight: 600, fontSize: "0.82rem", cursor: "pointer", fontFamily: "inherit", opacity: sending === replyKey ? 0.6 : 1 }}
+                style={{ background: "var(--accent)", border: "none", borderRadius: 10, padding: "0.5rem 1rem", color: "var(--accent-ink)", fontWeight: 600, fontSize: "0.82rem", cursor: "pointer", fontFamily: "inherit", opacity: sending === replyKey ? 0.6 : 1 }}
               >
                 {sending === replyKey ? "..." : "Envoyer"}
               </button>
@@ -905,7 +905,7 @@ function SectionAvisRecus({ userId }: { userId:string }) {
       ) : reviews.length === 0 ? (
         <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2.5rem", textAlign:"center" }}>
           <div style={{ fontSize:"2rem", marginBottom:".75rem" }}>⭐</div>
-          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, color:"rgba(255,255,255,.5)", marginBottom:".5rem" }}>Pas encore d'avis</p>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, color:"rgba(255,255,255,.5)", marginBottom:".5rem" }}>Pas encore d'avis</p>
           <p style={{ fontSize:".825rem", color:"rgba(255,255,255,.25)" }}>Tes avis apparaîtront ici quand des utilisateurs noteront tes annonces.</p>
         </div>
       ) : (
@@ -913,18 +913,18 @@ function SectionAvisRecus({ userId }: { userId:string }) {
           {/* Résumé */}
           <div style={{ display:"flex", gap:12, marginBottom:"1.25rem", flexWrap:"wrap" }}>
             <div style={{ flex:1, minWidth:120, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
-              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"'Syne',sans-serif", color:"#fff", lineHeight:1 }}>
+              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"var(--font-display)", color:"#fff", lineHeight:1 }}>
                 {avgRating !== null ? avgRating.toFixed(1) : "—"}
               </p>
               {avgRating !== null && <div style={{ display:"flex", justifyContent:"center", margin:"4px 0" }}><ReviewStars value={Math.round(avgRating)} /></div>}
               <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.3)", marginTop:2 }}>Note moyenne</p>
             </div>
             <div style={{ flex:1, minWidth:120, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
-              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"'Syne',sans-serif", color:"#fff", lineHeight:1 }}>{reviews.length}</p>
+              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"var(--font-display)", color:"#fff", lineHeight:1 }}>{reviews.length}</p>
               <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.3)", marginTop:6 }}>Avis reçu{reviews.length>1?"s":""}</p>
             </div>
             <div style={{ flex:1, minWidth:120, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
-              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"'Syne',sans-serif", color:"#4ade80", lineHeight:1 }}>
+              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"var(--font-display)", color:"#4ade80", lineHeight:1 }}>
                 {reviews.filter(r => r.tags.some(t => TAGS_INFO[t]?.positive)).length}
               </p>
               <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.3)", marginTop:6 }}>Positif{reviews.filter(r=>r.tags.some(t=>TAGS_INFO[t]?.positive)).length>1?"s":""}</p>
@@ -937,14 +937,14 @@ function SectionAvisRecus({ userId }: { userId:string }) {
               <div key={r.id} style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem 1.25rem" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:".625rem" }}>
                   {/* Avatar */}
-                  <div style={{ width:32, height:32, borderRadius:"50%", background:"rgba(124,58,237,.25)", border:"1px solid rgba(124,58,237,.35)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                    <span style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:".8rem", color:"#a78bfa" }}>{r.raterPseudo[0]?.toUpperCase()}</span>
+                  <div style={{ width:32, height:32, borderRadius:"50%", background:"rgba(255,212,59,.25)", border:"1px solid rgba(255,212,59,.35)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                    <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:".8rem", color:"var(--accent-text)" }}>{r.raterPseudo[0]?.toUpperCase()}</span>
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
                       <span style={{ fontWeight:700, fontSize:".875rem", color:"rgba(255,255,255,.85)" }}>{r.raterPseudo}</span>
                       {r.companyName && (
-                        <span style={{ fontSize:".7rem", color:"#a78bfa", background:"rgba(124,58,237,.12)", border:"1px solid rgba(124,58,237,.25)", borderRadius:100, padding:"1px 8px" }}>
+                        <span style={{ fontSize:".7rem", color:"var(--accent-text)", background:"rgba(255,212,59,.12)", border:"1px solid rgba(255,212,59,.25)", borderRadius:100, padding:"1px 8px" }}>
                           {r.companyName}
                         </span>
                       )}
@@ -1041,24 +1041,24 @@ function SectionAvis({ userId }: { userId:string }) {
 
       {step === "rate" && (
         <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
-          <p style={{ fontSize:"1rem", fontWeight:700, color:"rgba(255,255,255,.85)", marginBottom:"1.5rem", fontFamily:"'Syne',sans-serif" }}>
+          <p style={{ fontSize:"1rem", fontWeight:700, color:"rgba(255,255,255,.85)", marginBottom:"1.5rem", fontFamily:"var(--font-display)" }}>
             Apprécies-tu codedeparrainage.com ?
           </p>
           <StarsInput value={rating} onChange={setRating} />
-          {rating > 0 && <p style={{ marginTop:".75rem", fontSize:".875rem", color:"#a78bfa", fontWeight:600 }}>{LABELS[rating]}</p>}
+          {rating > 0 && <p style={{ marginTop:".75rem", fontSize:".875rem", color:"var(--accent-text)", fontWeight:600 }}>{LABELS[rating]}</p>}
           <div style={{ display:"flex", gap:10, marginTop:"1.5rem" }}>
-            <button type="button" style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:12, padding:".75rem", color:"#f87171", fontSize:".875rem", fontWeight:600, cursor:"pointer", fontFamily:"'DM Sans',sans-serif", transition:"all .2s" }}
+            <button type="button" style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:12, padding:".75rem", color:"#f87171", fontSize:".875rem", fontWeight:600, cursor:"pointer", fontFamily:"var(--font-text)", transition:"all .2s" }}
               onClick={() => { setRating(r => r||1); setStep("negative"); }}>
               👎 Non
             </button>
-            <button type="button" style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(34,197,94,.08)", border:"1px solid rgba(34,197,94,.25)", borderRadius:12, padding:".75rem", color:"#4ade80", fontSize:".875rem", fontWeight:600, cursor:"pointer", fontFamily:"'DM Sans',sans-serif", transition:"all .2s" }}
+            <button type="button" style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(34,197,94,.08)", border:"1px solid rgba(34,197,94,.25)", borderRadius:12, padding:".75rem", color:"#4ade80", fontSize:".875rem", fontWeight:600, cursor:"pointer", fontFamily:"var(--font-text)", transition:"all .2s" }}
               onClick={() => { setRating(r => r>=4?r:5); setStep("positive"); }}>
               👍 Oui
             </button>
           </div>
           {rating > 0 && (
             <button onClick={() => rating >= 4 ? setStep("positive") : setStep("negative")}
-              style={{ marginTop:"1rem", width:"100%", background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
+              style={{ marginTop:"1rem", width:"100%", background:"var(--accent)", color:"var(--accent-ink)", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>
               Continuer →
             </button>
           )}
@@ -1068,10 +1068,10 @@ function SectionAvis({ userId }: { userId:string }) {
       {step === "positive" && (
         <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
           <div style={{ fontSize:"2.5rem", marginBottom:"1rem" }}>🎉</div>
-          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Super, merci !</p>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Super, merci !</p>
           <p style={{ color:"rgba(255,255,255,.45)", fontSize:".875rem", marginBottom:"1.5rem" }}>Ça nous ferait vraiment plaisir si tu laissais un avis sur Google — ça prend 30 secondes 🙏</p>
           <a href={GOOGLE_REVIEW_URL} target="_blank" rel="noopener noreferrer"
-            style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#4285F4", color:"#fff", textDecoration:"none", borderRadius:12, padding:".8rem 1.5rem", fontWeight:700, fontSize:".875rem", fontFamily:"'DM Sans',sans-serif" }}
+            style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#4285F4", color:"#fff", textDecoration:"none", borderRadius:12, padding:".8rem 1.5rem", fontWeight:700, fontSize:".875rem", fontFamily:"var(--font-text)" }}
             onClick={async () => {
               try {
                 await supabase.from("platform_reviews").insert({ user_id: userId, rating: rating||5, comment: null });
@@ -1086,7 +1086,7 @@ function SectionAvis({ userId }: { userId:string }) {
             }}>
             Laisser un avis Google
           </a>
-          <button onClick={() => setStep("done")} style={{ display:"block", width:"100%", marginTop:".75rem", background:"none", border:"1px solid rgba(255,255,255,.1)", borderRadius:12, padding:".7rem", color:"rgba(255,255,255,.35)", fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
+          <button onClick={() => setStep("done")} style={{ display:"block", width:"100%", marginTop:".75rem", background:"none", border:"1px solid rgba(255,255,255,.1)", borderRadius:12, padding:".7rem", color:"rgba(255,255,255,.35)", fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>
             Plus tard
           </button>
         </div>
@@ -1094,14 +1094,14 @@ function SectionAvis({ userId }: { userId:string }) {
 
       {step === "negative" && (
         <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem" }}>
-          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:"1rem", color:"rgba(255,255,255,.85)", marginBottom:".5rem" }}>Désolé 😕</p>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1rem", color:"rgba(255,255,255,.85)", marginBottom:".5rem" }}>Désolé 😕</p>
           <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem", marginBottom:"1.25rem" }}>Dis-nous ce que tu changerais — ton retour nous aide vraiment.</p>
           <StarsInput value={rating} onChange={setRating} />
           <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Ce que j'améliorerais…" maxLength={600}
-            style={{ marginTop:"1rem", width:"100%", background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.1)", borderRadius:12, padding:".75rem 1rem", color:"rgba(255,255,255,.8)", fontSize:".875rem", fontFamily:"'DM Sans',sans-serif", resize:"vertical", minHeight:100, outline:"none" }} />
+            style={{ marginTop:"1rem", width:"100%", background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.1)", borderRadius:12, padding:".75rem 1rem", color:"rgba(255,255,255,.8)", fontSize:".875rem", fontFamily:"var(--font-text)", resize:"vertical", minHeight:100, outline:"none" }} />
           <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.2)", marginTop:3 }}>{comment.length}/600</p>
           <button onClick={submitNegative} disabled={sending}
-            style={{ marginTop:".875rem", width:"100%", background:"#7c3aed", color:"#fff", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"'DM Sans',sans-serif", opacity:sending?.5:1 }}>
+            style={{ marginTop:".875rem", width:"100%", background:"var(--accent)", color:"var(--accent-ink)", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)", opacity:sending?.5:1 }}>
             {sending ? "Envoi…" : "Envoyer mon avis"}
           </button>
           <button onClick={() => setStep("rate")} style={{ display:"block", width:"100%", marginTop:".5rem", background:"none", border:"none", color:"rgba(255,255,255,.3)", fontSize:".8rem", cursor:"pointer" }}>← Retour</button>
@@ -1111,7 +1111,7 @@ function SectionAvis({ userId }: { userId:string }) {
       {step === "done" && (
         <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
           <div style={{ fontSize:"2.5rem", marginBottom:".75rem" }}>✅</div>
-          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Merci pour ton retour !</p>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Merci pour ton retour !</p>
           <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem" }}>Ton avis a bien été enregistré.</p>
         </div>
       )}
@@ -1231,43 +1231,43 @@ export default function ProfilPage() {
         @keyframes shimmer { 0%,100%{opacity:.5} 50%{opacity:1} }
         @keyframes float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{background:#0A0A0F;color:#e2e8f0;font-family:'DM Sans',sans-serif;min-height:100vh}
+        body{background:var(--bg);color:#e2e8f0;font-family:var(--font-text);min-height:100vh}
         .layout{display:flex;max-width:1100px;margin:0 auto;padding:2rem 1.5rem;gap:1.75rem}
         .main{flex:1;min-width:0}
         .sc{display:flex;flex-direction:column;gap:1.25rem}
         .sh{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem}
-        .st{font-family:'Syne',sans-serif;font-weight:800;font-size:1.45rem;color:#fff;letter-spacing:-.03em}
+        .st{font-family:var(--font-display);font-weight:800;font-size:1.45rem;color:#fff;letter-spacing:-.03em}
         .ss{color:rgba(255,255,255,.35);font-size:.84rem;margin-top:2px}
-        .action-card{position:relative;overflow:hidden;background:rgba(124,58,237,.05);border:1px solid rgba(124,58,237,.25);border-radius:18px;padding:1.25rem;display:flex;flex-direction:column;gap:.6rem;transition:border-color .2s,transform .2s}
-        .action-card:hover{border-color:rgba(124,58,237,.45);transform:translateY(-2px)}
-        .action-card-boost{background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.35)}
+        .action-card{position:relative;overflow:hidden;background:rgba(255,212,59,.05);border:1px solid rgba(255,212,59,.25);border-radius:18px;padding:1.25rem;display:flex;flex-direction:column;gap:.6rem;transition:border-color .2s,transform .2s}
+        .action-card:hover{border-color:rgba(255,212,59,.45);transform:translateY(-2px)}
+        .action-card-boost{background:rgba(255,212,59,.07);border-color:rgba(255,212,59,.35)}
         .action-card-top{display:flex;align-items:center;gap:9px}
         .action-icon-wrap{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(255,255,255,.7)}
         .action-label{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.5)}
-        .action-value{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:#fff;line-height:1}
+        .action-value{font-family:var(--font-display);font-weight:800;font-size:2rem;color:#fff;line-height:1}
         .action-sub{font-size:.75rem;color:rgba(255,255,255,.3)}
-        .action-btn{display:inline-flex;align-items:center;gap:5px;margin-top:auto;padding:.45rem .875rem;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);border-radius:9px;color:#c4b5fd;font-size:.76rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:'DM Sans',sans-serif;justify-content:center}
-        .action-btn:hover{color:#fff;background:rgba(124,58,237,.22);border-color:rgba(124,58,237,.5)}
-        .action-btn-boost{background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.4);color:#c4b5fd}
+        .action-btn{display:inline-flex;align-items:center;gap:5px;margin-top:auto;padding:.45rem .875rem;background:rgba(255,212,59,.12);border:1px solid rgba(255,212,59,.3);border-radius:9px;color:var(--accent-text);font-size:.76rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:var(--font-text);justify-content:center}
+        .action-btn:hover{color:#fff;background:rgba(255,212,59,.22);border-color:rgba(255,212,59,.5)}
+        .action-btn-boost{background:rgba(255,212,59,.18);border-color:rgba(255,212,59,.4);color:var(--accent-text)}
         .row-card{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1rem 1.25rem;transition:border-color .2s}
-        .row-card:hover{border-color:rgba(124,58,237,.2)}
+        .row-card:hover{border-color:rgba(255,212,59,.2)}
         .row-card.done{opacity:.55}
-        .cat-tag{padding:.2rem .6rem;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);border-radius:100px;font-size:.72rem;color:#a78bfa;font-weight:600}
+        .cat-tag{padding:.2rem .6rem;background:rgba(255,212,59,.12);border:1px solid rgba(255,212,59,.25);border-radius:100px;font-size:.72rem;color:var(--accent-text);font-weight:600}
         .form-g{display:flex;flex-direction:column;gap:6px}
         .form-l{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.04em}
-        .form-i{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;color:#fff;font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:all .2s;width:100%}
-        .form-i:focus{border-color:rgba(124,58,237,.4);background:rgba(124,58,237,.05);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+        .form-i{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;color:#fff;font-size:.9rem;font-family:var(--font-text);outline:none;transition:all .2s;width:100%}
+        .form-i:focus{border-color:rgba(255,212,59,.4);background:rgba(255,212,59,.05);box-shadow:0 0 0 3px rgba(255,212,59,.1)}
         .form-i.disabled{opacity:.4;cursor:not-allowed}
         .form-ta{resize:vertical;min-height:90px}
         .form-h{font-size:.7rem;color:rgba(255,255,255,.22)}
-        .btn-p{display:inline-flex;align-items:center;gap:6px;background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:'DM Sans',sans-serif}
-        .btn-p:hover{background:#6d28d9;transform:translateY(-1px)}
+        .btn-p{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:var(--accent-ink);border:none;border-radius:10px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:var(--font-text)}
+        .btn-p:hover{background:var(--accent-hover);transform:translateY(-1px)}
         .btn-p.btn-saved{background:#16a34a}
-        .btn-o{display:inline-flex;align-items:center;gap:6px;background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:'DM Sans',sans-serif}
-        .btn-ghost-sm{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5);border-radius:8px;padding:.3rem .625rem;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+        .btn-o{display:inline-flex;align-items:center;gap:6px;background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:var(--font-text)}
+        .btn-ghost-sm{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5);border-radius:8px;padding:.3rem .625rem;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
         .btn-ghost-sm:hover{color:#fff;border-color:rgba(255,255,255,.18)}
         .btn-ghost-sm.danger:hover{color:#f87171;border-color:rgba(248,113,113,.3)}
-        .btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:10px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+        .btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:10px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--font-text)}
         .profil-sidebar{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:1.5rem;position:sticky;top:80px;align-self:flex-start}
         .g2{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
         .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem}

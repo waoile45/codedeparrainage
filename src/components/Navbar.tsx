@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTheme } from "./ThemeProvider";
+import Logo from "./Logo";
 import { createClient } from "@/lib/supabase";
 
 interface NavbarProps {
@@ -72,28 +73,24 @@ export default function Navbar({ activePage }: NavbarProps) {
       <style>{`
         .navbar {
           display: flex; align-items: center; justify-content: space-between;
-          padding: 0 2rem; height: 64px;
+          padding: 0 var(--gutter); height: 68px;
           background: var(--bg-nav);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(124,58,237,0.12);
+          border-bottom: 1px solid var(--border);
         }
         .nav-logo-wrap { display: flex; align-items: center; gap: 8px; flex-shrink: 0; min-width: 0; }
         .nav-logo {
           display: flex; align-items: center; gap: 8px;
-          font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.05rem;
+          font-family: var(--font-display); font-weight: 800; font-size: 1.05rem;
           color: var(--text-strong); text-decoration: none; letter-spacing: -0.02em;
           white-space: nowrap;
         }
-        .nav-logo img { height: 40px; width: auto; }
-        .nav-logo em { font-style: normal; color: #7c3aed; }
         .nav-home-btn {
           display: inline-flex; align-items: center; justify-content: center;
           background: var(--bg-card-md); border: 1px solid var(--border-md);
           border-radius: 8px; width: 32px; height: 32px;
           color: var(--text-muted); text-decoration: none; transition: all 0.18s;
         }
-        .nav-home-btn:hover { color: var(--text-strong); border-color: rgba(124,58,237,0.3); background: rgba(124,58,237,0.08); }
+        .nav-home-btn:hover { color: var(--text-strong); border-color: rgba(255,212,59,0.3); background: rgba(255,212,59,0.08); }
 
         .nav-center {
           display: flex; align-items: center; gap: 2px;
@@ -102,18 +99,18 @@ export default function Navbar({ activePage }: NavbarProps) {
         .nav-link {
           position: relative;
           color: var(--text-nav); text-decoration: none;
-          font-size: 0.855rem; font-weight: 500;
+          font-size: 0.92rem; font-weight: 600;
           padding: 0.4rem 0.75rem; border-radius: 9px;
           transition: all 0.18s; white-space: nowrap;
-          font-family: 'DM Sans', sans-serif;
+          font-family: var(--font-text);
           border: 1px solid transparent;
         }
         .nav-link:hover { color: var(--text-strong); background: var(--bg-card-md); }
-        .nav-link.active {
-          color: var(--text-strong); background: rgba(124,58,237,0.15);
-          border-color: rgba(124,58,237,0.25);
+        .nav-link.active { color: var(--text-strong); }
+        .nav-link.active::after {
+          content: ""; position: absolute; left: .75rem; right: .75rem; bottom: -2px;
+          height: 3px; border-radius: 2px; background: var(--accent);
         }
-        .nav-link.active:hover { background: rgba(124,58,237,0.2); }
         .nav-unread-dot {
           position: absolute; top: 4px; right: 4px; width: 8px; height: 8px;
           background: #ef4444; border-radius: 50%; border: 2px solid var(--bg-nav);
@@ -127,17 +124,17 @@ export default function Navbar({ activePage }: NavbarProps) {
           border: 1px solid var(--border-btn-ghost); border-radius: 10px;
           padding: 0.45rem 0.875rem; font-size: 0.82rem; font-weight: 500;
           cursor: pointer; transition: all 0.18s; text-decoration: none;
-          font-family: 'DM Sans', sans-serif; display: inline-flex; align-items: center;
+          font-family: var(--font-text); display: inline-flex; align-items: center;
         }
         .nav-btn-ghost:hover { color: var(--text-strong); border-color: var(--border-lg); }
         .nav-btn-primary {
-          background: #7c3aed; color: #fff; border: none;
-          border-radius: 10px; padding: 0.45rem 1rem;
-          font-size: 0.82rem; font-weight: 600; cursor: pointer;
+          background: var(--accent); color: var(--accent-ink); border: none;
+          border-radius: 10px; padding: 0.55rem 1rem;
+          font-size: 0.88rem; font-weight: 700; cursor: pointer;
           transition: all 0.18s; text-decoration: none; white-space: nowrap;
-          font-family: 'DM Sans', sans-serif; display: inline-flex; align-items: center; gap: 5px;
+          font-family: var(--font-text); display: inline-flex; align-items: center; gap: 5px;
         }
-        .nav-btn-primary:hover { background: #6d28d9; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124,58,237,0.35); }
+        .nav-btn-primary:hover { background: var(--accent-hover); }
         .nav-label-short { display: none; }
 
         /* Connecté — bouton avatar */
@@ -146,14 +143,14 @@ export default function Navbar({ activePage }: NavbarProps) {
           background: var(--bg-card-md); border: 1px solid var(--border-md);
           border-radius: 12px; padding: 0.35rem 0.75rem 0.35rem 0.4rem;
           cursor: pointer; transition: all 0.18s; color: var(--text-strong);
-          font-family: 'DM Sans', sans-serif; min-height: 40px;
+          font-family: var(--font-text); min-height: 40px;
         }
-        .nav-avatar-btn:hover { background: var(--bg-btn); border-color: rgba(124,58,237,0.3); }
+        .nav-avatar-btn:hover { background: var(--bg-btn); border-color: rgba(255,212,59,0.3); }
         .nav-avatar {
           width: 28px; height: 28px; border-radius: 50%;
-          background: linear-gradient(135deg,#7c3aed,#4f46e5);
+          background: var(--accent);
           display: flex; align-items: center; justify-content: center;
-          font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.8rem; color: #fff;
+          font-family: var(--font-display); font-weight: 800; font-size: 0.8rem; color: var(--accent-ink);
           flex-shrink: 0; overflow: hidden;
         }
         .nav-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
@@ -176,7 +173,7 @@ export default function Navbar({ activePage }: NavbarProps) {
           padding: 0.7rem 1rem; color: var(--text-muted);
           font-size: 0.855rem; font-weight: 500; text-decoration: none;
           transition: all 0.15s; cursor: pointer; background: none; border: none;
-          width: 100%; text-align: left; font-family: 'DM Sans', sans-serif;
+          width: 100%; text-align: left; font-family: var(--font-text);
         }
         .nav-dropdown-item:hover { color: var(--text-strong); background: var(--bg-card-md); }
         .nav-dropdown-item.danger:hover { color: #f87171; background: rgba(239,68,68,0.08); }
@@ -185,13 +182,13 @@ export default function Navbar({ activePage }: NavbarProps) {
 
         .nav-publier {
           display: flex; align-items: center; gap: 5px;
-          background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.3);
-          border-radius: 9px; padding: 0.4rem 0.75rem;
-          color: #a78bfa; font-size: 0.82rem; font-weight: 600;
+          background: var(--accent); border: none;
+          border-radius: 10px; padding: 0.55rem 0.9rem;
+          color: var(--accent-ink); font-size: 0.88rem; font-weight: 700;
           cursor: pointer; transition: all 0.18s; text-decoration: none;
-          font-family: 'DM Sans', sans-serif; white-space: nowrap;
+          font-family: var(--font-text); white-space: nowrap;
         }
-        .nav-publier:hover { background: rgba(124,58,237,0.22); color: #fff; border-color: rgba(124,58,237,0.5); }
+        .nav-publier:hover { background: var(--accent-hover); }
 
         /* Hamburger — zone tactile 40×40 */
         .nav-hamburger {
@@ -216,7 +213,7 @@ export default function Navbar({ activePage }: NavbarProps) {
           padding: 0.75rem 1rem calc(1rem + env(safe-area-inset-bottom));
           background: var(--bg-dropdown); border-bottom: 1px solid var(--border);
           box-shadow: 0 16px 40px rgba(0,0,0,0.35);
-          max-height: calc(100vh - 64px); overflow-y: auto;
+          max-height: calc(100vh - 68px); overflow-y: auto;
         }
         .nav-mobile.open { display: flex; }
         .nav-mobile-link {
@@ -224,11 +221,11 @@ export default function Navbar({ activePage }: NavbarProps) {
           min-height: 44px; padding: 0.5rem 0.875rem; border-radius: 10px;
           color: var(--text-link); font-size: 0.95rem; font-weight: 500;
           text-decoration: none; transition: all 0.15s;
-          font-family: 'DM Sans', sans-serif; background: none; border: none; width: 100%; text-align: left; cursor: pointer;
+          font-family: var(--font-text); background: none; border: none; width: 100%; text-align: left; cursor: pointer;
         }
         .nav-mobile-link:hover, .nav-mobile-link.active { color: var(--text-strong); background: var(--bg-card-md); }
-        .nav-mobile-link.active { background: rgba(124,58,237,0.15); }
-        .nav-mobile-link.primary { color: #fff; background: #7c3aed; justify-content: center; font-weight: 600; margin-top: 4px; }
+        .nav-mobile-link.active { background: rgba(255,212,59,0.15); }
+        .nav-mobile-link.primary { color: var(--accent-ink); background: var(--accent); justify-content: center; font-weight: 600; margin-top: 4px; }
         .nav-mobile-sep { height: 1px; background: var(--border); margin: 6px 0; }
         .nav-mobile-badge { background: #ef4444; color: #fff; border-radius: 100px; font-size: 0.7rem; font-weight: 700; padding: 1px 7px; margin-left: 4px; }
 
@@ -243,12 +240,9 @@ export default function Navbar({ activePage }: NavbarProps) {
           .nav-avatar-btn { padding: 0.25rem; border-radius: 50%; }
           .nav-avatar-btn .nav-chevron { display: none; }
           .nav-avatar { width: 32px; height: 32px; }
-          .nav-logo img { height: 34px; }
-          .nav-logo { font-size: 0.95rem; }
         }
         @media (max-width: 420px) {
           .nav-home-btn { display: none; }
-          .nav-logo { font-size: 0.88rem; }
         }
       `}</style>
 
@@ -256,8 +250,7 @@ export default function Navbar({ activePage }: NavbarProps) {
         <nav className="navbar" aria-label="Navigation principale">
           <div className="nav-logo-wrap">
             <Link href="/" className="nav-logo" aria-label="codedeparrainage.com — accueil">
-              <img src="/logo-96.png" alt="" width={78} height={96} />
-              <span>code<em>de</em>parrainage</span>
+              <Logo />
             </Link>
             {activePage && activePage !== "home" && (
               <Link href="/" className="nav-home-btn" aria-label="Accueil">

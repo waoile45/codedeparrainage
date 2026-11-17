@@ -15,9 +15,9 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
       <span style={{ fontSize: '.75rem', color: 'var(--text-muted)', minWidth: 110 }}>{label}</span>
       <div style={{ flex: 1, background: 'var(--border-lg)', borderRadius: 4, height: 6, overflow: 'hidden' }}>
-        <div style={{ width: `${(value / 10) * 100}%`, height: '100%', background: 'linear-gradient(90deg, #7c3aed, #a78bfa)', borderRadius: 4 }} />
+        <div style={{ width: `${(value / 10) * 100}%`, height: '100%', background: 'var(--accent)', borderRadius: 4 }} />
       </div>
-      <span style={{ fontSize: '.75rem', fontWeight: 700, color: '#a78bfa', minWidth: 28, textAlign: 'right' }}>
+      <span style={{ fontSize: '.75rem', fontWeight: 700, color: 'var(--accent-text)', minWidth: 28, textAlign: 'right' }}>
         {value.toFixed(1)}
       </span>
     </div>
@@ -38,22 +38,22 @@ function BanqueCard({ banque, rank }: { banque: BanqueEntry; rank: number }) {
   const rankStyle = RANK_COLORS[rank] ?? { bg: 'rgba(255,255,255,0.04)', color: 'var(--text-faint)', label: `#${rank}` }
 
   return (
-    <article style={{ background: 'var(--bg-card)', border: rank === 1 ? '1px solid rgba(124,58,237,.35)' : '1px solid var(--border)', borderRadius: 20, overflow: 'hidden' }}>
+    <article style={{ background: 'var(--bg-card)', border: rank === 1 ? '1px solid rgba(255,212,59,.35)' : '1px solid var(--border)', borderRadius: 20, overflow: 'hidden' }}>
       {/* ── Header ── */}
       <div style={{ padding: '1.375rem 1.5rem 1.25rem', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 200 }}>
-            <div style={{ background: rankStyle.bg, color: rankStyle.color, borderRadius: 10, fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: '1rem', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ background: rankStyle.bg, color: rankStyle.color, borderRadius: 10, fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1rem', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               {rankStyle.label}
             </div>
             <img src={`https://www.google.com/s2/favicons?sz=64&domain=${banque.domain}`} alt={banque.name} width={36} height={36} style={{ borderRadius: 8, flexShrink: 0 }} />
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: '1.15rem', color: 'var(--text-strong)' }}>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.15rem', color: 'var(--text-strong)' }}>
                   {banque.name}
                 </span>
                 {banque.badge && (
-                  <span style={{ fontSize: '.65rem', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: '#a78bfa', background: 'rgba(124,58,237,.12)', border: '1px solid rgba(124,58,237,.25)', borderRadius: 100, padding: '2px 8px' }}>
+                  <span style={{ fontSize: '.65rem', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--accent-text)', background: 'rgba(255,212,59,.12)', border: '1px solid rgba(255,212,59,.25)', borderRadius: 100, padding: '2px 8px' }}>
                     {banque.badge}
                   </span>
                 )}
@@ -64,8 +64,8 @@ function BanqueCard({ banque, rank }: { banque: BanqueEntry; rank: number }) {
               <p style={{ fontSize: '.82rem', color: 'var(--text-muted)', margin: '3px 0 0' }}>{banque.tagline}</p>
             </div>
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', borderRadius: 14, padding: '.75rem 1.25rem', textAlign: 'center', flexShrink: 0 }}>
-            <div style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: '1.75rem', color: '#fff', lineHeight: 1 }}>
+          <div style={{ background: 'var(--accent)', borderRadius: 14, padding: '.75rem 1.25rem', textAlign: 'center', flexShrink: 0 }}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.75rem', color: '#fff', lineHeight: 1 }}>
               {banque.score.toFixed(1)}
             </div>
             <div style={{ fontSize: '.7rem', color: 'rgba(255,255,255,.6)', marginTop: 2 }}>/10</div>
@@ -122,12 +122,12 @@ function BanqueCard({ banque, rank }: { banque: BanqueEntry; rank: number }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
           <div>
             <div style={{ fontSize: '.75rem', color: 'var(--text-faint)', marginBottom: 2 }}>Frais mensuels</div>
-            <div style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-strong)' }}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-strong)' }}>
               {banque.fraisMensuels}
             </div>
             <div style={{ fontSize: '.72rem', color: 'var(--text-faint)' }}>Bonus bienvenue : {banque.bonusBienvenue}</div>
           </div>
-          <a href={banque.affiliateUrl === '#' ? `https://${banque.domain}` : banque.affiliateUrl} target="_blank" rel={banque.affiliateUrl === '#' ? 'nofollow noopener' : 'nofollow sponsored noopener'} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#7c3aed', color: '#fff', fontWeight: 700, fontSize: '.875rem', padding: '.65rem 1.25rem', borderRadius: 12, textDecoration: 'none' }}>
+          <a href={banque.affiliateUrl === '#' ? `https://${banque.domain}` : banque.affiliateUrl} target="_blank" rel={banque.affiliateUrl === '#' ? 'nofollow noopener' : 'nofollow sponsored noopener'} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--accent)', color: 'var(--accent-ink)', fontWeight: 700, fontSize: '.875rem', padding: '.65rem 1.25rem', borderRadius: 12, textDecoration: 'none' }}>
             Ouvrir un compte {banque.name}
             <span style={{ fontSize: '.8rem' }}>↗</span>
           </a>
@@ -201,7 +201,7 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-dm-sans),'DM Sans',sans-serif", color: 'var(--text-strong)' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-text)", color: 'var(--text-strong)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />
 
@@ -212,7 +212,7 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
         {/* ── Hero ── */}
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '.7rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#a78bfa', background: 'rgba(124,58,237,.12)', border: '1px solid rgba(124,58,237,.25)', borderRadius: 100, padding: '3px 10px' }}>
+            <span style={{ fontSize: '.7rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--accent-text)', background: 'rgba(255,212,59,.12)', border: '1px solid rgba(255,212,59,.25)', borderRadius: 100, padding: '3px 10px' }}>
               Comparatif Banques
             </span>
             <span style={{ fontSize: '.75rem', color: 'var(--text-faint)' }}>
@@ -220,7 +220,7 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
             </span>
           </div>
 
-          <h1 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: 'clamp(1.6rem,4vw,2.4rem)', lineHeight: 1.1, letterSpacing: '-0.025em', margin: '0 0 1rem' }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.6rem,4vw,2.4rem)', lineHeight: 1.1, letterSpacing: '-0.025em', margin: '0 0 1rem' }}>
             {h1}
           </h1>
 
@@ -230,11 +230,11 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
 
           {/* Liens cas d'usage */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <a href="/meilleure-banque" style={{ fontSize: '.78rem', fontWeight: 600, padding: '.35rem .875rem', borderRadius: 8, textDecoration: 'none', background: !currentCas ? '#7c3aed' : 'var(--bg-card-md)', color: !currentCas ? '#fff' : 'var(--text-dim)', border: !currentCas ? 'none' : '1px solid var(--border)' }}>
+            <a href="/meilleure-banque" style={{ fontSize: '.78rem', fontWeight: 600, padding: '.35rem .875rem', borderRadius: 8, textDecoration: 'none', background: !currentCas ? 'var(--accent)' : 'var(--bg-card-md)', color: !currentCas ? '#fff' : 'var(--text-dim)', border: !currentCas ? 'none' : '1px solid var(--border)' }}>
               Général
             </a>
             {OTHER_CASES.map(({ key, label }) => (
-              <a key={key} href={`/meilleure-banque/${key}`} style={{ fontSize: '.78rem', fontWeight: 600, padding: '.35rem .875rem', borderRadius: 8, textDecoration: 'none', background: currentCas === key ? '#7c3aed' : 'var(--bg-card-md)', color: currentCas === key ? '#fff' : 'var(--text-dim)', border: currentCas === key ? 'none' : '1px solid var(--border)' }}>
+              <a key={key} href={`/meilleure-banque/${key}`} style={{ fontSize: '.78rem', fontWeight: 600, padding: '.35rem .875rem', borderRadius: 8, textDecoration: 'none', background: currentCas === key ? 'var(--accent)' : 'var(--bg-card-md)', color: currentCas === key ? '#fff' : 'var(--text-dim)', border: currentCas === key ? 'none' : '1px solid var(--border)' }}>
                 {label}
               </a>
             ))}
@@ -243,22 +243,22 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
 
         {/* ── Top 3 ── */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: '1rem 1.25rem', marginBottom: '2rem' }}>
-          <div style={{ fontSize: '.7rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', fontFamily: "var(--font-syne),Syne,sans-serif", marginBottom: '.75rem' }}>
+          <div style={{ fontSize: '.7rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', fontFamily: "var(--font-display)", marginBottom: '.75rem' }}>
             Notre top 3 en un coup d'œil
           </div>
           {banques.slice(0, 3).map((b, i) => (
             <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '.625rem 0', borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
-              <span style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: '.9rem', color: i === 0 ? '#F59E0B' : i === 1 ? '#94A3B8' : '#CD7C4A', minWidth: 24 }}>#{i + 1}</span>
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '.9rem', color: i === 0 ? '#F59E0B' : i === 1 ? '#94A3B8' : '#CD7C4A', minWidth: 24 }}>#{i + 1}</span>
               <img src={`https://www.google.com/s2/favicons?sz=32&domain=${b.domain}`} alt={b.name} width={20} height={20} style={{ borderRadius: 4 }} />
               <span style={{ fontWeight: 600, fontSize: '.875rem', flex: 1 }}>{b.name}</span>
               <span style={{ fontSize: '.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>{b.tagline}</span>
-              <span style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: '.875rem', color: '#a78bfa', minWidth: 36, textAlign: 'right' }}>{b.score.toFixed(1)}</span>
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '.875rem', color: 'var(--accent-text)', minWidth: 36, textAlign: 'right' }}>{b.score.toFixed(1)}</span>
             </div>
           ))}
         </div>
 
         {/* ── Classement ── */}
-        <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1.1rem', margin: '0 0 1rem' }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1.1rem', margin: '0 0 1rem' }}>
           Classement détaillé {year}
         </h2>
 
@@ -268,7 +268,7 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
 
         {/* ── Méthode ── */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem' }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem' }}>
             Comment ce comparatif est construit
           </h2>
           <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: '0 0 .875rem' }}>
@@ -281,7 +281,7 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
 
         {/* ── FAQ ── */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginBottom: '2rem' }}>
-          <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem' }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem' }}>
             Questions fréquentes sur les banques en ligne
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -298,7 +298,7 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
         </div>
 
         {/* ── Disclaimer ── */}
-        <div style={{ background: 'rgba(124,58,237,.05)', border: '1px solid rgba(124,58,237,.15)', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '2rem', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+        <div style={{ background: 'rgba(255,212,59,.05)', border: '1px solid rgba(255,212,59,.15)', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '2rem', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
           <span style={{ fontSize: '1rem', flexShrink: 0, marginTop: 1 }}>ℹ️</span>
           <p style={{ fontSize: '.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.55 }}>
             <strong style={{ color: 'var(--text-dim)' }}>Transparence :</strong> Certains liens de cette page sont des liens d'affiliation. Si vous ouvrez un compte via nos liens, nous percevons une commission sans surcoût pour vous. Cela ne change pas nos recommandations.
@@ -307,7 +307,7 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
 
         {/* ── Maillage interne ── */}
         <div style={{ paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-          <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '.875rem', fontFamily: "var(--font-syne),Syne,sans-serif" }}>
+          <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '.875rem', fontFamily: "var(--font-display)" }}>
             Autres comparatifs
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>

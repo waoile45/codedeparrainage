@@ -104,9 +104,9 @@ export async function POST(request: NextRequest) {
         to: 'waoile45@gmail.com',
         subject: sanitizeSubject(`🏢 Proposition d'entreprise : ${nomEntreprise}`),
         html: `
-          <div style="font-family:'DM Sans',Arial,sans-serif;max-width:520px;margin:0 auto;background:#0A0A0F;color:#e2e8f0;border-radius:16px;overflow:hidden;">
-            <div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:28px 32px;">
-              <p style="margin:0;font-size:1.2rem;font-weight:800;color:#fff;letter-spacing:-0.02em;">codedeparrainage.com</p>
+          <div style="font-family:'DM Sans',Arial,sans-serif;max-width:520px;margin:0 auto;background:#121211;color:#e2e8f0;border-radius:16px;overflow:hidden;">
+            <div style="background:#FFD43B;padding:28px 32px;">
+              <p style="margin:0;font-size:1.2rem;font-weight:800;color:#141414;letter-spacing:-0.02em;">codedeparrainage.com</p>
             </div>
             <div style="padding:32px;">
               <p style="margin:0 0 8px;font-size:1rem;font-weight:700;color:#fff;">Nouvelle proposition d'entreprise</p>

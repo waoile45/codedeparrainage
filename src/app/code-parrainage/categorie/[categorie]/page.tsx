@@ -126,7 +126,7 @@ export default async function CategoryPage({ params }: Props) {
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-dm-sans),'DM Sans',sans-serif", color: 'var(--text-strong)' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-text)", color: 'var(--text-strong)' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(itemListJsonLd) }} />
 
@@ -142,7 +142,7 @@ export default async function CategoryPage({ params }: Props) {
         </nav>
 
         {/* ── En-tête ── */}
-        <h1 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 800, fontSize: 'clamp(1.5rem,3.5vw,2.1rem)', margin: '0 0 .75rem', letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.5rem,3.5vw,2.1rem)', margin: '0 0 .75rem', letterSpacing: '-0.02em', lineHeight: 1.15 }}>
           {cat.h1}
         </h1>
         {totalCodes > 0 && (
@@ -162,11 +162,11 @@ export default async function CategoryPage({ params }: Props) {
               href={`/code-parrainage/${b.slug}`}
               style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 18, padding: '1rem 1.125rem', textDecoration: 'none', color: 'var(--text-strong)', minWidth: 0 }}
             >
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(124,58,237,.12)', border: '1px solid rgba(124,58,237,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(255,212,59,.12)', border: '1px solid rgba(255,212,59,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
                 <CompanyLogo domain={b.domain} name={b.name} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '.95rem' }}>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '.95rem' }}>
                   Code parrainage {b.name}
                 </div>
                 <div style={{ fontSize: '.8rem', color: 'var(--text-muted)', marginTop: 2 }}>
@@ -183,14 +183,14 @@ export default async function CategoryPage({ params }: Props) {
                   )}
                 </div>
               </div>
-              <span style={{ color: '#a78bfa', fontSize: '.875rem', flexShrink: 0 }} aria-hidden="true">→</span>
+              <span style={{ color: 'var(--accent-text)', fontSize: '.875rem', flexShrink: 0 }} aria-hidden="true">→</span>
             </a>
           ))}
         </div>
 
         {/* ── FAQ catégorie (même source que le JSON-LD) ── */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginTop: '2rem' }}>
-          <h2 style={{ fontFamily: "var(--font-syne),Syne,sans-serif", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
             Questions fréquentes — {cat.label}
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -208,7 +208,7 @@ export default async function CategoryPage({ params }: Props) {
 
         {/* ── Autres catégories ── */}
         <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-          <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '0.875rem', fontFamily: "var(--font-syne),Syne,sans-serif" }}>
+          <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '0.875rem', fontFamily: "var(--font-display)" }}>
             Autres catégories
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -217,7 +217,7 @@ export default async function CategoryPage({ params }: Props) {
                 {c.label}
               </a>
             ))}
-            <a href="/codes" style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'rgba(124,58,237,.1)', border: '1px solid rgba(124,58,237,.25)', color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}>
+            <a href="/codes" style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'rgba(255,212,59,.1)', border: '1px solid rgba(255,212,59,.25)', color: 'var(--accent-text)', textDecoration: 'none', fontWeight: 600 }}>
               Tous les codes →
             </a>
           </div>

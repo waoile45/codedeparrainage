@@ -14,7 +14,7 @@ const S = {
   body:      { maxWidth: 1140, margin: '0 auto', padding: '2rem 1.5rem 4rem' } as React.CSSProperties,
   statGrid:  { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 28 } as React.CSSProperties,
   statCard:  { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '1.25rem 1.5rem' } as React.CSSProperties,
-  statVal:   { fontSize: '1.8rem', fontWeight: 800, color: '#a78bfa', lineHeight: 1, marginBottom: 4, fontFamily: "'Syne', sans-serif" } as React.CSSProperties,
+  statVal:   { fontSize: '1.8rem', fontWeight: 800, color: 'var(--accent-text)', lineHeight: 1, marginBottom: 4, fontFamily: "var(--font-display)" } as React.CSSProperties,
   statLabel: { fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500 } as React.CSSProperties,
   tabBar:    { display: 'flex', gap: 4, marginBottom: 20, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 4, width: 'fit-content' } as React.CSSProperties,
   panel:     { background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '1.5rem', overflow: 'hidden' } as React.CSSProperties,
@@ -22,25 +22,25 @@ const S = {
   search:    { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '0.6rem 1rem 0.6rem 2.5rem', color: '#fff', fontSize: '0.85rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' } as React.CSSProperties,
   rows:      { display: 'flex', flexDirection: 'column', gap: 6 } as React.CSSProperties,
   row:       { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.8rem 1rem', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)', gap: 12 } as React.CSSProperties,
-  code:      { fontFamily: 'monospace', fontSize: '0.8rem', color: '#a78bfa', background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.2)', padding: '1px 7px', borderRadius: 6 } as React.CSSProperties,
-  avatar:    { width: 34, height: 34, borderRadius: '50%', background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 800, color: '#a78bfa', flexShrink: 0 } as React.CSSProperties,
+  code:      { fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--accent-text)', background: 'rgba(255,212,59,0.12)', border: '1px solid rgba(255,212,59,0.2)', padding: '1px 7px', borderRadius: 6 } as React.CSSProperties,
+  avatar:    { width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,212,59,0.2)', border: '1px solid rgba(255,212,59,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-text)', flexShrink: 0 } as React.CSSProperties,
   empty:     { textAlign: 'center' as const, padding: '3rem', color: 'rgba(255,255,255,0.2)', fontSize: '0.875rem' },
 }
 
 function Btn({ children, onClick, variant = 'ghost', disabled = false }: { children: React.ReactNode; onClick?: () => void; variant?: 'primary' | 'ghost' | 'danger' | 'credit'; disabled?: boolean }) {
   const base: React.CSSProperties = { fontSize: '0.75rem', border: 'none', borderRadius: 8, padding: '0.35rem 0.75rem', cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontWeight: 600, whiteSpace: 'nowrap', opacity: disabled ? 0.5 : 1, transition: 'all 0.15s' }
   const variants: Record<string, React.CSSProperties> = {
-    primary: { background: '#7c3aed', color: '#fff', padding: '0.5rem 1.1rem', fontSize: '0.82rem' },
+    primary: { background: 'var(--accent)', color: 'var(--accent-ink)', padding: '0.5rem 1.1rem', fontSize: '0.82rem' },
     ghost:   { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)' },
     danger:  { background: 'rgba(239,68,68,0.08)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' },
-    credit:  { background: 'rgba(124,58,237,0.1)', color: '#a78bfa', border: '1px solid rgba(124,58,237,0.3)' },
+    credit:  { background: 'rgba(255,212,59,0.1)', color: 'var(--accent-text)', border: '1px solid rgba(255,212,59,0.3)' },
   }
   return <button style={{ ...base, ...variants[variant] }} onClick={onClick} disabled={disabled}>{children}</button>
 }
 
 function TabBtn({ label, count, active, onClick }: { label: string; count?: number; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} style={{ padding: '0.45rem 1rem', borderRadius: 10, fontSize: '0.82rem', fontWeight: 600, border: 'none', cursor: 'pointer', background: active ? '#7c3aed' : 'none', color: active ? '#fff' : 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit', transition: 'all 0.15s' }}>
+    <button onClick={onClick} style={{ padding: '0.45rem 1rem', borderRadius: 10, fontSize: '0.82rem', fontWeight: 600, border: 'none', cursor: 'pointer', background: active ? 'var(--accent)' : 'none', color: active ? '#fff' : 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit', transition: 'all 0.15s' }}>
       {label}
       {count !== undefined && (
         <span style={{ background: active ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)', borderRadius: 100, fontSize: '0.67rem', padding: '1px 6px', fontWeight: 700 }}>{count}</span>
@@ -204,7 +204,7 @@ export default function AdminPage() {
       <nav style={S.nav}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <a href="/" style={S.logo}>
-            <span>code<span style={{ color: '#7c3aed' }}>de</span>parrainage.com</span>
+            <span>code<span style={{ color: 'var(--accent)' }}>de</span>parrainage.com</span>
           </a>
           <span style={S.badge}>ADMIN</span>
         </div>
@@ -273,7 +273,7 @@ export default function AdminPage() {
                       </div>
                       {givingBoost === ann.id ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <input type="number" value={boostDays} onChange={e => setBoostDays(e.target.value)} placeholder="jours" min={1} style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.4)', borderRadius: 8, padding: '0.35rem 0.6rem', color: '#fff', fontSize: '0.82rem', width: 70, outline: 'none', fontFamily: 'inherit' }} />
+                          <input type="number" value={boostDays} onChange={e => setBoostDays(e.target.value)} placeholder="jours" min={1} style={{ background: 'rgba(255,212,59,0.1)', border: '1px solid rgba(255,212,59,0.4)', borderRadius: 8, padding: '0.35rem 0.6rem', color: '#fff', fontSize: '0.82rem', width: 70, outline: 'none', fontFamily: 'inherit' }} />
                           <Btn variant="primary" onClick={() => handleGiveBoost(ann)} disabled={boostLoading}>{boostLoading ? '...' : 'OK'}</Btn>
                           <button onClick={() => setGivingBoost(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '1rem', padding: '0 2px' }}>✕</button>
                         </div>
@@ -323,13 +323,13 @@ export default function AdminPage() {
                               onChange={e => setCreditAmount(e.target.value)}
                               placeholder="ex: 10 ou -5"
                               autoFocus
-                              style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.4)', borderRadius: 8, padding: '0.35rem 0.6rem', color: '#fff', fontSize: '0.82rem', width: 110, outline: 'none', fontFamily: 'inherit' }}
+                              style={{ background: 'rgba(255,212,59,0.1)', border: '1px solid rgba(255,212,59,0.4)', borderRadius: 8, padding: '0.35rem 0.6rem', color: '#fff', fontSize: '0.82rem', width: 110, outline: 'none', fontFamily: 'inherit' }}
                             />
                             <Btn variant="primary" onClick={() => handleGiveCredits(user.id)} disabled={creditLoading}>{creditLoading ? '...' : 'OK'}</Btn>
                             <button onClick={() => { setGivingCredits(null); setCreditAmount('') }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0 2px' }}>✕</button>
                           </div>
                         ) : (
-                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#a78bfa' }}>{(user.credits?.[0]?.balance ?? 0).toFixed(1)} cr.</span>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--accent-text)' }}>{(user.credits?.[0]?.balance ?? 0).toFixed(1)} cr.</span>
                         )}
                         <Btn variant="credit" onClick={() => { setGivingCredits(user.id); setCreditAmount('') }}>⚡ Crédits</Btn>
                         <Btn variant={user.badge_parrain_mois ? 'primary' : 'ghost'} onClick={() => handleToggleBadge(user.id, !!user.badge_parrain_mois)}>
@@ -386,8 +386,8 @@ export default function AdminPage() {
                   { val: companies.length,                label: 'Entreprises référencées',     icon: '🏢' },
                   { val: totalCredits.toFixed(2) + ' cr.',label: 'Crédits en circulation',      icon: '⚡' },
                 ].map(({ val, label, icon }) => (
-                  <div key={label} style={{ background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.18)', borderRadius: 20, padding: '2rem' }}>
-                    <div style={{ fontSize: '2.5rem', fontWeight: 800, color: '#a78bfa', lineHeight: 1, fontFamily: "'Syne',sans-serif" }}>{val}</div>
+                  <div key={label} style={{ background: 'rgba(255,212,59,0.07)', border: '1px solid rgba(255,212,59,0.18)', borderRadius: 20, padding: '2rem' }}>
+                    <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--accent-text)', lineHeight: 1, fontFamily: "var(--font-display)" }}>{val}</div>
                     <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>{icon} {label}</div>
                   </div>
                 ))}
@@ -402,7 +402,7 @@ export default function AdminPage() {
       {showCompanyModal && (
         <div onClick={e => { if (e.target === e.currentTarget) { setShowCompanyModal(false); setEditingCompany(null) } }}
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '1rem' }}>
-          <div style={{ background: '#13131a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '1.75rem', width: '100%', maxWidth: 440 }}>
+          <div style={{ background: 'var(--bg-raised)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '1.75rem', width: '100%', maxWidth: 440 }}>
             <div style={{ fontSize: '1rem', fontWeight: 700, color: '#fff', marginBottom: '1.25rem' }}>
               {editingCompany ? 'Modifier' : 'Ajouter'} une entreprise
             </div>
@@ -425,7 +425,7 @@ export default function AdminPage() {
             <div style={{ marginBottom: 12 }}>
               <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'rgba(255,255,255,0.35)', marginBottom: 5, letterSpacing: '0.05em' }}>CATÉGORIE</div>
               <select value={companyForm.category} onChange={e => setCompanyForm(p => ({ ...p, category: e.target.value }))}
-                style={{ width: '100%', background: '#13131a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '0.65rem 1rem', color: '#fff', fontSize: '0.875rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' as const }}>
+                style={{ width: '100%', background: 'var(--bg-raised)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '0.65rem 1rem', color: '#fff', fontSize: '0.875rem', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' as const }}>
                 <option value="">Choisir...</option>
                 {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>)}
               </select>
@@ -436,7 +436,7 @@ export default function AdminPage() {
                 Annuler
               </button>
               <button onClick={handleSaveCompany} disabled={formLoading}
-                style={{ flex: 1, padding: '0.75rem', borderRadius: 12, fontSize: '0.875rem', fontWeight: 600, cursor: formLoading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', background: '#7c3aed', border: 'none', color: '#fff', opacity: formLoading ? 0.6 : 1 }}>
+                style={{ flex: 1, padding: '0.75rem', borderRadius: 12, fontSize: '0.875rem', fontWeight: 600, cursor: formLoading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', background: 'var(--accent)', border: 'none', color: 'var(--accent-ink)', opacity: formLoading ? 0.6 : 1 }}>
                 {formLoading ? 'Sauvegarde...' : 'Sauvegarder'}
               </button>
             </div>
