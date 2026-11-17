@@ -1204,6 +1204,7 @@ export const ENTREPRISES: Entreprise[] = [
   { nom: "NordVPN", domain: "nordvpn.com", logo: "https://www.google.com/s2/favicons?domain=nordvpn.com&sz=64" },
   { nom: "Nostalgift", domain: "nostalgift.com", logo: "https://www.google.com/s2/favicons?domain=nostalgift.com&sz=64" },
   { nom: "nounou top", domain: "nounou-top.com", logo: "https://www.google.com/s2/favicons?domain=nounou-top.com&sz=64" },
+  { nom: "Nous Portal", domain: "portal.nousresearch.com", logo: "https://www.google.com/s2/favicons?domain=portal.nousresearch.com&sz=64" },
   { nom: "novakid", domain: "novakid.com", logo: "https://www.google.com/s2/favicons?domain=novakid.com&sz=64" },
   { nom: "Novoma", domain: "novoma.com", logo: "https://www.google.com/s2/favicons?domain=novoma.com&sz=64" },
   { nom: "Noz", domain: "noz.com", logo: "https://www.google.com/s2/favicons?domain=noz.com&sz=64" },
