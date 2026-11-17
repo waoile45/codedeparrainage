@@ -13,7 +13,7 @@ function LegalLayout({ title, lastUpdate, children }: { title:string; lastUpdate
         .legal-page { max-width:760px; margin:0 auto; padding:3rem 1.5rem 6rem; }
 
         .legal-header { margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid rgba(255,255,255,.07); }
-        .legal-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:.75rem; }
+        .legal-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600;   color:var(--accent); margin-bottom:.75rem; }
         .legal-label::before { content:''; width:18px; height:1px; background:var(--accent); display:block; }
         .legal-title { font-family:var(--font-display); font-weight:800; font-size:clamp(1.5rem,3.5vw,2rem); color:#fff; letter-spacing:-.03em; margin-bottom:.5rem; }
         .legal-update { font-size:.78rem; color:rgba(255,255,255,.3); }

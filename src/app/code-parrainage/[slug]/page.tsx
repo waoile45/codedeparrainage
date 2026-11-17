@@ -361,7 +361,7 @@ export default async function CompanyPage({ params }: Props) {
                 {others.map((ann: any) => {
                   const { gain, description } = parseAnnouncementDescription(ann.description)
                   return (
-                    <li key={ann.id} className="bp-row">
+                    <li key={ann.id} className="bp-row reveal">
                       <div className="bp-row-code">
                         <span className="code-str" title={ann.code}>
                           {isLink(ann.code) ? ann.code.replace(/^https?:\/\/(www\.)?/i, '') : ann.code}
@@ -391,7 +391,7 @@ export default async function CompanyPage({ params }: Props) {
         <section className="band-paper bp-help">
           <div className="wrap bp-help-grid">
             <div>
-              <h2>Comment utiliser un code parrainage {name}</h2>
+              <h2 className="reveal">Comment utiliser un code parrainage {name}</h2>
               <ol className="bp-steps">
                 {steps.map((s, i) => (
                   <li key={i}>{s}</li>
@@ -401,7 +401,7 @@ export default async function CompanyPage({ params }: Props) {
             <div>
               <h2>Questions sur le parrainage {name}</h2>
               {faq.map((item, i) => (
-                <details key={i} className="bp-qa">
+                <details key={i} className="bp-qa reveal">
                   <summary><h3>{item.q}</h3></summary>
                   <p>{item.a}</p>
                 </details>

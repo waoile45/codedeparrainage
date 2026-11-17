@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Turnstile } from '@marsidev/react-turnstile'
+import { Inbox } from "@/components/Pictos";
 
 export default function RegisterPage() {
   const [email, setEmail]               = useState('')
@@ -143,7 +144,7 @@ export default function RegisterPage() {
         }
         .auth-input.has-toggle { padding-right:2.75rem; }
         .auth-input::placeholder { color:rgba(255,255,255,0.25); }
-        .auth-input:focus { border-color:rgba(255,212,59,0.45); background:rgba(255,212,59,0.05); box-shadow:0 0 0 3px rgba(255,212,59,0.1); }
+        .auth-input:focus { border-color:rgba(255,212,59,0.45); background:rgba(255,212,59,0.05);  }
         .pwd-toggle {
           position:absolute; right:0.875rem; top:50%; transform:translateY(-50%);
           background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.3);
@@ -157,7 +158,7 @@ export default function RegisterPage() {
           border-radius:13px; padding:0.875rem; font-size:0.9rem; font-weight:700;
           cursor:pointer; transition:all 0.2s; font-family:var(--font-text);
         }
-        .auth-btn:hover:not(:disabled) { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 6px 24px rgba(255,212,59,0.4); }
+        .auth-btn:hover:not(:disabled) { background:var(--accent-hover); transform:translateY(-1px);  }
         .auth-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
         .auth-btn-google {
           display:flex; align-items:center; justify-content:center; gap:10px;
@@ -185,7 +186,7 @@ export default function RegisterPage() {
 
           {success ? (
             <div style={{ textAlign:"center", padding:"1rem 0" }}>
-              <div style={{ fontSize:"2.5rem", marginBottom:"1rem" }}>📬</div>
+              <div style={{ marginBottom:"1rem", color:"var(--accent-text)" }}><Inbox size={48} /></div>
               <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.15rem", color:"#fff", marginBottom:".5rem" }}>Vérifie ta boîte mail !</p>
               <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem", lineHeight:1.6, marginBottom:"1.5rem" }}>
                 On t&apos;a envoyé un lien de confirmation à <strong style={{ color:"rgba(255,255,255,.7)" }}>{email}</strong>.<br/>

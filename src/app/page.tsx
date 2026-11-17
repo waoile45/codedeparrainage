@@ -168,7 +168,7 @@ export default async function HomePage() {
           <div className="wrap hp-hero-grid">
             <div className="hp-hero-text">
               <h1 className="display-wide">
-                Ne t&apos;inscris plus sans <span className="mark-dark">code parrainage</span>.
+                Ne t&apos;inscris plus sans <span className="mark-dark">code</span> <span className="mark-dark">parrainage</span>.
               </h1>
               <p className="hp-lede">
                 Chez une banque en ligne, une appli de cashback ou un courtier, le code saisi à l&apos;inscription
@@ -213,7 +213,7 @@ export default async function HomePage() {
               {d.brands.map((b, i) => (
                 <li key={b.urlSlug} className="reveal" data-delay={String(Math.min(i % 4, 3))}>
                   <Link href={`/code-parrainage/${b.urlSlug}`} className="hp-brand-row">
-                    <img src={`https://www.google.com/s2/favicons?domain=${b.domain}&sz=64`} alt="" width={32} height={32} loading="lazy" />
+                    <img src={`https://www.google.com/s2/favicons?domain=${b.domain}&sz=64`} alt="" width={32} height={32} loading="lazy" decoding="async" />
                     <span className="hp-brand-name">{b.name}</span>
                     <span className="hp-brand-bonus">{b.bonus ?? 'Prime selon les conditions de la marque'}</span>
                     <span className="hp-brand-count tnum">{b.count} code{b.count > 1 ? 's' : ''}</span>

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import { CategoryIcon } from "@/components/CategoryIcons";
+import { Cross } from "@/components/Pictos";
 
 type Category = "Tout" | "banque" | "paris" | "cashback" | "energie" | "telephonie" | "crypto" | "assurance" | "shopping";
 
@@ -81,17 +82,17 @@ function MiniStars({ avg, count, topTag }: { avg:number; count:number; topTag?:s
 }
 
 const TAGS_POSITIVE = [
-  { key:"code_ok",       label:"Code fonctionnel", emoji:"✅" },
-  { key:"reponse_rapide",label:"Réponse rapide",   emoji:"⚡" },
-  { key:"bon_gain",      label:"Bon gain",          emoji:"🎁" },
-  { key:"sympa",         label:"Parrain sympa",     emoji:"🤝" },
-  { key:"annonce_complete", label:"Annonce complète", emoji:"📋" },
+  { key:"code_ok",       label:"Code fonctionnel" },
+  { key:"reponse_rapide",label:"Réponse rapide" },
+  { key:"bon_gain",      label:"Bon gain" },
+  { key:"sympa",         label:"Parrain sympa" },
+  { key:"annonce_complete", label:"Annonce complète" },
 ];
 const TAGS_NEGATIVE = [
-  { key:"code_expire",   label:"Code expiré",        emoji:"⏰" },
-  { key:"code_invalide", label:"Code invalide",       emoji:"❌" },
-  { key:"desc_inexacte", label:"Description inexacte",emoji:"⚠️" },
-  { key:"inactif",       label:"Parrain inactif",     emoji:"💤" },
+  { key:"code_expire",   label:"Code expiré" },
+  { key:"code_invalide", label:"Code invalide" },
+  { key:"desc_inexacte", label:"Description inexacte" },
+  { key:"inactif",       label:"Parrain inactif" },
 ];
 const ALL_TAGS = [...TAGS_POSITIVE, ...TAGS_NEGATIVE];
 
@@ -142,7 +143,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
   }
 
   return (
-    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", backdropFilter:"blur(4px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={onClose}>
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={onClose}>
       <div style={{ background:"var(--bg-card)", border:"1px solid rgba(255,212,59,.3)", borderRadius:24, padding:"1.75rem", maxWidth:460, width:"100%", position:"relative", maxHeight:"90vh", overflowY:"auto" }} onClick={e=>e.stopPropagation()}>
         <button onClick={onClose} style={{ position:"absolute", top:14, right:14, background:"none", border:"none", color:"rgba(255,255,255,.3)", cursor:"pointer", fontSize:"1.25rem", lineHeight:1 }}>×</button>
 
@@ -162,7 +163,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
             </p>
 
             {/* Tags positifs */}
-            <p style={{ fontSize:".72rem", fontWeight:700, letterSpacing:".08em", textTransform:"uppercase", color:"rgba(34,197,94,.6)", marginBottom:".6rem" }}>Positif</p>
+            <p style={{ fontSize:".72rem", fontWeight:700, color:"rgba(34,197,94,.6)", marginBottom:".6rem" }}>Positif</p>
             <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:"1.25rem" }}>
               {TAGS_POSITIVE.map(t => {
                 const active = selectedTags.includes(t.key);
@@ -176,7 +177,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
             </div>
 
             {/* Tags négatifs */}
-            <p style={{ fontSize:".72rem", fontWeight:700, letterSpacing:".08em", textTransform:"uppercase", color:"rgba(239,68,68,.6)", marginBottom:".6rem" }}>Négatif</p>
+            <p style={{ fontSize:".72rem", fontWeight:700, color:"rgba(239,68,68,.6)", marginBottom:".6rem" }}>Négatif</p>
             <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:"1.5rem" }}>
               {TAGS_NEGATIVE.map(t => {
                 const active = selectedTags.includes(t.key);
@@ -190,7 +191,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
             </div>
 
             {/* Étoiles optionnelles */}
-            <p style={{ fontSize:".72rem", fontWeight:700, letterSpacing:".08em", textTransform:"uppercase", color:"rgba(255,255,255,.25)", marginBottom:".75rem" }}>Note globale <span style={{ fontWeight:400, textTransform:"none", letterSpacing:0 }}>(optionnel)</span></p>
+            <p style={{ fontSize:".72rem", fontWeight:700, color:"rgba(255,255,255,.25)", marginBottom:".75rem" }}>Note globale <span style={{ fontWeight:400, textTransform:"none", letterSpacing:0 }}>(optionnel)</span></p>
             <div style={{ display:"flex", gap:8, marginBottom:"1.25rem" }}>
               {[1,2,3,4,5].map(n => (
                 <button key={n} type="button" onClick={() => setRating(r => r===n?0:n)} onMouseEnter={() => setHovered(n)} onMouseLeave={() => setHovered(0)}
@@ -200,7 +201,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
                   </svg>
                 </button>
               ))}
-              {rating > 0 && <button type="button" onClick={() => setRating(0)} style={{ background:"none", border:"none", color:"rgba(255,255,255,.2)", fontSize:".75rem", cursor:"pointer", padding:2 }}>✕</button>}
+              {rating > 0 && <button type="button" onClick={() => setRating(0)} style={{ background:"none", border:"none", color:"rgba(255,255,255,.4)", cursor:"pointer", padding:2, display:"inline-flex" }} aria-label="Effacer la note"><Cross size={14} /></button>}
             </div>
 
             {/* Commentaire */}
@@ -653,7 +654,7 @@ export default function CodesClient() {
 
       {/* Modal édition */}
       {editModal && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", backdropFilter:"blur(4px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={() => setEditModal(null)}>
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={() => setEditModal(null)}>
           <div style={{ background:"var(--bg-card)", border:"1px solid rgba(255,212,59,.3)", borderRadius:24, padding:"1.75rem", maxWidth:460, width:"100%", position:"relative" }} onClick={e=>e.stopPropagation()}>
             <button onClick={() => setEditModal(null)} style={{ position:"absolute", top:14, right:14, background:"none", border:"none", color:"rgba(255,255,255,.3)", cursor:"pointer", fontSize:"1.25rem" }}>×</button>
             <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1rem", color:"var(--text-strong)", marginBottom:"1.25rem" }}>Modifier mon annonce</p>
@@ -676,7 +677,7 @@ export default function CodesClient() {
 
       {/* Modal suppression */}
       {deleteConfirm && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", backdropFilter:"blur(4px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={() => setDeleteConfirm(null)}>
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={() => setDeleteConfirm(null)}>
           <div style={{ background:"var(--bg-card)", border:"1px solid rgba(239,68,68,.3)", borderRadius:24, padding:"1.75rem", maxWidth:400, width:"100%", textAlign:"center" }} onClick={e=>e.stopPropagation()}>
             <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1rem", color:"var(--text-strong)", marginBottom:".5rem" }}>Supprimer cette annonce ?</p>
             <p style={{ fontSize:".875rem", color:"var(--text-muted)", marginBottom:"1.5rem" }}>Cette action est irréversible.</p>

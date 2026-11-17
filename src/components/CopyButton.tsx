@@ -37,7 +37,8 @@ export default function CopyButton({ code, variant = "line" }: { code: string; v
         .copy-ink:hover { background: #000; }
         .copy-line { background: transparent; color: var(--text-strong); border: 0; box-shadow: inset 0 0 0 1.5px var(--border-lg); }
         .copy-line:hover { box-shadow: inset 0 0 0 1.5px var(--accent); }
-        .copy-btn.is-copied { background: var(--ok); color: #0B2016; box-shadow: none; }
+        .copy-btn.is-copied { background: var(--ok); color: #0B2016; box-shadow: none; animation: copy-pop .35s cubic-bezier(.3,1.6,.5,1); }
+        @keyframes copy-pop { 0% { transform: scale(.9); } 100% { transform: scale(1); } }
       `}</style>
     </button>
   )

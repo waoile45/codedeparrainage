@@ -1,0 +1,128 @@
+/* Classement des parrains. Préfixe cl-. Animations : transform et opacity. */
+
+.cl { background: var(--bg); color: var(--text-strong); min-height: 100vh; }
+.cl h2 { font-weight: 800; font-size: clamp(1.7rem, 3.6vw, 2.6rem); line-height: 1.04; margin: 0 0 1rem; }
+
+/* ── En-tête ─────────────────────────────────────────────────────────── */
+.cl-hero { padding: clamp(2rem, 5vw, 4rem) 0 0; overflow: hidden; }
+.cl-title { font-weight: 800; font-size: clamp(2.4rem, 6vw, 4.6rem); line-height: .98; letter-spacing: -0.02em; margin: 0 0 1.1rem; font-stretch: 122%; }
+.cl-lede { max-width: 60ch; margin: 0; font-size: clamp(1.02rem, 1.4vw, 1.15rem); line-height: 1.6; color: var(--text-muted); }
+
+/* ── Podium dessiné ──────────────────────────────────────────────────── */
+.cl-podium {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end;
+  gap: clamp(6px, 1.4vw, 14px); max-width: 860px; margin: clamp(2.5rem, 6vw, 4rem) auto 0;
+}
+.cl-step { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.cl-step-who { display: flex; flex-direction: column; align-items: center; gap: .45rem; margin-bottom: 1rem; text-decoration: none; color: inherit; min-width: 0; max-width: 100%; }
+.cl-step-pseudo { display: inline-flex; align-items: center; gap: .4rem; max-width: 100%; font-weight: 800; font-size: clamp(.95rem, 1.6vw, 1.15rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl-step-who:hover .cl-step-pseudo { text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 4px; }
+.cl-step-xp { font-size: .95rem; color: var(--text-muted); font-weight: 600; }
+
+.cl-block-clip { width: 100%; overflow: hidden; border-radius: 12px 12px 0 0; }
+.cl-step-1 .cl-block-clip { height: clamp(150px, 22vw, 220px); }
+.cl-step-2 .cl-block-clip { height: clamp(110px, 15vw, 155px); }
+.cl-step-3 .cl-block-clip { height: clamp(80px, 11vw, 112px); }
+.cl-block { height: 100%; display: grid; place-items: start center; padding-top: .3rem; background: var(--paper-2); color: var(--ink); }
+.cl-step-1 .cl-block { background: var(--accent); }
+.cl-step-2 .cl-block { background: var(--paper); }
+.cl-block-num {
+  font-family: var(--font-display), sans-serif; font-weight: 800; font-stretch: 125%; line-height: 1;
+  font-size: clamp(3rem, 8vw, 6.5rem); letter-spacing: -0.03em;
+}
+.cl-step-1 .cl-block-num { font-size: clamp(4rem, 11vw, 8.5rem); }
+
+/* Les marches montent (3e, 2e, puis 1er), les membres arrivent ensuite. */
+html.js .cl-block { transform: translate3d(0, 100%, 0); transition: transform .9s cubic-bezier(.2,.8,.2,1); }
+html.js .cl-step-who { opacity: 0; transform: translate3d(0, 14px, 0); transition: opacity .5s ease, transform .5s ease; }
+html.js .cl-podium.is-up .cl-block,
+html.js .cl-podium.is-up .cl-step-who { transform: none; opacity: 1; }
+.cl-step-3 .cl-block { transition-delay: 0s; }
+.cl-step-2 .cl-block { transition-delay: .12s; }
+.cl-step-1 .cl-block { transition-delay: .24s; }
+.cl-step-3 .cl-step-who { transition-delay: .75s; }
+.cl-step-2 .cl-step-who { transition-delay: .85s; }
+.cl-step-1 .cl-step-who { transition-delay: .95s; }
+.cl-podium-skel .cl-block { transform: none !important; background: var(--bg-raised); }
+
+/* ── Avatar ──────────────────────────────────────────────────────────── */
+.cl-avatar {
+  display: inline-grid; place-items: center; flex-shrink: 0; border-radius: 50%; overflow: hidden;
+  background: var(--accent); color: var(--accent-ink); font-family: var(--font-display), sans-serif; font-weight: 800;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+.cl-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.cl-me { display: inline-block; padding: 1px 7px; border-radius: 6px; background: var(--accent); color: var(--accent-ink); font-size: .72rem; font-weight: 800; }
+
+/* ── Récompenses (papier) ────────────────────────────────────────────── */
+.cl-rewards { padding: clamp(3.5rem, 8vw, 6rem) 0; margin-top: -1px; }
+.cl-rewards-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+.cl-rewards h2 { color: var(--ink); }
+.cl-rewards-lede { margin: 0; color: var(--ink-soft); line-height: 1.6; }
+.cl-rewards-list { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--ink); }
+.cl-rewards-list li { display: flex; align-items: flex-start; gap: 1rem; padding: 1.1rem 0; border-bottom: 1px solid rgba(20,20,20,.14); color: var(--ink-soft); line-height: 1.5; }
+.cl-rewards-list strong { display: block; font-family: var(--font-display), sans-serif; font-stretch: 112%; font-weight: 800; font-size: 1.15rem; color: var(--ink); }
+.cl-rewards-list svg { color: var(--ink); margin-top: 2px; }
+
+/* ── Liste ───────────────────────────────────────────────────────────── */
+.cl-list-section { padding: clamp(3.5rem, 8vw, 6rem) 0; }
+.cl-list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.cl-count { color: var(--text-dim); font-weight: 600; }
+.cl-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border-lg); }
+.cl-row {
+  display: grid; grid-template-columns: 3.2rem 40px minmax(0, 1.3fr) auto minmax(8rem, 1fr);
+  align-items: center; gap: 1rem; padding: .85rem .5rem; border-bottom: 1px solid var(--border-md);
+}
+.cl-row.is-me { background: var(--accent-tint); border-radius: 10px; }
+.cl-rank { font-family: var(--font-display), sans-serif; font-stretch: 112%; font-weight: 800; font-size: 1.35rem; color: var(--text-dim); text-align: right; }
+.cl-row.is-me .cl-rank { color: var(--accent-text); }
+.cl-who { display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .5rem; min-width: 0; }
+.cl-pseudo { font-weight: 800; color: var(--text-strong); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.cl-pseudo:hover { text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 4px; }
+.cl-level { flex-basis: 100%; font-size: .85rem; color: var(--text-dim); }
+.cl-stats { display: flex; gap: 1rem; color: var(--text-dim); font-size: .92rem; font-weight: 600; }
+.cl-stats > span { display: inline-flex; align-items: center; gap: .35rem; }
+.cl-xp { display: flex; flex-direction: column; align-items: flex-end; gap: .4rem; }
+.cl-xp-num { font-family: var(--font-display), sans-serif; font-stretch: 112%; font-weight: 800; font-size: 1.05rem; }
+.cl-xp-num small { font-family: var(--font-text), sans-serif; font-size: .78rem; font-weight: 600; color: var(--text-dim); }
+.cl-bar { display: block; width: 100%; height: 6px; border-radius: 3px; background: var(--border-md); overflow: hidden; }
+.cl-bar-fill { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: left center; transform: scaleX(var(--v)); }
+html.js .cl-row.reveal .cl-bar-fill { transform: scaleX(0); transition: transform 1s cubic-bezier(.2,.8,.2,1) .15s; }
+html.js .cl-row.reveal.in .cl-bar-fill { transform: scaleX(var(--v)); }
+
+.cl-skel .cl-rank, .cl-skel .cl-who span { display: block; height: 14px; border-radius: 6px; background: var(--border-md); }
+.cl-skel .cl-who span { width: 40%; }
+.cl-skel .cl-avatar { background: var(--border-md); box-shadow: none; }
+
+/* ── Ma position ─────────────────────────────────────────────────────── */
+.cl-mine {
+  position: sticky; bottom: 16px; z-index: 50; display: flex; align-items: center; gap: 1rem;
+  width: min(var(--wrap), calc(100% - 2 * var(--gutter))); margin: 0 auto 2rem; padding: .8rem .8rem .8rem 1rem;
+  border-radius: 16px; background: var(--bg-raised); box-shadow: inset 0 0 0 1.5px var(--accent), 0 16px 40px rgba(0,0,0,.45);
+}
+.cl-mine-txt { flex: 1; min-width: 0; color: var(--text-muted); line-height: 1.4; }
+.cl-mine-txt strong { color: var(--text-strong); }
+.cl-mine .btn { min-height: 42px; flex-shrink: 0; }
+
+/* ── Dernier écran ───────────────────────────────────────────────────── */
+.cl-final { background: var(--accent); color: var(--accent-ink); padding: clamp(4rem, 9vw, 7rem) 0; }
+.cl-final h2 { color: var(--accent-ink); font-size: clamp(2rem, 5vw, 4rem); max-width: 18ch; margin-bottom: 2rem; font-stretch: 118%; }
+
+@media (max-width: 860px) {
+  .cl-rewards-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .cl-row { grid-template-columns: 2.2rem 36px minmax(0, 1fr) 6.5rem; gap: .7rem; padding: .8rem .25rem; }
+  .cl-row .cl-avatar { width: 36px !important; height: 36px !important; }
+  .cl-stats { grid-column: 3; grid-row: 2; font-size: .85rem; }
+  .cl-xp { grid-column: 4; grid-row: 1 / span 2; }
+  .cl-rank { font-size: 1.1rem; }
+  .cl-step-who .cl-avatar { width: 46px !important; height: 46px !important; }
+  .cl-step-1 .cl-step-who .cl-avatar { width: 58px !important; height: 58px !important; }
+  .cl-mine { flex-wrap: wrap; }
+  .cl-mine .btn { width: 100%; }
+}
+
+/* Pendant le chargement, la place des noms du podium est réservée (pas de décalage). */
+.cl-podium-skel .cl-step::before { content: ""; display: block; height: 130px; }
+.cl-podium-skel .cl-step-1::before { height: 146px; }

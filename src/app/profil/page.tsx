@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
+import type { ReactNode } from "react";
+import { Bolt, Chat, Check, Crown, Cross, Flame, Gift, Handshake, Lock, Medal, Pencil, Sleep, Stamp, Star, ThumbDown, ThumbUp, Ticket, Trophy, TrendUp, Warning, Clock } from "@/components/Pictos";
 
 type NavSection = "profil" | "annonces" | "messages" | "badges" | "quetes" | "credits" | "parametres" | "avis";
 
@@ -27,7 +29,7 @@ interface Annonce {
   companies: { name: string; category: string } | null;
 }
 
-interface Badge { id: string; label: string; icon: string; unlocked: boolean; desc: string; }
+interface Badge { id: string; label: string; icon: ReactNode; unlocked: boolean; desc: string; }
 
 const XP_THRESHOLDS = [
   { max: 100,   next: "Parrain Bronze" },
@@ -159,7 +161,7 @@ function AvatarUpload({ letter, avatarUrl, size=72, onUpload }: { letter:string;
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setUploading(false); return; }
       const path = `${user.id}/avatar`;
-      const { error } = await supabase.storage.from("avatars").upload(path, blob, { upsert: true, contentType: "image/png" });
+      const { error } = await supabase.storage.from("avatars").upload(path, blob, { upsert: true, contentType: blob.type || "image/png" });
       if (error) { console.error("Avatar upload error:", error); setUploading(false); return; }
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
       const urlWithBust = `${data.publicUrl}?t=${Date.now()}`;
@@ -167,18 +169,18 @@ function AvatarUpload({ letter, avatarUrl, size=72, onUpload }: { letter:string;
       setPreview(urlWithBust);
       onUpload(data.publicUrl);
       setUploading(false);
-    }, "image/png");
+    }, "image/webp", 0.86); // WebP : 10 à 20 fois plus léger que le PNG (Safari retombe sur du PNG)
   };
 
   return (
     <>
       {/* ── Crop Modal ── */}
       {cropSrc && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.82)", backdropFilter:"blur(6px)", zIndex:9999, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:16 }}>
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.82)", zIndex:9999, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:16 }}>
           <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1rem", color:"#fff", marginBottom:4 }}>Recadrer la photo</p>
           <p style={{ fontSize:".78rem", color:"rgba(255,255,255,.4)", marginBottom:8 }}>Glisse pour repositionner · Molette pour zoomer</p>
           <div
-            style={{ width:CROP_SIZE, height:CROP_SIZE, borderRadius:"50%", overflow:"hidden", cursor:dragging?"grabbing":"grab", userSelect:"none", border:"3px solid rgba(255,212,59,.6)", boxShadow:"0 0 40px rgba(255,212,59,.3)" }}
+            style={{ width:CROP_SIZE, height:CROP_SIZE, borderRadius:"50%", overflow:"hidden", cursor:dragging?"grabbing":"grab", userSelect:"none", border:"3px solid rgba(255,212,59,.6)" }}
             onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
             onWheel={e => { e.preventDefault(); const delta = e.deltaY > 0 ? -0.05 : 0.05; const img = imgRef.current; if (!img) return; const minScale = Math.max(CROP_SIZE / img.naturalWidth, CROP_SIZE / img.naturalHeight); setCropScale(s => Math.max(minScale, Math.min(s + delta, 4))); }}
           >
@@ -236,7 +238,7 @@ function EditablePseudo({ value, onSave, size="lg" }: { value:string; onSave:(v:
         <button onClick={confirm} disabled={saving} style={{ background:"rgba(34,197,94,.15)", border:"1px solid rgba(34,197,94,.3)", borderRadius:7, padding:"5px 8px", color:"#4ade80", cursor:"pointer", display:"flex" }}>
           {saving ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> : <I.check />}
         </button>
-        <button onClick={cancel} style={{ background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)", borderRadius:7, padding:"5px 8px", color:"rgba(255,255,255,.4)", cursor:"pointer", fontSize:"0.8rem" }}>✕</button>
+        <button onClick={cancel} style={{ background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)", borderRadius:7, padding:"5px 8px", color:"rgba(255,255,255,.4)", cursor:"pointer", fontSize:"0.8rem", display:"inline-flex" }}><Cross size={13} /></button>
       </div>
       {err && <p style={{ fontSize:".75rem", color:"#f87171", marginTop:4 }}>{err}</p>}
     </div>
@@ -288,7 +290,7 @@ function Sidebar({ active, setActive, user }: { active:NavSection; setActive:(s:
       <div style={{ display:"flex", flexDirection:"column", gap:"1.5rem" }}>
         {NAV_GROUPS.map(group => (
           <div key={group.label}>
-            <p style={{ fontSize:"0.63rem", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(255,255,255,.2)", marginBottom:"0.5rem", paddingLeft:"0.875rem" }}>{group.label}</p>
+            <p style={{ fontSize:"0.63rem", fontWeight:700, letterSpacing:"0.1em", color:"rgba(255,255,255,.2)", marginBottom:"0.5rem", paddingLeft:"0.875rem" }}>{group.label}</p>
             <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
               {group.items.map(item => {
                 const on = active===item.key;
@@ -363,7 +365,7 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
           <div style={{ position:"absolute", inset:0, background:"none", pointerEvents:"none", borderRadius:"inherit" }} />
           <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"var(--border-md)" }} />
           <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.4)" }}><I.bolt /></div><span className="action-label">Streak</span></div>
-          <p className="action-value" style={{ color:"var(--accent-text)", position:"relative", zIndex:1 }}>{user.streak_days} 🔥</p>
+          <p className="action-value" style={{ color:"var(--accent-text)", position:"relative", zIndex:1 }}>{user.streak_days} <Flame size={20} /></p>
           <p className="action-sub" style={{ position:"relative", zIndex:1 }}>jours consécutifs</p>
           <a href="/classement" className="action-btn action-btn-boost" style={{ position:"relative", zIndex:1 }}>Voir le classement <I.arrow /></a>
         </div>
@@ -380,7 +382,7 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
       <div className="g4">
         {[
           { v: annonces.length,          l:"Annonces" },
-          { v: `${user.streak_days} 🔥`, l:"Streak" },
+          { v: <>{user.streak_days} <Flame size={16} /></>, l:"Streak" },
           { v: user.xp,                  l:"XP total" },
         ].map((s,i) => (
           <div key={i} style={{ background:"rgba(255,212,59,.05)", border:"1px solid rgba(255,212,59,.2)", borderRadius:14, padding:"0.9rem 0.75rem", display:"flex", flexDirection:"column", alignItems:"center", gap:3, textAlign:"center" }}>
@@ -432,7 +434,7 @@ function SectionAnnonces({ annonces, onDelete, onEdit }: {
       </div>
       {annonces.length === 0 && (
         <div style={{ textAlign:"center", padding:"3rem", color:"rgba(255,255,255,.25)", fontSize:"0.875rem" }}>
-          <div style={{ fontSize:"2rem", marginBottom:"0.75rem" }}>📋</div>
+          <div style={{ marginBottom:"0.75rem", color:"var(--text-dim)" }}><Ticket size={40} /></div>
           <p>Aucune annonce — <a href="/publier" style={{ color:"var(--accent-text)", textDecoration:"none" }}>publie ton premier code !</a></p>
         </div>
       )}
@@ -444,7 +446,7 @@ function SectionAnnonces({ annonces, onDelete, onEdit }: {
           {/* Ligne principale */}
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:8 }}>
             <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-              <div style={{ width:8, height:8, borderRadius:"50%", background:"#22c55e", boxShadow:"0 0 6px #22c55e", flexShrink:0 }} />
+              <div style={{ width:8, height:8, borderRadius:"50%", background:"#22c55e", flexShrink:0 }} />
               <div>
                 <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
                   <p style={{ fontWeight:700, color:"#fff", fontSize:"0.9rem" }}>{a.companies?.name ?? "Inconnu"}</p>
@@ -459,10 +461,10 @@ function SectionAnnonces({ annonces, onDelete, onEdit }: {
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
               {a.companies?.category && <span className="cat-tag">{a.companies.category}</span>}
-              <span style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>⚡ {a.bumps_today} boosts</span>
-              <a href="/boost" className="btn-ghost-sm">Booster ⚡</a>
+              <span style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>{a.bumps_today}/5 remontées aujourd&apos;hui</span>
+              <a href="/boost" className="btn-ghost-sm"><Bolt size={14} /> Booster</a>
               {editingId !== a.id && (
-                <button className="btn-ghost-sm" onClick={() => startEdit(a)}>✏️ Modifier</button>
+                <button className="btn-ghost-sm" onClick={() => startEdit(a)}><Pencil size={14} /> Modifier</button>
               )}
               <button className="btn-ghost-sm danger" onClick={() => onDelete(a.id)}>Supprimer</button>
             </div>
@@ -502,7 +504,7 @@ function SectionAnnonces({ annonces, onDelete, onEdit }: {
                   disabled={saving || !editCode.trim()}
                   style={{ background:"var(--accent)", color:"var(--accent-ink)", fontWeight:700, fontSize:".82rem", padding:".5rem 1.25rem", borderRadius:10, border:"none", cursor:"pointer", opacity:saving||!editCode.trim()?0.6:1 }}
                 >
-                  {saving ? "Enregistrement…" : "✓ Sauvegarder"}
+                  {saving ? "Enregistrement…" : "Sauvegarder"}
                 </button>
                 <button
                   onClick={cancelEdit}
@@ -523,13 +525,13 @@ function SectionAnnonces({ annonces, onDelete, onEdit }: {
 // ── Section Badges ─────────────────────────────────────────────────────────────
 function SectionBadges({ xp, annoncesCount, isTop3 }: { xp:number; annoncesCount:number; isTop3:boolean }) {
   const badges: Badge[] = [
-    { id:"0", label:"Parrain du mois", icon:"👑", unlocked:isTop3, desc:"Top 3 des parrains avec le plus d'XP" },
-    { id:"1", label:"Première annonce", icon:"🚀", unlocked:annoncesCount > 0, desc:"Tu as publié ton premier code" },
-    { id:"2", label:"Parrain Bronze",   icon:"🥉", unlocked:xp>=100,  desc:"Atteins 100 XP" },
-    { id:"3", label:"Streak x7",        icon:"🔥", unlocked:false,    desc:"Connecte-toi 7 jours de suite" },
-    { id:"4", label:"Premier boost",    icon:"⚡", unlocked:false,    desc:"Booste une annonce" },
-    { id:"5", label:"Parrain Argent",   icon:"🥈", unlocked:xp>=500,  desc:"Atteins 500 XP" },
-    { id:"6", label:"Légende",          icon:"👑", unlocked:xp>=2000, desc:"Atteins 2000 XP" },
+    { id:"0", label:"Parrain du mois", icon:<Crown size={30} />, unlocked:isTop3, desc:"Top 3 des parrains avec le plus d'XP" },
+    { id:"1", label:"Première annonce", icon:<Ticket size={30} />, unlocked:annoncesCount > 0, desc:"Tu as publié ton premier code" },
+    { id:"2", label:"Parrain Bronze",   icon:<Medal rank={3} size={30} />, unlocked:xp>=100,  desc:"Atteins 100 XP" },
+    { id:"3", label:"7 jours d'affilée", icon:<Flame size={30} />, unlocked:false,    desc:"Connecte-toi 7 jours de suite" },
+    { id:"4", label:"Premier boost",    icon:<Bolt size={30} />, unlocked:false,    desc:"Booste une annonce" },
+    { id:"5", label:"Parrain Argent",   icon:<Medal rank={2} size={30} />, unlocked:xp>=500,  desc:"Atteins 500 XP" },
+    { id:"6", label:"Légende",          icon:<Trophy size={30} />, unlocked:xp>=2000, desc:"Atteins 2000 XP" },
   ];
   return (
     <div className="sc">
@@ -537,8 +539,8 @@ function SectionBadges({ xp, annoncesCount, isTop3 }: { xp:number; annoncesCount
       <div className="g3">
         {badges.map(b => (
           <div key={b.id} style={{ position:"relative", background:b.unlocked?"rgba(255,212,59,.07)":"rgba(255,255,255,.03)", border:`1px solid ${b.unlocked?"rgba(255,212,59,.3)":"rgba(255,255,255,.07)"}`, borderRadius:16, padding:"1.4rem 1rem", textAlign:"center", opacity:b.unlocked?1:.42 }}>
-            {!b.unlocked && <div style={{ position:"absolute", top:10, right:10, fontSize:"0.75rem" }}>🔒</div>}
-            <div style={{ fontSize:"2rem", marginBottom:"0.5rem" }}>{b.icon}</div>
+            {!b.unlocked && <div style={{ position:"absolute", top:10, right:10, color:"var(--text-dim)" }}><Lock size={15} /></div>}
+            <div style={{ marginBottom:"0.5rem", color: b.unlocked ? "var(--accent-text)" : "var(--text-dim)" }}>{b.icon}</div>
             <p style={{ fontWeight:700, fontSize:"0.85rem", color:"#fff", marginBottom:3 }}>{b.label}</p>
             <p style={{ fontSize:"0.72rem", color:"rgba(255,255,255,.35)" }}>{b.desc}</p>
           </div>
@@ -562,7 +564,7 @@ function SectionQuetes({ user, annonces, hasReview }: { user:UserProfile; annonc
       <div className="sh"><div><h2 className="st">Quêtes</h2><p className="ss">Complète des quêtes pour gagner de l&apos;XP</p></div></div>
       {quetes.map((q,i) => (
         <div key={i} className={`row-card ${q.done?"done":""}`} style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <div style={{ width:22, height:22, borderRadius:"50%", border:`1.5px solid ${q.done?"rgba(34,197,94,.4)":"rgba(255,255,255,.15)"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.7rem", color:"#4ade80", flexShrink:0, background:q.done?"rgba(34,197,94,.1)":"none" }}>{q.done?"✓":""}</div>
+          <div style={{ width:22, height:22, borderRadius:"50%", border:`1.5px solid ${q.done?"rgba(34,197,94,.4)":"rgba(255,255,255,.15)"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.7rem", color:"#4ade80", flexShrink:0, background:q.done?"rgba(34,197,94,.1)":"none" }}>{q.done ? <Check size={13} /> : null}</div>
           <div style={{ flex:1 }}>
             <p style={{ fontSize:"0.875rem", color:"rgba(255,255,255,.8)", marginBottom:q.done?0:5 }}>{q.label}</p>
             {!q.done && (
@@ -575,7 +577,7 @@ function SectionQuetes({ user, annonces, hasReview }: { user:UserProfile; annonc
           <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
             {!q.done && q.link && (
               <a href={q.link} style={{ fontSize:"0.75rem", fontWeight:600, color:"var(--accent-text)", background:"rgba(255,212,59,.15)", border:"1px solid rgba(255,212,59,.3)", borderRadius:8, padding:"3px 10px", textDecoration:"none", whiteSpace:"nowrap", transition:"all .2s" }}>
-                Faire →
+                Faire
               </a>
             )}
             <span style={{ fontSize:"0.82rem", fontWeight:700, color:q.done?"#4ade80":"rgba(255,255,255,.3)", whiteSpace:"nowrap", fontFamily:"var(--font-display)" }}>+{q.xp} XP</span>
@@ -588,6 +590,16 @@ function SectionQuetes({ user, annonces, hasReview }: { user:UserProfile; annonc
 
 // ── Section Crédits ────────────────────────────────────────────────────────────
 function SectionCredits() {
+  // Solde réel du membre (la section affichait un « 0 » écrit en dur).
+  const [balance, setBalance] = useState<number | null>(null);
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const { data } = await supabase.from("credits").select("balance").eq("user_id", user.id).maybeSingle();
+      setBalance(Number(data?.balance ?? 0));
+    });
+  }, []);
   return (
     <div className="sc">
       <div className="sh">
@@ -601,14 +613,14 @@ function SectionCredits() {
         <div style={{ position:"relative", overflow:"hidden", background:"rgba(255,212,59,.08)", border:"1px solid rgba(255,212,59,.25)", borderRadius:18, padding:"1.75rem" }}>
           <div style={{ position:"relative", zIndex:1 }}>
             <p style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.4)", marginBottom:4 }}>Solde actuel</p>
-            <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"2.75rem", color:"var(--accent-text)", lineHeight:1, marginBottom:4 }}>0</p>
+            <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"2.75rem", color:"var(--accent-text)", lineHeight:1, marginBottom:4 }}>{balance === null ? "…" : balance.toFixed(2).replace(".", ",")}</p>
             <p style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>crédits disponibles</p>
           </div>
-          <div style={{ position:"absolute", right:"1.5rem", bottom:"1rem", fontSize:"3rem", animation:"float 3s ease-in-out infinite" }}>⚡</div>
+          <div style={{ position:"absolute", right:"1.5rem", bottom:"1rem", color:"var(--accent-text)", opacity:.45 }}><Bolt size={56} /></div>
         </div>
         <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"1.5rem", display:"flex", flexDirection:"column", gap:"0.875rem" }}>
           <p style={{ fontSize:"0.8rem", fontWeight:600, color:"rgba(255,255,255,.5)" }}>Pourquoi booster ?</p>
-          {[{ icon:"📈", text:<>3× plus de vues</> },{ icon:"🏆", text:<>Tête du classement</> },{ icon:"⚡", text:<>XP bonus</>}].map((item,i) => (
+          {[{ icon:<TrendUp size={16} />, text:<>En tête de l&apos;annuaire</> },{ icon:<Ticket size={16} />, text:<>Badge « Annonce boostée »</> },{ icon:<Bolt size={16} />, text:<>Actif tout de suite</>}].map((item,i) => (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:8 }}><span>{item.icon}</span><p style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.55)" }}>{item.text}</p></div>
           ))}
         </div>
@@ -626,12 +638,12 @@ function SectionParametres({ user, onPseudoSave, onAvatarUpload, onBioSave }: { 
     <div className="sc">
       <div className="sh"><div><h2 className="st">Paramètres du compte</h2><p className="ss">Modifie tes informations personnelles</p></div></div>
       <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:16, padding:"1.25rem 1.5rem" }}>
-        <p style={{ fontSize:"0.7rem", fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase", color:"rgba(255,255,255,.3)", marginBottom:"1rem" }}>Photo de profil & nom d&apos;affichage</p>
+        <p style={{ fontSize:"0.7rem", fontWeight:700, letterSpacing:"0.08em", color:"rgba(255,255,255,.3)", marginBottom:"1rem" }}>Photo de profil & nom d&apos;affichage</p>
         <div style={{ display:"flex", alignItems:"center", gap:"1.5rem" }}>
           <AvatarUpload letter={user.pseudo[0]?.toUpperCase()??"?"} avatarUrl={user.avatar_url} size={60} onUpload={onAvatarUpload} />
           <div style={{ flex:1 }}>
             <EditablePseudo value={user.pseudo} onSave={onPseudoSave} size="sm" />
-            <p style={{ fontSize:"0.7rem", color:"rgba(255,255,255,.25)", marginTop:4 }}>Clique sur ✏️ pour modifier le pseudo · sur l&apos;avatar pour changer la photo</p>
+            <p style={{ fontSize:"0.7rem", color:"rgba(255,255,255,.25)", marginTop:4 }}>Clique sur le crayon pour modifier ton pseudo, et sur l&apos;avatar pour changer la photo.</p>
           </div>
         </div>
       </div>
@@ -641,7 +653,7 @@ function SectionParametres({ user, onPseudoSave, onAvatarUpload, onBioSave }: { 
         <textarea className="form-i form-ta" value={bio} onChange={e=>setBio(e.target.value)} placeholder="Parle un peu de toi..." rows={4} maxLength={300} />
         <p className="form-h">{bio.length}/300 caractères</p>
       </div>
-      <button className={`btn-p${saved?" btn-saved":""}`} onClick={save}>{saved?"✓ Sauvegardé":"Enregistrer"}</button>
+      <button className={`btn-p${saved?" btn-saved":""}`} onClick={save}>{saved?"Sauvegardé":"Enregistrer"}</button>
       <div style={{ paddingTop:"1.5rem", borderTop:"1px solid rgba(255,255,255,.06)", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <p style={{ fontSize:"0.82rem", color:"rgba(255,255,255,.3)" }}>Zone dangereuse</p>
         <button className="btn-danger">Supprimer mon compte</button>
@@ -713,7 +725,7 @@ function SectionMessages() {
 
   if (messages.length === 0) return (
     <div style={{ textAlign: "center", padding: "3rem", color: "rgba(255,255,255,.25)", fontSize: "0.875rem" }}>
-      <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>💬</div>
+      <div style={{ marginBottom: "0.75rem", color: "var(--text-dim)" }}><Chat size={40} /></div>
       <p>Aucun message pour l&apos;instant</p>
       <p style={{ marginTop: 8, fontSize: "0.78rem" }}>Tu peux contacter un parrain depuis la page <a href="/codes" style={{ color: "var(--accent-text)" }}>Codes</a></p>
     </div>
@@ -800,16 +812,16 @@ function Skeleton() {
 }
 
 // ── Section Avis reçus ────────────────────────────────────────────────────────
-const TAGS_INFO: Record<string, { label:string; emoji:string; positive:boolean }> = {
-  code_ok:         { label:"Code fonctionnel",      emoji:"✅", positive:true  },
-  reponse_rapide:  { label:"Réponse rapide",         emoji:"⚡", positive:true  },
-  bon_gain:        { label:"Bon gain",               emoji:"🎁", positive:true  },
-  sympa:           { label:"Parrain sympa",          emoji:"🤝", positive:true  },
-  annonce_complete:{ label:"Annonce complète",       emoji:"📋", positive:true  },
-  code_expire:     { label:"Code expiré",            emoji:"⏰", positive:false },
-  code_invalide:   { label:"Code invalide",          emoji:"❌", positive:false },
-  desc_inexacte:   { label:"Description inexacte",   emoji:"⚠️", positive:false },
-  inactif:         { label:"Parrain inactif",        emoji:"💤", positive:false },
+const TAGS_INFO: Record<string, { label:string; emoji:ReactNode; positive:boolean }> = {
+  code_ok:         { label:"Code fonctionnel",      emoji:<Check size={13} />, positive:true  },
+  reponse_rapide:  { label:"Réponse rapide",         emoji:<Bolt size={13} />, positive:true  },
+  bon_gain:        { label:"Bon gain",               emoji:<Gift size={13} />, positive:true  },
+  sympa:           { label:"Parrain sympa",          emoji:<Handshake size={13} />, positive:true  },
+  annonce_complete:{ label:"Annonce complète",       emoji:<Ticket size={13} />, positive:true  },
+  code_expire:     { label:"Code expiré",            emoji:<Clock size={13} />, positive:false },
+  code_invalide:   { label:"Code invalide",          emoji:<Cross size={13} />, positive:false },
+  desc_inexacte:   { label:"Description inexacte",   emoji:<Warning size={13} />, positive:false },
+  inactif:         { label:"Parrain inactif",        emoji:<Sleep size={13} />, positive:false },
 };
 
 interface ReceivedReview {
@@ -904,7 +916,7 @@ function SectionAvisRecus({ userId }: { userId:string }) {
         <div style={{ textAlign:"center", padding:"2rem", color:"rgba(255,255,255,.25)", fontSize:".875rem" }}>Chargement…</div>
       ) : reviews.length === 0 ? (
         <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2.5rem", textAlign:"center" }}>
-          <div style={{ fontSize:"2rem", marginBottom:".75rem" }}>⭐</div>
+          <div style={{ marginBottom:".75rem", color:"var(--text-dim)" }}><Star size={36} /></div>
           <p style={{ fontFamily:"var(--font-display)", fontWeight:700, color:"rgba(255,255,255,.5)", marginBottom:".5rem" }}>Pas encore d'avis</p>
           <p style={{ fontSize:".825rem", color:"rgba(255,255,255,.25)" }}>Tes avis apparaîtront ici quand des utilisateurs noteront tes annonces.</p>
         </div>
@@ -1015,7 +1027,7 @@ function SectionAvis({ userId }: { userId:string }) {
       .then(({ data }) => { if (data) { setRating(data.rating); setStep("done"); } setChecked(true); });
   }, [userId]);
 
-  const LABELS: Record<number,string> = { 1:"Très mauvais 😤", 2:"Pas terrible 😕", 3:"Correct 😐", 4:"Bien 😊", 5:"Excellent ! 🤩" };
+  const LABELS: Record<number,string> = { 1:"Très mauvais", 2:"Pas terrible", 3:"Correct", 4:"Bien", 5:"Excellent" };
 
   async function submitNegative() {
     setSending(true);
@@ -1049,17 +1061,17 @@ function SectionAvis({ userId }: { userId:string }) {
           <div style={{ display:"flex", gap:10, marginTop:"1.5rem" }}>
             <button type="button" style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:12, padding:".75rem", color:"#f87171", fontSize:".875rem", fontWeight:600, cursor:"pointer", fontFamily:"var(--font-text)", transition:"all .2s" }}
               onClick={() => { setRating(r => r||1); setStep("negative"); }}>
-              👎 Non
+              <ThumbDown size={16} /> Non
             </button>
             <button type="button" style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:6, background:"rgba(34,197,94,.08)", border:"1px solid rgba(34,197,94,.25)", borderRadius:12, padding:".75rem", color:"#4ade80", fontSize:".875rem", fontWeight:600, cursor:"pointer", fontFamily:"var(--font-text)", transition:"all .2s" }}
               onClick={() => { setRating(r => r>=4?r:5); setStep("positive"); }}>
-              👍 Oui
+              <ThumbUp size={16} /> Oui
             </button>
           </div>
           {rating > 0 && (
             <button onClick={() => rating >= 4 ? setStep("positive") : setStep("negative")}
               style={{ marginTop:"1rem", width:"100%", background:"var(--accent)", color:"var(--accent-ink)", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>
-              Continuer →
+              Continuer
             </button>
           )}
         </div>
@@ -1067,9 +1079,9 @@ function SectionAvis({ userId }: { userId:string }) {
 
       {step === "positive" && (
         <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
-          <div style={{ fontSize:"2.5rem", marginBottom:"1rem" }}>🎉</div>
+          <div style={{ marginBottom:"1rem", color:"var(--accent-text)" }}><Stamp size={48} /></div>
           <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Super, merci !</p>
-          <p style={{ color:"rgba(255,255,255,.45)", fontSize:".875rem", marginBottom:"1.5rem" }}>Ça nous ferait vraiment plaisir si tu laissais un avis sur Google — ça prend 30 secondes 🙏</p>
+          <p style={{ color:"rgba(255,255,255,.45)", fontSize:".875rem", marginBottom:"1.5rem" }}>Ça nous ferait vraiment plaisir si tu laissais un avis sur Google — ça prend 30 secondes.</p>
           <a href={GOOGLE_REVIEW_URL} target="_blank" rel="noopener noreferrer"
             style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#4285F4", color:"#fff", textDecoration:"none", borderRadius:12, padding:".8rem 1.5rem", fontWeight:700, fontSize:".875rem", fontFamily:"var(--font-text)" }}
             onClick={async () => {
@@ -1094,7 +1106,7 @@ function SectionAvis({ userId }: { userId:string }) {
 
       {step === "negative" && (
         <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem" }}>
-          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1rem", color:"rgba(255,255,255,.85)", marginBottom:".5rem" }}>Désolé 😕</p>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1rem", color:"rgba(255,255,255,.85)", marginBottom:".5rem" }}>Désolé</p>
           <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem", marginBottom:"1.25rem" }}>Dis-nous ce que tu changerais — ton retour nous aide vraiment.</p>
           <StarsInput value={rating} onChange={setRating} />
           <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Ce que j'améliorerais…" maxLength={600}
@@ -1110,7 +1122,7 @@ function SectionAvis({ userId }: { userId:string }) {
 
       {step === "done" && (
         <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
-          <div style={{ fontSize:"2.5rem", marginBottom:".75rem" }}>✅</div>
+          <div style={{ marginBottom:".75rem", color:"var(--ok)" }}><Stamp size={44} /></div>
           <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Merci pour ton retour !</p>
           <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem" }}>Ton avis a bien été enregistré.</p>
         </div>
@@ -1256,7 +1268,7 @@ export default function ProfilPage() {
         .form-g{display:flex;flex-direction:column;gap:6px}
         .form-l{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.04em}
         .form-i{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;color:#fff;font-size:.9rem;font-family:var(--font-text);outline:none;transition:all .2s;width:100%}
-        .form-i:focus{border-color:rgba(255,212,59,.4);background:rgba(255,212,59,.05);box-shadow:0 0 0 3px rgba(255,212,59,.1)}
+        .form-i:focus{border-color:rgba(255,212,59,.4);background:rgba(255,212,59,.05);}
         .form-i.disabled{opacity:.4;cursor:not-allowed}
         .form-ta{resize:vertical;min-height:90px}
         .form-h{font-size:.7rem;color:rgba(255,255,255,.22)}

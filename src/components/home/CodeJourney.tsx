@@ -125,7 +125,7 @@ export default function CodeJourney({ data }: { data: JourneyData }) {
         {/* 2. La fiche du code */}
         <div className={`cj-panel ${shown === 1 ? "on" : ""}`}>
           <div className="cj-brand">
-            <img src={`https://www.google.com/s2/favicons?domain=${data.domain}&sz=64`} alt="" width={28} height={28} />
+            <img src={`https://www.google.com/s2/favicons?domain=${data.domain}&sz=64`} alt="" width={28} height={28} decoding="async" />
             <span>{data.brand}</span>
           </div>
           <p className="cj-bonus">{data.bonus}</p>

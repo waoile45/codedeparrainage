@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
+import { Bolt, Building, Crown, Cross, Megaphone, Search, Users } from "@/components/Pictos";
 
 type Tab = 'annonces' | 'utilisateurs' | 'entreprises' | 'stats'
 
@@ -216,10 +217,10 @@ export default function AdminPage() {
         {/* STATS */}
         <div style={S.statGrid}>
           {[
-            { val: users.length,            label: 'Utilisateurs',         icon: '👥' },
-            { val: announcements.length,    label: 'Annonces',             icon: '📢' },
-            { val: companies.length,        label: 'Entreprises',          icon: '🏢' },
-            { val: totalCredits.toFixed(0), label: 'Crédits en circulation', icon: '⚡' },
+            { val: users.length,            label: 'Utilisateurs',         icon: <Users size={20} /> },
+            { val: announcements.length,    label: 'Annonces',             icon: <Megaphone size={20} /> },
+            { val: companies.length,        label: 'Entreprises',          icon: <Building size={20} /> },
+            { val: totalCredits.toFixed(0), label: 'Crédits en circulation', icon: <Bolt size={20} /> },
           ].map(({ val, label, icon }) => (
             <div key={label} style={S.statCard}>
               <div style={S.statVal}>{val}</div>
@@ -251,7 +252,7 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <div style={S.searchWrap}>
-                  <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', fontSize: '0.85rem' }}>🔍</span>
+                  <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', display: 'inline-flex' }}><Search size={15} /></span>
                   <input style={S.search} placeholder="Entreprise, code ou utilisateur..." value={searchAnn} onChange={e => setSearchAnn(e.target.value)} />
                 </div>
                 <div style={S.rows}>
@@ -264,7 +265,7 @@ export default function AdminPage() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#e2e8f0' }}>{ann.companies?.name ?? '—'}</span>
                             <span style={S.code}>{ann.code}</span>
-                            {isBoosted(ann) && <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#22c55e', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 100, padding: '1px 8px' }}>⚡ Boostée</span>}
+                            {isBoosted(ann) && <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#22c55e', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 100, padding: '1px 8px' }}>Boostée</span>}
                           </div>
                           <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
                             par {ann.users?.pseudo ?? '?'} · {new Date(ann.created_at).toLocaleDateString('fr-FR')}
@@ -275,10 +276,10 @@ export default function AdminPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <input type="number" value={boostDays} onChange={e => setBoostDays(e.target.value)} placeholder="jours" min={1} style={{ background: 'rgba(255,212,59,0.1)', border: '1px solid rgba(255,212,59,0.4)', borderRadius: 8, padding: '0.35rem 0.6rem', color: '#fff', fontSize: '0.82rem', width: 70, outline: 'none', fontFamily: 'inherit' }} />
                           <Btn variant="primary" onClick={() => handleGiveBoost(ann)} disabled={boostLoading}>{boostLoading ? '...' : 'OK'}</Btn>
-                          <button onClick={() => setGivingBoost(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '1rem', padding: '0 2px' }}>✕</button>
+                          <button onClick={() => setGivingBoost(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '1rem', padding: '0 2px' }}><Cross size={14} /></button>
                         </div>
                       ) : (
-                        <Btn variant="credit" onClick={() => { setGivingBoost(ann.id); setBoostDays('7') }}>⚡ Boost</Btn>
+                        <Btn variant="credit" onClick={() => { setGivingBoost(ann.id); setBoostDays('7') }}><Bolt size={13} /> Boost</Btn>
                       )}
                       <Btn variant="danger" onClick={() => handleDeleteAnnouncement(ann.id)}>Supprimer</Btn>
                     </div>
@@ -295,7 +296,7 @@ export default function AdminPage() {
                   <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{filteredUsers.length} résultat{filteredUsers.length !== 1 ? 's' : ''} sur {users.length}</div>
                 </div>
                 <div style={S.searchWrap}>
-                  <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', fontSize: '0.85rem' }}>🔍</span>
+                  <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', display: 'inline-flex' }}><Search size={15} /></span>
                   <input style={S.search} placeholder="Pseudo ou email..." value={searchUser} onChange={e => setSearchUser(e.target.value)} />
                 </div>
                 <div style={S.rows}>
@@ -326,14 +327,14 @@ export default function AdminPage() {
                               style={{ background: 'rgba(255,212,59,0.1)', border: '1px solid rgba(255,212,59,0.4)', borderRadius: 8, padding: '0.35rem 0.6rem', color: '#fff', fontSize: '0.82rem', width: 110, outline: 'none', fontFamily: 'inherit' }}
                             />
                             <Btn variant="primary" onClick={() => handleGiveCredits(user.id)} disabled={creditLoading}>{creditLoading ? '...' : 'OK'}</Btn>
-                            <button onClick={() => { setGivingCredits(null); setCreditAmount('') }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0 2px' }}>✕</button>
+                            <button onClick={() => { setGivingCredits(null); setCreditAmount('') }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0 2px' }}><Cross size={14} /></button>
                           </div>
                         ) : (
                           <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--accent-text)' }}>{(user.credits?.[0]?.balance ?? 0).toFixed(1)} cr.</span>
                         )}
-                        <Btn variant="credit" onClick={() => { setGivingCredits(user.id); setCreditAmount('') }}>⚡ Crédits</Btn>
+                        <Btn variant="credit" onClick={() => { setGivingCredits(user.id); setCreditAmount('') }}><Bolt size={13} /> Crédits</Btn>
                         <Btn variant={user.badge_parrain_mois ? 'primary' : 'ghost'} onClick={() => handleToggleBadge(user.id, !!user.badge_parrain_mois)}>
-                          👑 {user.badge_parrain_mois ? 'Retirer badge' : 'Badge'}
+                          <Crown size={13} /> {user.badge_parrain_mois ? 'Retirer badge' : 'Badge'}
                         </Btn>
                       </div>
                     </div>
@@ -353,7 +354,7 @@ export default function AdminPage() {
                   <Btn variant="primary" onClick={() => { setShowCompanyModal(true); setEditingCompany(null); setCompanyForm({ name:'', slug:'', category:'', referral_bonus_description:'' }) }}>+ Ajouter</Btn>
                 </div>
                 <div style={S.searchWrap}>
-                  <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', fontSize: '0.85rem' }}>🔍</span>
+                  <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', display: 'inline-flex' }}><Search size={15} /></span>
                   <input style={S.search} placeholder="Nom, slug ou catégorie..." value={searchComp} onChange={e => setSearchComp(e.target.value)} />
                 </div>
                 <div style={S.rows}>
@@ -381,10 +382,10 @@ export default function AdminPage() {
             {tab === 'stats' && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 16 }}>
                 {[
-                  { val: users.length,                    label: 'Utilisateurs inscrits',      icon: '👥' },
-                  { val: announcements.length,            label: 'Annonces publiées',           icon: '📢' },
-                  { val: companies.length,                label: 'Entreprises référencées',     icon: '🏢' },
-                  { val: totalCredits.toFixed(2) + ' cr.',label: 'Crédits en circulation',      icon: '⚡' },
+                  { val: users.length,                    label: 'Utilisateurs inscrits',      icon: <Users size={20} /> },
+                  { val: announcements.length,            label: 'Annonces publiées',           icon: <Megaphone size={20} /> },
+                  { val: companies.length,                label: 'Entreprises référencées',     icon: <Building size={20} /> },
+                  { val: totalCredits.toFixed(2) + ' cr.',label: 'Crédits en circulation',      icon: <Bolt size={20} /> },
                 ].map(({ val, label, icon }) => (
                   <div key={label} style={{ background: 'rgba(255,212,59,0.07)', border: '1px solid rgba(255,212,59,0.18)', borderRadius: 20, padding: '2rem' }}>
                     <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--accent-text)', lineHeight: 1, fontFamily: "var(--font-display)" }}>{val}</div>

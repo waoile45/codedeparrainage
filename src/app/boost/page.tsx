@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
+import { Bolt, Ticket, TrendUp } from "@/components/Pictos";
 
 interface Annonce {
   id: string;
@@ -29,9 +30,9 @@ function DaySelector({ value, onChange, max }: { value: number; onChange: (v: nu
 const COST_PER_DAY = 0.10;
 
 const WHY = [
-  { icon:"📈", title:"3× plus de vues",      desc:"Ton annonce remonte en tête de /codes automatiquement." },
-  { icon:"🏆", title:"Meilleur classement",  desc:"Les annonces boostées gagnent plus d'XP et montent dans le classement." },
-  { icon:"⚡", title:"Activation immédiate", desc:"Le boost est actif dès la validation, sans délai." },
+  { icon:<TrendUp size={22} />, title:"En tête de l'annuaire", desc:"Pendant toute la durée du boost, ton annonce passe avant les autres dans /codes." },
+  { icon:<Ticket size={22} />, title:"Signalée comme boostée", desc:"Un badge « Annonce boostée » la distingue dans la liste." },
+  { icon:<Bolt size={22} />, title:"Actif tout de suite", desc:"Le boost démarre dès la validation, sans délai." },
 ];
 
 export default function BoostPage() {
@@ -137,7 +138,7 @@ export default function BoostPage() {
       <style>{`*,*::before,*::after{box-sizing:border-box;margin:0;padding:0} body{background:var(--bg);color:#e2e8f0;font-family:var(--font-text);min-height:100vh} @keyframes pop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}`}</style>
       <Navbar activePage="profil" />
       <div style={{ maxWidth:480, margin:"6rem auto", textAlign:"center", padding:"0 1.5rem" }}>
-        <div style={{ fontSize:"3.5rem", animation:"pop .5s ease forwards", display:"inline-block", marginBottom:"1rem" }}>⚡</div>
+        <div style={{ fontSize:"3.5rem", animation:"pop .5s ease forwards", display:"inline-block", marginBottom:"1rem", color:"var(--accent-text)" }}><Bolt size={56} /></div>
         <h2 style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.75rem", color:"#fff", marginBottom:".5rem" }}>Boost activé !</h2>
         <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem", marginBottom:"2rem" }}>
           {selected.length} annonce{selected.length > 1 ? "s" : ""} boostée{selected.length > 1 ? "s" : ""} — visible en tête de /codes maintenant.
@@ -160,7 +161,7 @@ export default function BoostPage() {
         body { background:var(--bg); color:#e2e8f0; font-family:var(--font-text); min-height:100vh; }
         .page { max-width:720px; margin:0 auto; padding:3rem 1.5rem 6rem; }
         .page-header { margin-bottom:2.5rem; }
-        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:.75rem; }
+        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600;   color:var(--accent); margin-bottom:.75rem; }
         .header-label::before { content:''; width:18px; height:1px; background:var(--accent); display:block; }
         .page-title { font-family:var(--font-display); font-weight:800; font-size:clamp(1.5rem,3.5vw,2rem); color:#fff; letter-spacing:-.03em; margin-bottom:.35rem; display:flex; align-items:center; gap:10px; }
         .page-sub { color:rgba(255,255,255,.35); font-size:.875rem; }
@@ -185,7 +186,7 @@ export default function BoostPage() {
         .annonce-card.selected .annonce-checkbox { background:var(--accent); border-color:var(--accent); }
         .annonce-info { flex:1; min-width:0; }
         .annonce-company { font-weight:700; font-size:.9rem; color:#fff; margin-bottom:2px; }
-        .annonce-code { font-family:'Courier New',monospace; font-size:.78rem; color:rgba(255,255,255,.35); letter-spacing:.06em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; }
+        .annonce-code { font-family:'Courier New',monospace; font-size:.78rem; color:rgba(255,255,255,.35);  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; }
         .annonce-tags { display:flex; gap:5px; margin-top:4px; flex-wrap:wrap; }
         .tag { padding:1px 7px; border-radius:100px; font-size:.65rem; font-weight:600; }
         .tag-cat { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); color:rgba(255,255,255,.4); }
@@ -193,12 +194,12 @@ export default function BoostPage() {
         .annonce-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; }
         .cost-per-day { font-size:.75rem; color:rgba(255,255,255,.3); }
         .cost-per-day strong { color:var(--accent-text); font-family:var(--font-display); }
-        .summary-card { position:sticky; bottom:24px; background:rgba(10,10,15,.92); backdrop-filter:blur(16px); border:1px solid rgba(255,212,59,.3); border-radius:18px; padding:1.1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; box-shadow:0 8px 32px rgba(255,212,59,.2); margin-top:1.5rem; }
+        .summary-card { position:sticky; bottom:24px; background:rgba(10,10,15,.92);  border:1px solid rgba(255,212,59,.3); border-radius:18px; padding:1.1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;  margin-top:1.5rem; }
         .summary-detail { font-size:.78rem; color:rgba(255,255,255,.35); }
         .summary-total { font-family:var(--font-display); font-weight:800; font-size:1.15rem; color:#fff; }
         .summary-total span { color:var(--accent-text); }
         .boost-btn { display:inline-flex; align-items:center; gap:7px; background:var(--accent); color:var(--accent-ink); border:none; border-radius:12px; padding:.65rem 1.5rem; font-size:.9rem; font-weight:700; cursor:pointer; transition:all .2s; font-family:var(--font-text); white-space:nowrap; }
-        .boost-btn:hover:not(:disabled) { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 6px 20px rgba(255,212,59,.4); }
+        .boost-btn:hover:not(:disabled) { background:var(--accent-hover); transform:translateY(-1px);  }
         .boost-btn:disabled { opacity:.4; cursor:not-allowed; }
         .no-credits-hint { font-size:.72rem; color:#f87171; margin-top:2px; }
         @media(max-width:600px) { .page{padding:2rem 1rem 5rem} .why-grid{grid-template-columns:1fr} .summary-card{flex-direction:column;align-items:stretch} .boost-btn{justify-content:center} }
@@ -208,17 +209,15 @@ export default function BoostPage() {
       <main className="page">
 
         <div className="page-header">
-          <div className="header-label">Visibilité</div>
-          <h1 className="page-title">
+                    <h1 className="page-title">
             Booster une annonce
-            <span style={{ fontSize:"1.5rem", animation:"float 3s ease-in-out infinite", display:"inline-block" }}>⚡</span>
           </h1>
-          <p className="page-sub">Passe en tête de la page /codes et multiplie tes parrainages</p>
+          <p className="page-sub">Ton annonce passe en tête de l'annuaire pendant la durée que tu choisis.</p>
         </div>
 
         <div className="solde-banner">
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <span style={{ fontSize:"1.5rem", animation:"float 3s ease-in-out infinite", display:"inline-block" }}>⚡</span>
+            <span style={{ color:"var(--accent-text)", display:"inline-flex" }}><Bolt size={26} /></span>
             <div>
               <p className="solde-val">{credits.toFixed(2)}</p>
               <p className="solde-lbl">crédits disponibles</p>
@@ -253,7 +252,7 @@ export default function BoostPage() {
           </div>
         ) : annonces.length === 0 ? (
           <div style={{ textAlign:"center", padding:"3rem", color:"rgba(255,255,255,.25)" }}>
-            <p style={{ fontSize:"2rem", marginBottom:".75rem" }}>📋</p>
+            <p style={{ marginBottom:".75rem" }}><Ticket size={40} /></p>
             <p style={{ fontSize:".875rem" }}>Tu n'as pas encore d'annonce.</p>
             <a href="/publier" style={{ display:"inline-flex", marginTop:"1rem", background:"rgba(255,212,59,.15)", border:"1px solid rgba(255,212,59,.3)", borderRadius:10, padding:".5rem 1rem", color:"var(--accent-text)", fontSize:".82rem", fontWeight:600, textDecoration:"none" }}>Publier un code</a>
           </div>
@@ -274,7 +273,7 @@ export default function BoostPage() {
               <p className="annonce-code">{a.code}</p>
               <div className="annonce-tags">
                 {a.category && <span className="tag tag-cat">{a.category}</span>}
-                {a.boosted && <span className="tag tag-boosted">⚡ Boost actif — {a.boostDaysLeft}j restants</span>}
+                {a.boosted && <span className="tag tag-boosted"><Bolt size={13} /> Boost actif, encore {a.boostDaysLeft} j</span>}
               </div>
             </div>
 

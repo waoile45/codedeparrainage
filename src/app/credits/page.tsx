@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
+import { Bolt, Chat, InfinityLoop, Lock } from "@/components/Pictos";
 
 // ── Packs ──────────────────────────────────────────────────────────────────────
 const PACKS = [
@@ -15,7 +16,7 @@ const PACKS = [
 
 const FEATURES = [
   "Annonce en tête de /codes",
-  "Badge ⚡ Boosté visible",
+  "Badge « Annonce boostée » visible",
   "Crédits sans expiration",
   "Activation immédiate",
 ];
@@ -80,7 +81,7 @@ export default function CreditsPage() {
 
         /* Header */
         .page-header { text-align:center; margin-bottom:3rem; }
-        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:.75rem; }
+        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600;   color:var(--accent); margin-bottom:.75rem; }
         .header-label::before,.header-label::after { content:''; width:18px; height:1px; background:var(--accent); display:block; }
         .page-title { font-family:var(--font-display); font-weight:800; font-size:clamp(1.75rem,4vw,2.5rem); color:#fff; letter-spacing:-.03em; margin-bottom:.5rem; }
         .page-sub { color:rgba(255,255,255,.35); font-size:.9rem; margin-bottom:1.5rem; }
@@ -124,7 +125,7 @@ export default function CreditsPage() {
         .pack-card.popular {
           background:rgba(255,212,59,.08);
           border-color:rgba(255,212,59,.4);
-          box-shadow:0 0 40px rgba(255,212,59,.12);
+          
         }
         .pack-card.popular::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:var(--border-md); }
 
@@ -132,14 +133,14 @@ export default function CreditsPage() {
         .popular-badge {
           position:absolute; top:-1px; left:50%; transform:translateX(-50%);
           background:var(--accent); color:var(--accent-ink);
-          font-size:.65rem; font-weight:700; letter-spacing:.05em;
+          font-size:.65rem; font-weight:700; 
           padding:3px 12px; border-radius:0 0 10px 10px;
           display:flex; align-items:center; gap:4px;
           white-space:nowrap;
         }
 
         /* Card top */
-        .pack-label { font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-top:.5rem; }
+        .pack-label { font-size:.7rem; font-weight:700;   color:rgba(255,255,255,.4); margin-top:.5rem; }
         .pack-credits { display:flex; align-items:baseline; gap:4px; }
         .pack-credits-num { font-family:var(--font-display); font-weight:800; font-size:2.5rem; color:#fff; line-height:1; }
         .pack-credits-lbl { font-size:.85rem; color:rgba(255,255,255,.4); }
@@ -173,7 +174,7 @@ export default function CreditsPage() {
         }
         .buy-btn:hover { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.2); }
         .buy-btn.popular-btn { background:var(--accent); border-color:var(--accent); }
-        .buy-btn.popular-btn:hover { background:var(--accent-hover); box-shadow:0 4px 20px rgba(255,212,59,.4); }
+        .buy-btn.popular-btn:hover { background:var(--accent-hover);  }
         .buy-btn:disabled { opacity:.5; cursor:not-allowed; }
 
         /* How it works */
@@ -217,12 +218,11 @@ export default function CreditsPage() {
 
         {/* Header */}
         <div className="page-header">
-          <div className="header-label">Recharge</div>
-          <h1 className="page-title">Crédits Boost ⚡</h1>
-          <p className="page-sub">Booste tes annonces et multiplie tes parrainages</p>
+          <h1 className="page-title">Crédits de boost</h1>
+          <p className="page-sub">Un crédit, c&apos;est 10 jours de boost pour une annonce. Les crédits n&apos;expirent pas.</p>
           <div className="solde-pill">
-            <span className="solde-icon">⚡</span>
-            Solde actuel :&nbsp;<span className="solde-val">{credits.toFixed(2)}</span>&nbsp;crédits
+            <span className="solde-icon"><Bolt size={28} /></span>
+            Solde actuel :&nbsp;<span className="solde-val">{credits.toFixed(2).replace(".", ",")}</span>&nbsp;crédits
           </div>
         </div>
 
@@ -230,14 +230,14 @@ export default function CreditsPage() {
         <div className="packs-grid">
           {PACKS.slice(0,3).map(pack => (
             <div key={pack.id} className={`pack-card ${pack.popular?"popular":""}`}>
-              {pack.popular && <div className="popular-badge">⭐ Le plus populaire</div>}
+              {pack.popular && <div className="popular-badge">−10 % par crédit</div>}
               <div>
                 <p className="pack-label">{pack.label}</p>
                 <div className="pack-credits">
                   <span className="pack-credits-num">{pack.credits}</span>
                   <span className="pack-credits-lbl">crédits</span>
                 </div>
-                <p className="pack-per-credit">soit {pack.perCredit.toFixed(2)}€ / crédit</p>
+                <p className="pack-per-credit">soit {pack.perCredit.toFixed(2).replace(".", ",")} € le crédit</p>
               </div>
               <div className="pack-price-row">
                 <span className="pack-price">{pack.price}€</span>
@@ -266,7 +266,7 @@ export default function CreditsPage() {
                 {loading === pack.id ? (
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                 ) : (
-                  <>Acheter — {pack.price}€</>
+                  <>Acheter pour {pack.price} €</>
                 )}
               </button>
             </div>
@@ -283,7 +283,7 @@ export default function CreditsPage() {
                   <span className="pack-credits-num">{pack.credits}</span>
                   <span className="pack-credits-lbl">crédits</span>
                 </div>
-                <p className="pack-per-credit">soit {pack.perCredit.toFixed(2)}€ / crédit</p>
+                <p className="pack-per-credit">soit {pack.perCredit.toFixed(2).replace(".", ",")} € le crédit</p>
               </div>
               <div className="pack-price-row">
                 <span className="pack-price">{pack.price}€</span>
@@ -303,7 +303,7 @@ export default function CreditsPage() {
               <button className="buy-btn" onClick={()=>handleBuy(pack.id)} disabled={loading===pack.id}>
                 {loading===pack.id
                   ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                  : <>Acheter — {pack.price}€</>
+                  : <>Acheter pour {pack.price} €</>
                 }
               </button>
             </div>
@@ -345,10 +345,10 @@ export default function CreditsPage() {
         {/* Security */}
         <div className="security-row">
           {[
-            { icon:"🔒", label:"Paiement sécurisé Stripe" },
-            { icon:"♾️", label:"Crédits sans expiration" },
-            { icon:"⚡", label:"Activation immédiate" },
-            { icon:"🇫🇷", label:"Support en français" },
+            { icon:<Lock size={16} />, label:"Paiement sécurisé Stripe" },
+            { icon:<InfinityLoop size={16} />, label:"Crédits sans expiration" },
+            { icon:<Bolt size={16} />, label:"Activation immédiate" },
+            { icon:<Chat size={16} />, label:"Support en français" },
           ].map((s,i) => (
             <div key={i} className="security-item">
               <span>{s.icon}</span>

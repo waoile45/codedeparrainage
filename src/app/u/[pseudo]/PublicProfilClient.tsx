@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
+import type { ReactNode } from "react";
+import { Bolt, Check, Clock, Cross, Flame, Gift, Handshake, Sleep, Ticket, Users, Warning } from "@/components/Pictos";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface PublicUser {
@@ -69,16 +71,16 @@ const NIVEAU_COLORS: Record<string, string> = {
   "Parrain Or":"#f59e0b", "Super Parrain":"var(--accent)", "Parrain Légendaire":"#ec4899",
 };
 
-const TAGS_INFO: Record<string, { label:string; emoji:string; positive:boolean }> = {
-  code_ok:         { label:"Code fonctionnel",     emoji:"✅", positive:true  },
-  reponse_rapide:  { label:"Réponse rapide",        emoji:"⚡", positive:true  },
-  bon_gain:        { label:"Bon gain",              emoji:"🎁", positive:true  },
-  sympa:           { label:"Parrain sympa",         emoji:"🤝", positive:true  },
-  annonce_complete:{ label:"Annonce complète",      emoji:"📋", positive:true  },
-  code_expire:     { label:"Code expiré",           emoji:"⏰", positive:false },
-  code_invalide:   { label:"Code invalide",         emoji:"❌", positive:false },
-  desc_inexacte:   { label:"Description inexacte",  emoji:"⚠️", positive:false },
-  inactif:         { label:"Parrain inactif",       emoji:"💤", positive:false },
+const TAGS_INFO: Record<string, { label:string; emoji:ReactNode; positive:boolean }> = {
+  code_ok:         { label:"Code fonctionnel",     emoji:<Check size={13} />, positive:true  },
+  reponse_rapide:  { label:"Réponse rapide",        emoji:<Bolt size={13} />, positive:true  },
+  bon_gain:        { label:"Bon gain",              emoji:<Gift size={13} />, positive:true  },
+  sympa:           { label:"Parrain sympa",         emoji:<Handshake size={13} />, positive:true  },
+  annonce_complete:{ label:"Annonce complète",      emoji:<Ticket size={13} />, positive:true  },
+  code_expire:     { label:"Code expiré",           emoji:<Clock size={13} />, positive:false },
+  code_invalide:   { label:"Code invalide",         emoji:<Cross size={13} />, positive:false },
+  desc_inexacte:   { label:"Description inexacte",  emoji:<Warning size={13} />, positive:false },
+  inactif:         { label:"Parrain inactif",       emoji:<Sleep size={13} />, positive:false },
 };
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
@@ -228,7 +230,7 @@ export default function PublicProfilClient() {
         .section-sub{font-size:.78rem;color:rgba(255,255,255,.3);margin-bottom:1.25rem}
         .code-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem 1.125rem;display:flex;align-items:center;gap:12px;transition:border-color .2s}
         .code-card:hover{border-color:rgba(255,212,59,.25)}
-        .code-mono{font-family:'Courier New',monospace;font-size:.9rem;font-weight:700;color:#fff;letter-spacing:.06em}
+        .code-mono{font-family:'Courier New',monospace;font-size:.9rem;font-weight:700;color:#fff;}
         .tag-pill{font-size:.7rem;padding:2px 8px;border-radius:100px;border:1px solid;display:inline-flex;align-items:center;gap:3px}
         .review-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.875rem 1rem;margin-bottom:8px}
         .stat-box{flex:1;min-width:90px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.875rem;text-align:center}
@@ -243,7 +245,7 @@ export default function PublicProfilClient() {
           <div style={{ textAlign:"center", padding:"4rem", color:"rgba(255,255,255,.25)" }}>Chargement…</div>
         ) : notFound ? (
           <div className="not-found">
-            <div style={{ fontSize:"2.5rem", marginBottom:"1rem" }}>👤</div>
+            <div style={{ marginBottom:"1rem", color:"var(--text-dim)" }}><Users size={44} /></div>
             <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1.1rem", color:"rgba(255,255,255,.5)", marginBottom:".5rem" }}>Profil introuvable</p>
             <p style={{ fontSize:".875rem" }}>Aucun utilisateur avec le pseudo &laquo;&nbsp;{pseudo}&nbsp;&raquo;</p>
             <a href="/codes" style={{ display:"inline-flex", marginTop:"1.5rem", padding:".6rem 1.25rem", background:"rgba(255,212,59,.15)", border:"1px solid rgba(255,212,59,.3)", borderRadius:10, color:"var(--accent-text)", fontSize:".82rem", fontWeight:600, textDecoration:"none" }}>← Parcourir les codes</a>
@@ -269,7 +271,7 @@ export default function PublicProfilClient() {
                     <span style={{ color:"var(--accent-text)", fontWeight:700 }}>{user.xp} XP</span>
                     <span>·</span>
                     <span>Membre depuis {formatDate(user.created_at)}</span>
-                    {user.streak_days > 0 && <><span>·</span><span>{user.streak_days} 🔥</span></>}
+                    {user.streak_days > 0 && <span style={{ display:"inline-flex", alignItems:"center", gap:4 }}><Flame size={15} /> {user.streak_days} jours d&apos;affilée</span>}
                   </div>
                   {/* XP bar */}
                   <div style={{ height:4, background:"rgba(255,255,255,.07)", borderRadius:100, overflow:"hidden", maxWidth:280 }}>
@@ -320,7 +322,7 @@ export default function PublicProfilClient() {
                           )}
                         </div>
                         <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:4 }}>
-                          <span style={{ width:5, height:5, borderRadius:"50%", background:"var(--accent)", boxShadow:"0 0 5px var(--accent)", flexShrink:0 }} />
+                          <span style={{ width:5, height:5, borderRadius:"50%", background:"var(--accent)", flexShrink:0 }} />
                           <span className="code-mono">{a.code}</span>
                         </div>
                       </div>

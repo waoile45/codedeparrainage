@@ -196,3 +196,17 @@ html.js .hp-annonce.reveal.in { transform: rotate(1.5deg); }
   .hp-search input { flex: none; }
   .hp-search .btn { width: 100%; }
 }
+
+/* ── Entrée du haut de page (au chargement, pas au défilement) ───────── */
+@keyframes hp-rise { from { opacity: 0; transform: translate3d(0, 22px, 0); } to { opacity: 1; transform: none; } }
+html.js .hp-lede, html.js .hp-search, html.js .hp-popular, html.js .hp-hero-demo { animation: hp-rise .8s cubic-bezier(.2,.8,.2,1) both; }
+html.js .hp-lede { animation-delay: .08s; }
+html.js .hp-search { animation-delay: .16s; }
+html.js .hp-popular { animation-delay: .24s; }
+html.js .hp-hero-demo { animation-delay: .2s; animation-duration: 1s; }
+/* Le surligneur jaune du titre se pose de gauche à droite */
+@keyframes hp-mark { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.mark-dark { position: relative; display: inline-block; background: none; color: var(--accent-ink); z-index: 0; padding: 0 .1em; }
+.mark-dark::before { content: ""; position: absolute; inset: .02em 0 -.04em; z-index: -1; border-radius: 4px; background: var(--accent); transform-origin: left center; }
+html.js .mark-dark::before { animation: hp-mark .55s cubic-bezier(.6,.1,.2,1) .35s both; }
+html.js .mark-dark + .mark-dark::before { animation-delay: .6s; }

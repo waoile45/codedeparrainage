@@ -83,3 +83,10 @@
   .bp-related-list { grid-template-columns: 1fr; }
   .bp-ticket { padding-left: 16px; }
 }
+
+/* ── Mouvement ───────────────────────────────────────────────────────── */
+@keyframes bp-drop { 0% { opacity: 0; transform: translate3d(0, -18px, 0) rotate(-2.5deg); } 70% { opacity: 1; transform: translate3d(0, 3px, 0) rotate(.6deg); } 100% { opacity: 1; transform: none; } }
+html.js .bp-ticket { animation: bp-drop .75s cubic-bezier(.2,.8,.2,1) .15s both; }
+@keyframes bp-fade { from { opacity: 0; transform: translate3d(0, 14px, 0); } to { opacity: 1; transform: none; } }
+html.js .bp-top { animation: bp-fade .6s ease both; }
+html.js .bp-bonus { animation: bp-fade .6s ease .1s both; }

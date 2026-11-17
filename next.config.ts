@@ -38,6 +38,13 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   poweredByHeader: false,
+  // Avatars des membres (Supabase Storage) : servis redimensionnés par
+  // l'optimiseur de Next (certains fichiers d'origine dépassent 800 Ko).
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'feuxtdljgvixvhttwiqy.supabase.co', pathname: '/storage/v1/object/public/avatars/**' },
+    ],
+  },
   async headers() {
     return [
       {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
+import { Stamp, ThumbDown, ThumbUp } from "@/components/Pictos";
 
 // ⚠️ Remplace par ton URL Google Business / Google Maps review
 const GOOGLE_REVIEW_URL = "https://g.page/r/CWGFDaSeMPebEAE/review";
@@ -76,11 +77,11 @@ export default function AvisPage() {
   }
 
   const LABELS: Record<number,string> = {
-    1:"Très mauvais 😤",
-    2:"Pas terrible 😕",
-    3:"Correct 😐",
-    4:"Bien 😊",
-    5:"Excellent ! 🤩",
+    1:"Très mauvais",
+    2:"Pas terrible",
+    3:"Correct",
+    4:"Bien",
+    5:"Excellent",
   };
 
   return (
@@ -93,18 +94,18 @@ export default function AvisPage() {
         body { background:var(--bg); color:var(--text); font-family:var(--font-text); min-height:100vh; }
         .page { max-width:560px; margin:0 auto; padding:3rem 1.5rem 6rem; }
         .page-header { text-align:center; margin-bottom:2.5rem; }
-        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:.75rem; }
+        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600;   color:var(--accent); margin-bottom:.75rem; }
         .header-label::before,.header-label::after { content:''; display:block; width:18px; height:1px; background:var(--accent); }
         .page-title { font-family:var(--font-display); font-weight:800; font-size:clamp(1.5rem,4vw,2rem); color:var(--text-strong); letter-spacing:-.03em; margin-bottom:.5rem; }
         .page-sub { color:var(--text-dim); font-size:.875rem; }
         .card { background:var(--bg-card); border:1px solid var(--border); border-radius:24px; padding:2.5rem 2rem; animation:fadeIn .35s ease; }
         .btn-primary { display:flex; align-items:center; justify-content:center; gap:7px; width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:13px; padding:.875rem; font-size:.9rem; font-weight:700; cursor:pointer; transition:all .2s; font-family:var(--font-text); margin-top:1.5rem; }
-        .btn-primary:hover:not(:disabled) { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 6px 24px rgba(255,212,59,.4); }
+        .btn-primary:hover:not(:disabled) { background:var(--accent-hover); transform:translateY(-1px);  }
         .btn-primary:disabled { opacity:.4; cursor:not-allowed; transform:none; }
         .btn-ghost { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; background:none; color:var(--text-muted); border:1px solid var(--border-btn-ghost); border-radius:13px; padding:.8rem; font-size:.875rem; font-weight:600; cursor:pointer; transition:all .2s; font-family:var(--font-text); margin-top:.75rem; }
         .btn-ghost:hover { color:var(--text-strong); border-color:var(--border-lg); }
         .form-input { background:var(--bg-input); border:1px solid var(--border-md); border-radius:12px; padding:.75rem 1rem; color:var(--text-strong); font-size:.875rem; font-family:var(--font-text); outline:none; transition:all .2s; width:100%; resize:vertical; min-height:120px; }
-        .form-input:focus { border-color:rgba(255,212,59,.4); background:rgba(255,212,59,.05); box-shadow:0 0 0 3px rgba(255,212,59,.1); }
+        .form-input:focus { border-color:rgba(255,212,59,.4); background:rgba(255,212,59,.05);  }
         .form-input::placeholder { color:var(--text-faint); }
         @media(max-width:600px) { .page{padding:2rem 1rem 5rem;} }
       `}</style>
@@ -113,7 +114,6 @@ export default function AvisPage() {
 
       <main className="page">
         <div className="page-header">
-          <div className="header-label">Ton avis</div>
           <h1 className="page-title">Que penses-tu de notre site ?</h1>
           <p className="page-sub">Ton avis nous aide à nous améliorer</p>
         </div>
@@ -140,7 +140,7 @@ export default function AvisPage() {
                   onMouseLeave={e => (e.currentTarget.style.background = "rgba(239,68,68,.08)")}
                   onClick={() => { setRating(r => r || 1); setStep("negative"); }}
                 >
-                  👎 Non
+                  <ThumbDown size={16} /> Non
                 </button>
                 <button
                   type="button"
@@ -149,12 +149,12 @@ export default function AvisPage() {
                   onMouseLeave={e => (e.currentTarget.style.background = "rgba(34,197,94,.08)")}
                   onClick={() => { setRating(r => r >= 4 ? r : 5); setStep("positive"); }}
                 >
-                  👍 Oui
+                  <ThumbUp size={16} /> Oui
                 </button>
               </div>
               {rating > 0 && (
                 <button className="btn-primary" onClick={handleRate}>
-                  Continuer →
+                  Continuer
                 </button>
               )}
             </div>
@@ -163,12 +163,12 @@ export default function AvisPage() {
           {/* ── Step 2a : avis positif → Google ── */}
           {step === "positive" && (
             <div style={{ textAlign:"center", animation:"fadeIn .3s ease" }}>
-              <div style={{ fontSize:"3rem", marginBottom:"1rem", display:"inline-block", animation:"pop .4s ease" }}>🎉</div>
+              <div style={{ fontSize:"3rem", marginBottom:"1rem", display:"inline-block", animation:"pop .4s ease", color:"var(--accent-text)" }}><Stamp size={56} /></div>
               <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.25rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
                 Super, merci !
               </p>
               <p style={{ color:"var(--text-muted)", fontSize:".875rem", lineHeight:1.6, marginBottom:"1.75rem" }}>
-                Ça nous ferait vraiment plaisir si tu pouvais laisser un avis sur Google. Ça prend 30 secondes et ça nous aide énormément 🙏
+                Ça nous ferait vraiment plaisir si tu pouvais laisser un avis sur Google. Ça prend 30 secondes et ça nous aide énormément.
               </p>
               {!GOOGLE_REVIEW_URL && (
                 <p style={{ fontSize:".8rem", color:"var(--text-faint)", marginBottom:"1rem" }}>
@@ -211,7 +211,7 @@ export default function AvisPage() {
           {step === "negative" && (
             <div style={{ animation:"fadeIn .3s ease" }}>
               <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1.05rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
-                Désolé que tu n&rsquo;aies pas aimé 😕
+                Désolé que tu n&rsquo;aies pas aimé.
               </p>
               <p style={{ color:"var(--text-muted)", fontSize:".875rem", marginBottom:"1.25rem" }}>
                 Dis-nous ce que tu changerais — ton retour nous aide vraiment à progresser.
@@ -240,7 +240,7 @@ export default function AvisPage() {
           {/* ── Step 3 : fin ── */}
           {step === "done" && (
             <div style={{ textAlign:"center", animation:"fadeIn .35s ease" }}>
-              <div style={{ fontSize:"3.5rem", marginBottom:"1rem", display:"inline-block", animation:"pop .5s ease" }}>✅</div>
+              <div style={{ fontSize:"3.5rem", marginBottom:"1rem", display:"inline-block", animation:"pop .5s ease", color:"var(--ok)" }}><Stamp size={60} /></div>
               <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.25rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
                 Merci pour ton retour !
               </p>

@@ -2,9 +2,16 @@
 
 import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase";
+import { Medal, Ticket, Flame } from "@/components/Pictos";
+import "./classement.css";
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// Classement des parrains. Une idée par écran : le podium dessiné (les marches
+// montent à l'arrivée), les récompenses du mois, puis tout le classement avec
+// une barre d'XP proportionnelle au premier, qui se remplit au défilement.
+// Animations en transform/opacity uniquement.
+
 interface Parrain {
   id: string;
   pseudo: string;
@@ -16,156 +23,108 @@ interface Parrain {
   isMe?: boolean;
 }
 
-const NIVEAU_COLOR: Record<string, string> = {
-  "Débutant":          "#A39E93",
-  "Parrain Bronze":    "var(--accent)",
-  "Parrain Argent":    "var(--accent)",
-  "Parrain Or":        "#f59e0b",
-  "Super Parrain":     "#f97316",
-  "Parrain Légendaire":"#ef4444",
-};
+const nf = (n: number) => n.toLocaleString("fr-FR");
 
-const PODIUM_CONFIG = [
-  { rank:2, scale:"scale-95", top:"mt-8",  glow:"rgba(156,163,175,.25)", border:"rgba(156,163,175,.35)", bg:"rgba(156,163,175,.08)", crown:"🥈", label:"Argent" },
-  { rank:1, scale:"scale-100",top:"mt-0",  glow:"rgba(251,191,36,.3)",   border:"rgba(251,191,36,.45)", bg:"rgba(251,191,36,.08)",   crown:"👑", label:"Or" },
-  { rank:3, scale:"scale-90", top:"mt-12", glow:"rgba(180,83,9,.25)",    border:"rgba(180,83,9,.35)",   bg:"rgba(180,83,9,.08)",     crown:"🥉", label:"Bronze" },
-];
-
-// ── Animated counter ──────────────────────────────────────────────────────────
-function Counter({ target, duration=800 }: { target:number; duration?:number }) {
-  const [v, setV] = useState(0);
-  const ref = useRef(false);
+// ── Compteur qui défile jusqu'à sa valeur (requestAnimationFrame) ─────────────
+function Counter({ target, duration = 900 }: { target: number; duration?: number }) {
+  const [v, setV] = useState(target);
+  const done = useRef(false);
   useEffect(() => {
-    if (ref.current) return; ref.current = true;
-    const steps = 30;
-    const inc = target / steps;
-    let cur = 0;
-    const t = setInterval(() => {
-      cur = Math.min(cur + inc, target);
-      setV(Math.round(cur));
-      if (cur >= target) clearInterval(t);
-    }, duration / steps);
-    return () => clearInterval(t);
+    if (done.current || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    done.current = true;
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (t: number) => {
+      const k = Math.min(1, (t - t0) / duration);
+      setV(Math.round(target * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [target, duration]);
-  return <>{v.toLocaleString("fr-FR")}</>;
+  return <>{nf(v)}</>;
 }
 
-// ── Avatar ────────────────────────────────────────────────────────────────────
-function Avatar({ pseudo, size=44, isMe=false, avatarUrl }: { pseudo:string; size?:number; isMe?:boolean; avatarUrl?:string|null }) {
+// ── Avatar : photo du membre, sinon son initiale sur le jaune ─────────────────
+function Avatar({ pseudo, size = 44, avatarUrl }: { pseudo: string; size?: number; avatarUrl?: string | null }) {
   const [imgErr, setImgErr] = useState(false);
   return (
-    <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
-      {isMe && <div style={{ position:"absolute", inset:-2, borderRadius:"50%", background:"conic-gradient(var(--accent),var(--accent),var(--accent))", animation:"spin 4s linear infinite" }} />}
-      <div style={{ position:"relative", width:size, height:size, borderRadius:"50%", background:`var(--accent)`, border:`2px solid ${isMe?"var(--accent)":"rgba(255,212,59,.3)"}`, display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden" }}>
-        {avatarUrl && !imgErr
-          ? <img src={avatarUrl} alt={pseudo} style={{ width:"100%", height:"100%", objectFit:"cover" }} onError={() => setImgErr(true)} />
-          : <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:size*.38, color:"#fff" }}>{pseudo[0]?.toUpperCase()}</span>
-        }
-      </div>
-    </div>
+    <span className="cl-avatar" style={{ width: size, height: size, fontSize: size * 0.4 }}>
+      {avatarUrl && !imgErr
+        ? <Image src={avatarUrl} alt="" width={size} height={size} sizes={`${size}px`} onError={() => setImgErr(true)} />
+        : pseudo[0]?.toUpperCase()}
+    </span>
   );
 }
 
-// ── Rank badge ────────────────────────────────────────────────────────────────
-function RankBadge({ rank }: { rank:number }) {
-  if (rank === 1) return <span style={{ fontSize:"1.1rem" }}>🥇</span>;
-  if (rank === 2) return <span style={{ fontSize:"1.1rem" }}>🥈</span>;
-  if (rank === 3) return <span style={{ fontSize:"1.1rem" }}>🥉</span>;
-  return <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"0.82rem", color:"var(--text-faint)", width:24, textAlign:"center", display:"inline-block" }}>#{rank}</span>;
-}
-
-// ── Podium card ───────────────────────────────────────────────────────────────
-function PodiumCard({ parrain, config }: { parrain:Parrain; config:typeof PODIUM_CONFIG[0] }) {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setVisible(true), config.rank * 120); return () => clearTimeout(t); }, [config.rank]);
-  const color = NIVEAU_COLOR[parrain.level] ?? "#A39E93";
-
-  return (
-    <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", opacity:visible?1:0, transform:visible?"translateY(0)":"translateY(20px)", transition:"all 0.5s ease" }} className={config.top}>
-      <div style={{ fontSize:"1.5rem", marginBottom:"0.5rem" }}>{config.crown}</div>
-      <div style={{ position:"relative", width:"100%", background:config.bg, border:`1px solid ${config.border}`, borderRadius:20, padding:"1.5rem 1rem", textAlign:"center", boxShadow:`0 8px 32px ${config.glow}` }}>
-        {config.rank === 1 && (
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,rgba(251,191,36,.6),transparent)", borderRadius:"20px 20px 0 0" }} />
-        )}
-        <div style={{ display:"flex", justifyContent:"center", marginBottom:"0.75rem" }}>
-          <Avatar pseudo={parrain.pseudo} size={52} isMe={parrain.isMe} avatarUrl={parrain.avatarUrl} />
-        </div>
-        <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"0.95rem", color:"var(--text-strong)", marginBottom:3, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{parrain.pseudo}</p>
-        <span style={{ fontSize:"0.65rem", fontWeight:700, background:`${color}22`, color, padding:"2px 8px", borderRadius:100, border:`1px solid ${color}44`, display:"inline-block", marginBottom:"0.75rem" }}>{parrain.level}</span>
-        <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-          <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.4rem", color:"var(--text-strong)", lineHeight:1 }}>{parrain.xp.toLocaleString("fr-FR")}</p>
-          <p style={{ fontSize:"0.7rem", color:"var(--text-dim)" }}>XP total</p>
-        </div>
-        <div style={{ display:"flex", justifyContent:"center", gap:12, marginTop:"0.75rem", paddingTop:"0.75rem", borderTop:"1px solid var(--border)" }}>
-          <span style={{ fontSize:"0.7rem", color:"var(--text-dim)" }}>📋 {parrain.annonces}</span>
-          <span style={{ fontSize:"0.7rem", color:"var(--text-dim)" }}>🔥 {parrain.streak}</span>
-        </div>
-      </div>
-      <div style={{ marginTop:"0.625rem", background:"var(--bg-card-md)", border:"1px solid var(--border-md)", borderRadius:100, padding:"3px 14px", fontSize:"0.72rem", color:"var(--text-muted)", fontWeight:600 }}>#{config.rank}</div>
-    </div>
-  );
-}
-
-// ── Row ───────────────────────────────────────────────────────────────────────
-function RankRow({ parrain, rank, index }: { parrain:Parrain; rank:number; index:number }) {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+// ── Podium : 2e, 1er, 3e ──────────────────────────────────────────────────────
+function Podium({ top3 }: { top3: Parrain[] }) {
+  // Deux images d'attente : le navigateur peint d'abord les marches en bas,
+  // puis la classe déclenche la montée.
+  const [up, setUp] = useState(false);
   useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setTimeout(() => setVisible(true), index * 40); obs.disconnect(); } }, { threshold:0.1 });
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [index]);
-
-  const color = NIVEAU_COLOR[parrain.level] ?? "#A39E93";
-
+    let r2 = 0;
+    const r1 = requestAnimationFrame(() => { r2 = requestAnimationFrame(() => setUp(true)); });
+    return () => { cancelAnimationFrame(r1); cancelAnimationFrame(r2); };
+  }, []);
+  const order = [
+    { p: top3[1], rank: 2 },
+    { p: top3[0], rank: 1 },
+    { p: top3[2], rank: 3 },
+  ];
   return (
-    <div ref={ref} data-rank={rank} style={{ display:"flex", alignItems:"center", gap:12, padding:"0.875rem 1.25rem", background:parrain.isMe?"rgba(255,212,59,.07)":"var(--bg-card)", border:`1px solid ${parrain.isMe?"rgba(255,212,59,.3)":"var(--border)"}`, borderRadius:14, opacity:visible?1:0, transform:visible?"translateX(0)":"translateX(-12px)", transition:"all 0.35s ease", position:"relative", overflow:"hidden" }}>
-      {parrain.isMe && <div style={{ position:"absolute", top:0, left:0, bottom:0, width:2, background:"var(--accent)", borderRadius:"2px 0 0 2px" }} />}
-      <div style={{ width:28, textAlign:"center", flexShrink:0 }}>
-        <RankBadge rank={rank} />
-      </div>
-      <Avatar pseudo={parrain.pseudo} size={36} isMe={parrain.isMe} avatarUrl={parrain.avatarUrl} />
-      <div style={{ flex:1, minWidth:0 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-          <p style={{ fontWeight:700, color:"var(--text-strong)", fontSize:"0.875rem", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{parrain.pseudo}</p>
-          {parrain.isMe && <span style={{ fontSize:"0.62rem", fontWeight:700, background:"rgba(255,212,59,.25)", color:"var(--accent-text)", padding:"1px 6px", borderRadius:100, border:"1px solid rgba(255,212,59,.3)", flexShrink:0 }}>Toi</span>}
+    <div className={`cl-podium${up ? " is-up" : ""}`}>
+      {order.map(({ p, rank }) => p && (
+        <div key={p.id} className={`cl-step cl-step-${rank}`}>
+          <a href={`/u/${encodeURIComponent(p.pseudo)}`} className="cl-step-who">
+            <Avatar pseudo={p.pseudo} size={rank === 1 ? 72 : 56} avatarUrl={p.avatarUrl} />
+            <span className="cl-step-pseudo">{p.pseudo}{p.isMe && <span className="cl-me">toi</span>}</span>
+            <span className="cl-step-xp tnum"><Counter target={p.xp} /> XP</span>
+          </a>
+          <div className="cl-block-clip">
+            <div className="cl-block">
+              <span className="cl-block-num" aria-label={`${rank}e`}>{rank}</span>
+            </div>
+          </div>
         </div>
-        <span style={{ fontSize:"0.68rem", fontWeight:600, color }}>{parrain.level}</span>
-      </div>
-      <div style={{ display:"flex", alignItems:"center", gap:16, flexShrink:0 }}>
-        <div style={{ textAlign:"center", display:"flex", flexDirection:"column", gap:1 }}>
-          <span style={{ fontSize:"0.72rem", color:"var(--text-faint)" }}>Annonces</span>
-          <span style={{ fontWeight:700, color:"var(--text-muted)", fontSize:"0.82rem" }}>{parrain.annonces}</span>
-        </div>
-        <div style={{ textAlign:"center", display:"flex", flexDirection:"column", gap:1 }}>
-          <span style={{ fontSize:"0.72rem", color:"var(--text-faint)" }}>Streak</span>
-          <span style={{ fontWeight:700, color:"var(--text-muted)", fontSize:"0.82rem" }}>🔥 {parrain.streak}</span>
-        </div>
-        <div style={{ textAlign:"right", minWidth:70 }}>
-          <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1rem", color:parrain.isMe?"var(--accent-text)":"var(--text-strong)" }}>{parrain.xp.toLocaleString("fr-FR")}</p>
-          <p style={{ fontSize:"0.68rem", color:"var(--text-faint)" }}>XP</p>
-        </div>
-      </div>
+      ))}
     </div>
   );
 }
 
-// ── Skeleton row ──────────────────────────────────────────────────────────────
+// ── Ligne du classement ───────────────────────────────────────────────────────
+function RankRow({ parrain, rank, max }: { parrain: Parrain; rank: number; max: number }) {
+  const ratio = max > 0 ? Math.max(0.015, parrain.xp / max) : 0;
+  return (
+    <li data-rank={rank} className={`cl-row reveal${parrain.isMe ? " is-me" : ""}`}>
+      <span className="cl-rank tnum">{rank}</span>
+      <Avatar pseudo={parrain.pseudo} size={40} avatarUrl={parrain.avatarUrl} />
+      <span className="cl-who">
+        <a href={`/u/${encodeURIComponent(parrain.pseudo)}`} className="cl-pseudo">{parrain.pseudo}</a>
+        {parrain.isMe && <span className="cl-me">toi</span>}
+        <span className="cl-level">{parrain.level}</span>
+      </span>
+      <span className="cl-stats">
+        <span title="Codes publiés"><Ticket size={16} /> <span className="tnum">{parrain.annonces}</span></span>
+        {parrain.streak > 1 && <span title="Jours de connexion d'affilée"><Flame size={16} /> <span className="tnum">{parrain.streak}</span></span>}
+      </span>
+      <span className="cl-xp">
+        <span className="cl-xp-num tnum">{nf(parrain.xp)} <small>XP</small></span>
+        <span className="cl-bar" aria-hidden="true"><span className="cl-bar-fill" style={{ ["--v" as string]: ratio }} /></span>
+      </span>
+    </li>
+  );
+}
+
 function SkeletonRow() {
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:12, padding:"0.875rem 1.25rem", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:14 }}>
-      <div style={{ width:28, height:20, background:"var(--border-md)", borderRadius:4 }} />
-      <div style={{ width:36, height:36, borderRadius:"50%", background:"var(--border-md)" }} />
-      <div style={{ flex:1 }}>
-        <div style={{ width:"40%", height:12, background:"var(--border-md)", borderRadius:4, marginBottom:6 }} />
-        <div style={{ width:"25%", height:10, background:"var(--border)", borderRadius:4 }} />
-      </div>
-      <div style={{ width:60, height:20, background:"var(--border-md)", borderRadius:4 }} />
-    </div>
+    <li className="cl-row cl-skel" aria-hidden="true">
+      <span className="cl-rank" /><span className="cl-avatar" style={{ width: 40, height: 40 }} /><span className="cl-who"><span /></span>
+    </li>
   );
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
+// ── Page ──────────────────────────────────────────────────────────────────────
 export default function ClassementPage() {
   const [parrains, setParrains] = useState<Parrain[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -234,204 +193,104 @@ export default function ClassementPage() {
     fetchClassement();
   }, []);
 
-  const sorted = [...parrains].sort((a,b) => b.xp - a.xp || b.annonces - a.annonces);
+  const sorted = [...parrains].sort((a, b) => b.xp - a.xp || b.annonces - a.annonces);
   const top3   = sorted.slice(0, 3);
   const rest   = sorted.slice(3);
-  const meRank = sorted.findIndex(p => p.isMe) + 1;
-  const me     = sorted.find(p => p.isMe);
+  const meRank = sorted.findIndex((p) => p.isMe) + 1;
+  const me     = sorted.find((p) => p.isMe);
+  const maxXp  = sorted[0]?.xp ?? 0;
+  const totalAnnonces = parrains.reduce((a, p) => a + p.annonces, 0);
+  const publishers    = parrains.filter((p) => p.annonces > 0).length;
 
-  const podiumOrder = [
-    { parrain: top3[1], config: PODIUM_CONFIG[0] },
-    { parrain: top3[0], config: PODIUM_CONFIG[1] },
-    { parrain: top3[2], config: PODIUM_CONFIG[2] },
+  const REWARDS = [
+    { rank: 1, items: ["Badge « Top 1 » permanent sur ton profil", "Mention « Parrain du mois » pendant 30 jours", "5 crédits de boost"] },
+    { rank: 2, items: ["Badge « Top 2 » permanent", "3 crédits de boost"] },
+    { rank: 3, items: ["Badge « Top 3 » permanent", "1 crédit de boost"] },
   ];
 
-  const totalAnnonces = parrains.reduce((a,p) => a + p.annonces, 0);
-  const totalXP       = parrains.reduce((a,p) => a + p.xp, 0);
-
   return (
-    <>
-      <style>{`
-        @keyframes spin    { to { transform:rotate(360deg); } }
-        @keyframes shimmer { 0%{opacity:.5} 50%{opacity:1} 100%{opacity:.5} }
-        @keyframes float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
-        *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-        body { background:var(--bg); color:var(--text); font-family:var(--font-text); min-height:100vh; }
-
-        .page { max-width:800px; margin:0 auto; padding:3rem 1.5rem 6rem; }
-
-        .page-header { text-align:center; margin-bottom:3rem; }
-        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:.75rem; }
-        .header-label::before { content:''; display:block; width:18px; height:1px; background:var(--accent); }
-        .header-label::after  { content:''; display:block; width:18px; height:1px; background:var(--accent); }
-        .page-title { font-family:var(--font-display); font-weight:800; font-size:clamp(1.75rem,4vw,2.5rem); color:var(--text-strong); letter-spacing:-.03em; margin-bottom:.5rem; }
-        .page-sub { color:var(--text-dim); font-size:.88rem; display:flex; align-items:center; justify-content:center; gap:8px; }
-        .live-dot { width:7px; height:7px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e; animation:shimmer 2s ease-in-out infinite; flex-shrink:0; }
-
-        .stats-banner { display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; margin-bottom:3rem; max-width:360px; margin-left:auto; margin-right:auto; }
-        .stat-b { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:1.1rem; text-align:center; }
-        .stat-b-val { font-family:var(--font-display); font-weight:800; font-size:1.5rem; color:var(--text-strong); }
-        .stat-b-lbl { font-size:.72rem; color:var(--text-dim); margin-top:2px; }
-
-        .podium-wrap { display:flex; align-items:flex-end; gap:1rem; margin-bottom:2.5rem; }
-
-        .list-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:.875rem; }
-        .list-title { font-family:var(--font-display); font-weight:700; font-size:1rem; color:var(--text-muted); }
-        .list-rows { display:flex; flex-direction:column; gap:.5rem; }
-
-        .my-rank-banner { position:sticky; bottom:24px; margin-top:1.5rem; background:var(--bg-nav); backdrop-filter:blur(16px); border:1px solid rgba(255,212,59,.35); border-radius:16px; padding:.875rem 1.25rem; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow:0 8px 32px rgba(255,212,59,.2); }
-        .my-rank-left { display:flex; align-items:center; gap:10px; }
-        .my-rank-label { font-size:.78rem; color:var(--text-dim); }
-        .my-rank-pos { font-family:var(--font-display); font-weight:800; font-size:1.25rem; color:var(--accent-text); }
-
-        .cta-section { margin-top:3rem; position:relative; overflow:hidden; background:rgba(255,212,59,.08); border:1px solid rgba(255,212,59,.25); border-radius:24px; padding:3rem 2rem; text-align:center; }
-        .cta-glow { position:absolute; top:-60px; left:50%; transform:translateX(-50%); width:300px; height:300px; background:none; pointer-events:none; }
-        .cta-title { font-family:var(--font-display); font-weight:800; font-size:1.5rem; color:var(--text-strong); margin-bottom:.5rem; letter-spacing:-.02em; }
-        .cta-sub { color:var(--text-muted); font-size:.875rem; margin-bottom:1.5rem; }
-        .cta-btn { display:inline-flex; align-items:center; gap:8px; background:var(--accent); color:var(--accent-ink); border:none; padding:.75rem 1.75rem; border-radius:12px; font-size:.9rem; font-weight:700; cursor:pointer; transition:all .2s; text-decoration:none; font-family:var(--font-text); }
-        .cta-btn:hover { background:var(--accent-hover); transform:translateY(-2px); box-shadow:0 6px 24px rgba(255,212,59,.4); }
-
-        .rewards-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; }
-        .podium-wrap > * { min-width:0; }
-        @media(max-width:600px) {
-          .page { padding:2rem 1rem 5rem; }
-          .podium-wrap { gap:.5rem; }
-          .stats-banner { grid-template-columns:repeat(2,1fr); }
-          .rewards-grid { grid-template-columns:1fr; }
-          .my-rank-banner { flex-wrap:wrap; gap:.75rem; bottom:12px; }
-        }
-      `}</style>
-
+    <div className="cl">
       <Navbar activePage="classement" />
 
-      <main className="page">
+      <main>
+        {/* ── En-tête + podium ── */}
+        <section className="cl-hero">
+          <div className="wrap">
+            <h1 className="cl-title">Classement des parrains</h1>
+            <p className="cl-lede">
+              {loading
+                ? "Les membres classés par XP. Chaque code publié rapporte 10 XP."
+                : <>{nf(sorted.length)} membres classés par XP, dont {nf(publishers)} qui ont publié au moins un code ({nf(totalAnnonces)} codes en tout). Chaque code publié rapporte 10 XP.</>}
+            </p>
 
-        {/* Header */}
-        <header className="page-header">
-          <div className="header-label">Compétition</div>
-          <h1 className="page-title">Classement des parrains</h1>
-          <p className="page-sub">
-            <span className="live-dot" />
-            Les meilleurs parrains de la communauté
-          </p>
-        </header>
-
-        {/* Stats banner */}
-        <div className="stats-banner">
-          <div className="stat-b">
-            <div className="stat-b-val">{loading ? "—" : <Counter target={totalAnnonces} />}</div>
-            <div className="stat-b-lbl">Annonces publiées</div>
+            {loading ? (
+              <div className="cl-podium cl-podium-skel" aria-hidden="true">
+                <div className="cl-step cl-step-2"><div className="cl-block-clip"><div className="cl-block" /></div></div>
+                <div className="cl-step cl-step-1"><div className="cl-block-clip"><div className="cl-block" /></div></div>
+                <div className="cl-step cl-step-3"><div className="cl-block-clip"><div className="cl-block" /></div></div>
+              </div>
+            ) : top3.length >= 3 ? (
+              <Podium top3={top3} />
+            ) : null}
           </div>
-          <div className="stat-b">
-            <div className="stat-b-val">{loading ? "—" : <Counter target={totalXP} />}</div>
-            <div className="stat-b-lbl">XP distribués</div>
-          </div>
-        </div>
+        </section>
 
-        {/* Rewards banner */}
-        <div style={{ position:"relative", overflow:"hidden", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:20, padding:"1.5rem", marginBottom:"2.5rem" }}>
-          <div style={{ position:"absolute", inset:0, background:"none", pointerEvents:"none" }} />
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"var(--border-md)" }} />
-          <div style={{ position:"relative", zIndex:1 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:"1.1rem", flexWrap:"wrap" }}>
-              <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"0.95rem", color:"var(--text-strong)" }}>Récompenses du mois</p>
-              <span style={{ fontSize:"0.65rem", fontWeight:700, background:"rgba(255,212,59,.2)", color:"var(--accent-text)", padding:"2px 8px", borderRadius:100, border:"1px solid rgba(255,212,59,.3)", marginLeft:2 }}>Remise le 1er du mois</span>
+        {/* ── Récompenses du mois ── */}
+        <section className="band-paper cl-rewards">
+          <div className="wrap cl-rewards-grid">
+            <div>
+              <h2 className="reveal">Ce que gagnent les trois premiers</h2>
+              <p className="cl-rewards-lede reveal" data-delay="1">Remis le 1er de chaque mois, d&apos;après le classement de la veille.</p>
             </div>
-            <div className="rewards-grid">
-              {[
-                { rank:"#1", crown:"🥇", color:"rgba(251,191,36,.9)", bg:"rgba(251,191,36,.07)", border:"rgba(251,191,36,.25)", rewards:["Badge « Top 1 » permanent", "⭐ Tag Parrain du mois (30j)", "5 crédits boost"] },
-                { rank:"#2", crown:"🥈", color:"rgba(156,163,175,.8)", bg:"rgba(156,163,175,.05)", border:"rgba(156,163,175,.2)",  rewards:["Badge « Top 2 » permanent", "3 crédits boost"] },
-                { rank:"#3", crown:"🥉", color:"rgba(180,83,9,.9)",    bg:"rgba(180,83,9,.06)",   border:"rgba(180,83,9,.22)",    rewards:["Badge « Top 3 » permanent", "1 crédit boost"] },
-              ].map((r) => (
-                <div key={r.rank} style={{ background:r.bg, border:`1px solid ${r.border}`, borderRadius:14, padding:"1rem" }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:"0.625rem" }}>
-                    <span style={{ fontSize:"1.1rem" }}>{r.crown}</span>
-                    <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"0.9rem", color:r.color }}>{r.rank}</span>
-                  </div>
-                  <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-                    {r.rewards.map((rw, i) => (
-                      <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:5 }}>
-                        <span style={{ color:r.color, fontSize:"0.65rem", marginTop:2, flexShrink:0 }}>✦</span>
-                        <span style={{ fontSize:"0.75rem", color:"var(--text-muted)", lineHeight:1.4 }}>{rw}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            <ol className="cl-rewards-list">
+              {REWARDS.map((r) => (
+                <li key={r.rank} className="reveal" data-delay={String(r.rank)}>
+                  <Medal rank={r.rank} size={34} />
+                  <span>
+                    <strong>{r.rank === 1 ? "1er" : `${r.rank}e`}</strong>
+                    {r.items.join(", ")}.
+                  </span>
+                </li>
               ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* ── Tout le classement ── */}
+        <section className="cl-list-section">
+          <div className="wrap">
+            <div className="cl-list-head">
+              <h2>Tout le classement</h2>
+              {!loading && <span className="cl-count tnum">{nf(sorted.length)} membres</span>}
             </div>
+            <ol className="cl-list">
+              {loading
+                ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
+                : rest.map((p, i) => <RankRow key={p.id} parrain={p} rank={i + 4} max={maxXp} />)}
+            </ol>
           </div>
-        </div>
+        </section>
 
-        {/* Podium */}
-        {loading ? (
-          <div style={{ display:"flex", alignItems:"flex-end", gap:"1rem", marginBottom:"2.5rem" }}>
-            {[2,1,3].map(r => (
-              <div key={r} style={{ flex:1, background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:20, padding:"1.5rem 1rem", animation:"shimmer 1.5s ease-in-out infinite", height: r===1?180:150 }} />
-            ))}
-          </div>
-        ) : top3.length >= 3 ? (
-          <div className="podium-wrap">
-            {podiumOrder.map(({ parrain, config }) => parrain && (
-              <PodiumCard key={parrain.id} parrain={parrain} config={config} />
-            ))}
-          </div>
-        ) : null}
-
-        {/* Rest of list */}
-        <div>
-          <div className="list-header">
-            <span className="list-title">Suite du classement</span>
-            <span style={{ fontSize:".75rem", color:"var(--text-faint)" }}>Top {sorted.length}</span>
-          </div>
-          <div className="list-rows">
-            {loading
-              ? Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
-              : rest.map((p, i) => <RankRow key={p.id} parrain={p} rank={i + 4} index={i} />)
-            }
-          </div>
-        </div>
-
-        {/* My rank sticky banner (if not in top 3) */}
+        {/* ── Ma position (si hors podium) ── */}
         {!loading && me && meRank > 3 && (
-          <div className="my-rank-banner">
-            <div className="my-rank-left">
-              <Avatar pseudo={me.pseudo} size={32} isMe avatarUrl={me.avatarUrl} />
-              <div>
-                <p className="my-rank-label">Ta position</p>
-                <p className="my-rank-pos">#{meRank} sur {sorted.length}</p>
-              </div>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:16 }}>
-              <div style={{ textAlign:"center" }}>
-                <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1rem", color:"var(--text-strong)" }}>{me.xp}</p>
-                <p style={{ fontSize:"0.65rem", color:"var(--text-faint)" }}>XP</p>
-              </div>
-              {meRank > 1 && sorted[meRank-2] && (
-                <div style={{ textAlign:"right" }}>
-                  <p style={{ fontSize:"0.72rem", color:"var(--text-dim)" }}>Pour passer #{meRank-1}</p>
-                  <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"0.875rem", color:"var(--accent-text)" }}>+{sorted[meRank-2].xp - me.xp + 1} XP</p>
-                </div>
-              )}
-              <a href="/faq" style={{ display:"inline-flex", alignItems:"center", gap:5, background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.4)", borderRadius:9, padding:".4rem .875rem", color:"var(--accent-text)", fontSize:".78rem", fontWeight:600, textDecoration:"none", transition:"all .2s", whiteSpace:"nowrap" }}>
-                Monter ↑
-              </a>
-            </div>
+          <div className="cl-mine">
+            <Avatar pseudo={me.pseudo} size={34} avatarUrl={me.avatarUrl} />
+            <span className="cl-mine-txt">
+              Tu es <strong className="tnum">{meRank}e</strong> sur {nf(sorted.length)}
+              {sorted[meRank - 2] && <> ; il te manque <strong className="tnum">{nf(sorted[meRank - 2].xp - me.xp + 1)} XP</strong> pour passer devant {sorted[meRank - 2].pseudo}</>}
+            </span>
+            <a href="/publier" className="btn btn-accent">Publier un code</a>
           </div>
         )}
 
-        {/* CTA */}
-        <div className="cta-section">
-          <div className="cta-glow" />
-          <p style={{ fontSize:"2rem", marginBottom:".75rem", animation:"float 3s ease-in-out infinite", display:"inline-block" }}>🚀</p>
-          <h2 className="cta-title">Tu veux grimper dans le classement ?</h2>
-          <p className="cta-sub">Publie tes codes, gagne de l&rsquo;XP, et décroche le top 3.</p>
-          <a href="/publier" className="cta-btn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Publier mon code
-          </a>
-        </div>
-
+        {/* ── Dernier écran ── */}
+        <section className="cl-final">
+          <div className="wrap">
+            <h2 className="display-wide reveal">Un code publié, c&apos;est 10 XP de plus.</h2>
+            <a href="/publier" className="btn btn-ink reveal" data-delay="1">Publier mon code</a>
+          </div>
+        </section>
       </main>
-    </>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 import Navbar from '@/components/Navbar'
+import { Search } from "@/components/Pictos";
 
 // 404 global — remplace l'ancien soft-404 (« Entreprise introuvable » servi en 200)
 export default function NotFound() {
@@ -6,7 +7,7 @@ export default function NotFound() {
     <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-text)", color: 'var(--text-strong)' }}>
       <Navbar />
       <div style={{ maxWidth: 860, margin: '0 auto', padding: '6rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, textAlign: 'center' }}>
-        <div style={{ fontSize: '3rem' }} aria-hidden="true">😕</div>
+        <div style={{ color: 'var(--text-dim)' }} aria-hidden="true"><Search size={48} /></div>
         <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.4rem', margin: 0 }}>
           Page introuvable
         </h1>

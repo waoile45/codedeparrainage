@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
+import { Chat, Ticket } from "@/components/Pictos";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface ConversationData {
@@ -54,7 +55,7 @@ function Avatar({ pseudo, size = 36 }: { pseudo: string; size?: number }) {
 function EmptyState() {
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem", padding: "3rem" }}>
-      <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(255,212,59,.1)", border: "1px solid rgba(255,212,59,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>💬</div>
+      <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(255,212,59,.1)", border: "1px solid rgba(255,212,59,.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent-text)" }}><Chat size={26} /></div>
       <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1rem", color: "rgba(255,255,255,.6)" }}>Aucun message</p>
       <p style={{ fontSize: ".8rem", color: "rgba(255,255,255,.25)", textAlign: "center" }}>Contacte un parrain depuis la page des codes pour démarrer une conversation.</p>
       <a href="/codes" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,212,59,.15)", border: "1px solid rgba(255,212,59,.3)", borderRadius: 10, padding: ".5rem 1rem", color: "var(--accent-text)", fontSize: ".82rem", fontWeight: 600, textDecoration: "none" }}>
@@ -386,7 +387,7 @@ export default function MessagesPage() {
                   <div className="chat-header-info">
                     <p className="chat-header-pseudo">{activeConv.otherPseudo}</p>
                     <div className="chat-header-sub">
-                      <span className="chat-company-tag">📋 {activeConv.companyName}{activeConv.code ? ` · ${activeConv.code}` : ""}</span>
+                      <span className="chat-company-tag"><Ticket size={14} /> {activeConv.companyName}{activeConv.code ? `, ${activeConv.code}` : ""}</span>
                     </div>
                   </div>
                   <div className="chat-actions">

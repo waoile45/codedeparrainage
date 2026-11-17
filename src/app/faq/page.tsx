@@ -1,6 +1,7 @@
 "use client";
 
 import Navbar from "@/components/Navbar";
+import { Ticket } from "@/components/Pictos";
 
 const FAQ = [
   {
@@ -44,7 +45,7 @@ export default function FaqPage() {
       <Navbar />
       <main style={{ maxWidth:720, margin:"0 auto", padding:"3rem 1.5rem 6rem", fontFamily:"var(--font-text)" }}>
         <div style={{ marginBottom:"2rem" }}>
-          <div style={{ display:"inline-flex", alignItems:"center", gap:6, fontSize:".72rem", fontWeight:600, letterSpacing:".1em", textTransform:"uppercase", color:"var(--accent)", marginBottom:".75rem" }}>
+          <div style={{ display:"inline-flex", alignItems:"center", gap:6, fontSize:".72rem", fontWeight:600, color:"var(--accent)", marginBottom:".75rem" }}>
             <span style={{ width:18, height:1, background:"var(--accent)", display:"block" }} />
             FAQ
           </div>
@@ -67,7 +68,7 @@ export default function FaqPage() {
         </div>
 
         <div style={{ background:"rgba(255,212,59,.1)", border:"1px solid rgba(255,212,59,.3)", borderRadius:20, padding:"1.75rem", textAlign:"center" }}>
-          <div style={{ fontSize:"2rem", marginBottom:".75rem" }}>🚀</div>
+          <div style={{ marginBottom:".75rem", color:"var(--accent-text)" }}><Ticket size={40} /></div>
           <h2 style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.25rem", color:"var(--text-strong)", marginBottom:".5rem" }}>
             Prêt à gagner de l&apos;XP ?
           </h2>

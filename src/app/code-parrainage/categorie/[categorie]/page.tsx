@@ -160,8 +160,8 @@ export default async function CategoryPage({ params }: Props) {
         <section className="band-paper cp-brands">
           <div className="wrap">
             <ol className="hp-brand-list">
-              {brands.map((b) => (
-                <li key={b.slug}>
+              {brands.map((b, i) => (
+                <li key={b.slug} className="reveal" data-delay={String(i % 4)}>
                   <a href={`/code-parrainage/${b.slug}`} className="hp-brand-row">
                     <span className="cp-logo"><CompanyLogo domain={b.domain} name={b.name} /></span>
                     <span className="hp-brand-name">{b.name}</span>

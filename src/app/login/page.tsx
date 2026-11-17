@@ -144,7 +144,7 @@ export default function LoginPage() {
         }
         .auth-input.has-toggle { padding-right:2.75rem; }
         .auth-input::placeholder { color:rgba(255,255,255,0.25); }
-        .auth-input:focus { border-color:rgba(255,212,59,0.45); background:rgba(255,212,59,0.05); box-shadow:0 0 0 3px rgba(255,212,59,0.1); }
+        .auth-input:focus { border-color:rgba(255,212,59,0.45); background:rgba(255,212,59,0.05);  }
         .pwd-toggle {
           position:absolute; right:0.875rem; top:50%; transform:translateY(-50%);
           background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.3);
@@ -161,7 +161,7 @@ export default function LoginPage() {
           border-radius:13px; padding:0.875rem; font-size:0.9rem; font-weight:700;
           cursor:pointer; transition:all 0.2s; font-family:var(--font-text);
         }
-        .auth-btn:hover:not(:disabled) { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 6px 24px rgba(255,212,59,0.4); }
+        .auth-btn:hover:not(:disabled) { background:var(--accent-hover); transform:translateY(-1px);  }
         .auth-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
         .auth-btn-google {
           display:flex; align-items:center; justify-content:center; gap:10px;

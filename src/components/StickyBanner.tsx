@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { Cross } from "@/components/Pictos";
 
 // Pages où proposer l'inscription n'a pas de sens (on y est déjà)
 const HIDDEN_ON = ["/login", "/register", "/auth"];
@@ -61,7 +62,7 @@ export default function StickyBanner() {
           background: var(--accent); color: var(--accent-ink); text-decoration: none;
           padding: 0.55rem 1rem; border-radius: 10px;
           font-size: 0.82rem; font-weight: 700; white-space: nowrap;
-          box-shadow: 0 4px 16px rgba(255,212,59,0.4);
+          
         }
         .sb-close {
           background: none; border: none; cursor: pointer;
@@ -84,7 +85,7 @@ export default function StickyBanner() {
         </div>
         <div className="sb-actions">
           <Link href="/register" className="sb-cta">Créer un compte</Link>
-          <button onClick={dismiss} className="sb-close" aria-label="Fermer">✕</button>
+          <button onClick={dismiss} className="sb-close" aria-label="Fermer"><Cross size={16} /></button>
         </div>
       </div>
     </>

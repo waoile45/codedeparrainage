@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import { ENTREPRISES, type Entreprise } from "@/data/entreprises";
 import { CategoryIcon } from "@/components/CategoryIcons";
+import { Building, Bulb, Check, Envelope, Stamp } from "@/components/Pictos";
 
 // ── Entreprises recommandées (prioritaires) ────────────────────────────────────
 const RECOMMENDED: Entreprise[] = [
@@ -241,7 +242,7 @@ export default function PublierPage() {
 
         .page { max-width:680px; margin:0 auto; padding:3rem 1.5rem 6rem; }
         .page-header { margin-bottom:2rem; }
-        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:.75rem; }
+        .header-label { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; font-weight:600;   color:var(--accent); margin-bottom:.75rem; }
         .header-label::before { content:''; width:18px; height:1px; background:var(--accent); display:block; }
         .page-title { font-family:var(--font-display); font-weight:800; font-size:clamp(1.5rem,3.5vw,2rem); color:var(--text-strong); letter-spacing:-.03em; margin-bottom:.35rem; }
         .page-sub { color:var(--text-dim); font-size:.875rem; }
@@ -253,7 +254,7 @@ export default function PublierPage() {
         .search-icon { position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:var(--text-faint); pointer-events:none; }
         .search-input { width:100%; background:var(--bg-input); border:1px solid var(--border-md); border-radius:12px; padding:.75rem 1rem .75rem 2.75rem; color:var(--text-strong); font-size:.875rem; font-family:var(--font-text); outline:none; transition:all .2s; }
         .search-input::placeholder { color:var(--text-faint); }
-        .search-input:focus { border-color:rgba(255,212,59,.4); background:rgba(255,212,59,.05); box-shadow:0 0 0 3px rgba(255,212,59,.1); }
+        .search-input:focus { border-color:rgba(255,212,59,.4); background:rgba(255,212,59,.05);  }
 
         .results-hint { font-size:.72rem; color:var(--text-faint); margin-bottom:.75rem; }
 
@@ -263,14 +264,14 @@ export default function PublierPage() {
         .company-grid::-webkit-scrollbar-thumb { background:rgba(255,212,59,.4); border-radius:4px; }
         .company-card { display:flex; align-items:center; gap:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:.75rem 1rem; cursor:pointer; transition:all .18s; }
         .company-card:hover { border-color:rgba(255,212,59,.3); background:rgba(255,212,59,.06); }
-        .company-card.selected { border-color:rgba(255,212,59,.5); background:rgba(255,212,59,.12); box-shadow:0 0 16px rgba(255,212,59,.15); }
+        .company-card.selected { border-color:rgba(255,212,59,.5); background:rgba(255,212,59,.12);  }
         .company-name { font-weight:600; font-size:.855rem; color:var(--text-strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
         .form-group { display:flex; flex-direction:column; gap:7px; }
         .form-label { font-size:.78rem; font-weight:600; color:var(--text-muted); letter-spacing:.04em; display:flex; align-items:center; gap:8px; }
         .form-label-opt { font-size:.7rem; color:var(--text-faint); font-weight:400; }
         .form-input { background:var(--bg-input); border:1px solid var(--border-md); border-radius:12px; padding:.75rem 1rem; color:var(--text-strong); font-size:.9rem; font-family:var(--font-text); outline:none; transition:all .2s; width:100%; }
-        .form-input:focus { border-color:rgba(255,212,59,.4); background:rgba(255,212,59,.05); box-shadow:0 0 0 3px rgba(255,212,59,.1); }
+        .form-input:focus { border-color:rgba(255,212,59,.4); background:rgba(255,212,59,.05);  }
         .form-input::placeholder { color:var(--text-faint); }
         .form-textarea { resize:vertical; min-height:100px; }
         .form-hint { font-size:.7rem; color:var(--text-faint); }
@@ -284,14 +285,14 @@ export default function PublierPage() {
         .cats { display:flex; flex-wrap:wrap; gap:6px; }
         .cat-pill { padding:.3rem .75rem; background:var(--bg-card-md); border:1px solid var(--border-md); border-radius:100px; color:var(--text-link); font-size:.75rem; font-weight:500; cursor:pointer; transition:all .18s; font-family:var(--font-text); }
         .cat-pill:hover { color:var(--text-strong); border-color:rgba(255,212,59,.3); }
-        .cat-pill.active { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); box-shadow:0 0 14px rgba(255,212,59,.3); }
+        .cat-pill.active { background:var(--accent); border-color:var(--accent); color:var(--accent-ink);  }
 
-        .code-input { font-family:'Courier New',monospace !important; font-size:1rem !important; font-weight:700 !important; letter-spacing:.08em; text-transform:uppercase; }
+        .code-input { font-family:'Courier New',monospace !important; font-size:1rem !important; font-weight:700 !important;   }
         .code-preview { display:flex; align-items:center; gap:8px; background:var(--bg-code); border:1px solid var(--border); border-radius:10px; padding:.6rem .875rem; margin-top:6px; }
-        .code-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px var(--accent); }
+        .code-dot { width:6px; height:6px; border-radius:50%; background:var(--accent);  }
 
         .btn-next { display:flex; align-items:center; justify-content:center; gap:7px; width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:13px; padding:.875rem; font-size:.9rem; font-weight:700; cursor:pointer; transition:all .2s; font-family:var(--font-text); margin-top:1.5rem; }
-        .btn-next:hover { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 6px 24px rgba(255,212,59,.4); }
+        .btn-next:hover { background:var(--accent-hover); transform:translateY(-1px);  }
         .btn-next:disabled { opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
         .btn-back { display:flex; align-items:center; gap:6px; background:none; border:1px solid var(--border-btn-ghost); border-radius:10px; padding:.5rem .875rem; color:var(--text-muted); font-size:.82rem; cursor:pointer; transition:all .18s; font-family:var(--font-text); margin-bottom:1.25rem; }
         .btn-back:hover { color:var(--text-strong); border-color:var(--border-lg); }
@@ -324,7 +325,6 @@ export default function PublierPage() {
 
       <main className="page">
         <div className="page-header">
-          <div className="header-label">Publication</div>
           <h1 className="page-title">
             Publier mon code
             <span className="xp-badge">+{XP_GAIN} XP</span>
@@ -342,7 +342,7 @@ export default function PublierPage() {
               {/* Populaires */}
               {!search.trim() && (
                 <div style={{ marginBottom:"1.25rem" }}>
-                  <p style={{ fontSize:".72rem", fontWeight:600, color:"var(--accent-text)", letterSpacing:".06em", textTransform:"uppercase", marginBottom:".625rem" }}>⭐ Populaires</p>
+                  <p style={{ fontSize:".95rem", fontWeight:700, color:"var(--text-strong)", marginBottom:".625rem" }}>Les plus courantes</p>
                   <div style={{ display:"flex", gap:".5rem", overflowX:"auto", paddingBottom:".5rem", scrollbarWidth:"thin" }}>
                     {RECOMMENDED.map(e => (
                       <div
@@ -356,7 +356,7 @@ export default function PublierPage() {
                     ))}
                   </div>
                   <div style={{ height:1, background:"var(--border)", margin:"1.25rem 0" }} />
-                  <p style={{ fontSize:".72rem", fontWeight:600, color:"var(--text-faint)", letterSpacing:".06em", textTransform:"uppercase", marginBottom:".625rem" }}>Toutes les entreprises</p>
+                  <p style={{ fontSize:".72rem", fontWeight:600, color:"var(--text-faint)", marginBottom:".625rem" }}>Toutes les entreprises</p>
                 </div>
               )}
 
@@ -406,7 +406,7 @@ export default function PublierPage() {
               {search.trim() && !showProposal && !proposalSent && (
                 <div style={{ textAlign:"center", marginTop:"1rem" }}>
                   <button className="btn-propose" onClick={() => { setShowProposal(true); setProposalName(search.trim()); }}>
-                    Tu ne trouves pas ton entreprise ? Propose-la →
+                    Tu ne trouves pas ton entreprise ? Propose-la
                   </button>
                 </div>
               )}
@@ -414,10 +414,10 @@ export default function PublierPage() {
               {(showProposal || proposalSent) && (
                 <div className="proposal-box">
                   {proposalSent ? (
-                    <p className="proposal-sent">✅ Merci ! Ta proposition a été envoyée à l&rsquo;équipe.</p>
+                    <p className="proposal-sent"><Check size={15} /> Merci, ta proposition a été envoyée.</p>
                   ) : (
                     <>
-                      <p className="proposal-title">🏢 Proposer une entreprise</p>
+                      <p className="proposal-title"><Building size={16} /> Proposer une entreprise</p>
                       <p className="proposal-sub">Si l&rsquo;entreprise n&rsquo;est pas encore dans notre base, indique son nom et nous l&rsquo;ajouterons.</p>
                       <div className="form-group" style={{ marginBottom:"0.75rem" }}>
                         <label className="form-label">Nom de l&rsquo;entreprise</label>
@@ -497,7 +497,7 @@ export default function PublierPage() {
                 error.startsWith("__NOT_FOUND__") ? (
                   <div style={{ background:"rgba(255,212,59,.1)", border:"1px solid rgba(255,212,59,.3)", borderRadius:12, padding:"1rem 1.125rem", marginBottom:"1rem" }}>
                     <div style={{ fontWeight:700, fontSize:".875rem", color:"var(--accent-text)", marginBottom:6 }}>
-                      🏢 Cette entreprise n&apos;est pas encore dans notre base
+                      <Building size={16} /> Cette entreprise n&apos;est pas encore dans notre base
                     </div>
                     <p style={{ fontSize:".8rem", color:"var(--text-muted)", margin:"0 0 .75rem" }}>
                       Envoie-nous une demande et nous l&apos;ajouterons manuellement sous 24h.
@@ -506,7 +506,7 @@ export default function PublierPage() {
                       href={`mailto:waoile45@gmail.com?${error.replace("__NOT_FOUND__","")}`}
                       style={{ display:"inline-flex", alignItems:"center", gap:6, background:"var(--accent)", color:"var(--accent-ink)", fontWeight:700, fontSize:".8rem", padding:".45rem 1rem", borderRadius:9, textDecoration:"none" }}
                     >
-                      ✉️ Demander l&apos;ajout par email
+                      <Envelope size={16} /> Demander l&apos;ajout par email
                     </a>
                   </div>
                 ) : (
@@ -621,10 +621,10 @@ export default function PublierPage() {
           {/* ── Step 3 : succès ── */}
           {step === 3 && (
             <div className="success-wrap">
-              <div className="success-icon">🎉</div>
+              <div className="success-icon"><Stamp size={56} /></div>
               <h2 className="success-title">Annonce publiée !</h2>
               <p className="success-sub">Ton code {selectedEntreprise?.nom} est maintenant visible par toute la communauté.</p>
-              <div className="success-xp">+{XP_GAIN} XP gagnés ⚡</div>
+              <div className="success-xp">+{XP_GAIN} XP gagnés</div>
               <div className="success-actions">
                 <a href="/codes" className="btn-success-primary">Voir les codes</a>
                 <button className="btn-success-ghost" onClick={() => { setStep(1); setSelectedEntreprise(null); setSelectedCategory(""); setCode(""); setDesc(""); setGain(""); setError(""); }}>
@@ -639,7 +639,7 @@ export default function PublierPage() {
 
         {step < 3 && (
           <div style={{ marginTop:"1.25rem", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:14, padding:"1rem 1.25rem", display:"flex", alignItems:"flex-start", gap:10 }}>
-            <span style={{ fontSize:"1rem", flexShrink:0 }}>💡</span>
+            <span style={{ flexShrink:0, color:"var(--accent-text)", display:"inline-flex" }}><Bulb size={18} /></span>
             <p style={{ fontSize:".78rem", color:"var(--text-dim)", lineHeight:1.6 }}>
               Les annonces avec une description claire reçoivent <strong style={{ color:"var(--text-muted)" }}>2× plus de clics</strong>.
               Précise le montant offert et les conditions pour maximiser tes parrainages.
