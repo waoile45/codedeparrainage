@@ -5,6 +5,7 @@ import { createAnonSupabase } from '@/lib/supabase-server'
 import Navbar from '@/components/Navbar'
 import CopyButton from '@/components/CopyButton'
 import CompanyLogo from '@/components/CompanyLogo'
+import './brand.css'
 import { safeJsonLd } from '@/lib/sanitize'
 import {
   SITE_URL,
@@ -15,7 +16,7 @@ import {
   buildBrandTitle,
   buildBrandDescription,
 } from '@/lib/seo'
-import { getCategoryForBrand } from '@/data/categories'
+import { CATEGORIES, getCategoryForBrand } from '@/data/categories'
 
 // ISR 4h — pages 100% statiques (client anon : PAS de cookies(), sinon la route
 // bascule en rendu dynamique à chaque requête et n'est plus pré-générée).
@@ -165,11 +166,18 @@ function buildFaq(opts: {
   if (codesCount > 0) {
     faq.push({
       q: `Comment trouver un code ${name} qui fonctionne ?`,
-      a: `Les codes listés sur cette page sont publiés par des parrains inscrits et notés par la communauté (code fonctionnel, réponse rapide…)${dateStr ? ` — dernier code mis à jour le ${dateStr}` : ''}. En cas de problème, tu peux contacter le parrain directement depuis son annonce.`,
+      a: `Les codes de cette page sont publiés par des membres inscrits, avec leur pseudo et leur date ; les plus récents ou remontés par leur parrain passent en tête${dateStr ? ` (dernière mise à jour le ${dateStr})` : ''}. Si un code est refusé, essaie le suivant, et compare la prime avec celle affichée par ${name}.`,
     })
   }
 
   return faq
+}
+
+// Marques du hub « paris sportifs » : message de mise en garde obligatoire.
+const BETTING_BRANDS = new Set(CATEGORIES.find((c) => c.slug === 'paris-sportifs')?.brands ?? [])
+
+function isLink(code: string) {
+  return /^https?:\/\//i.test(code.trim())
 }
 
 export default async function CompanyPage({ params }: Props) {
@@ -189,6 +197,7 @@ export default async function CompanyPage({ params }: Props) {
   const year = new Date().getFullYear()
   const category = getCategoryForBrand(slug)
   const url = `${SITE_URL}/code-parrainage/${slug}`
+  const betting = BETTING_BRANDS.has(slug)
 
   // Le domaine pour le favicon — on nettoie au cas où la colonne slug contient un path ou sous-domaine
   const domain = (company.slug ?? slug + '.com').replace(/^(https?:\/\/)?(www\.)?/, '')
@@ -197,9 +206,9 @@ export default async function CompanyPage({ params }: Props) {
   const tagline: string =
     company.description ??
     pickVariant(slug, [
-      `Codes de parrainage ${name} partagés et vérifiés par la communauté.`,
-      `Les codes parrainage ${name} publiés par nos parrains, mis à jour en continu.`,
-      `Trouve un parrain ${name} actif et récupère son code en un clic.`,
+      `Les codes de parrainage ${name} publiés par des clients, du plus récent au plus ancien.`,
+      `Des codes ${name} partagés par des membres déjà clients, avec leur date de publication.`,
+      `Copie le code d'un client ${name} et colle-le au moment de ton inscription.`,
     ], 20)
 
   const faq = buildFaq({ slug, name, bonus, codesCount, parrainsCount, dateStr })
@@ -216,12 +225,12 @@ export default async function CompanyPage({ params }: Props) {
         .select('name, url_slug')
         .in('url_slug', catSlugs)
       for (const c of (catCompanies ?? []) as any[]) {
-        related.push({ slug: c.url_slug, name: formatBrandName(c.name) })
+        if (!related.some((r) => r.slug === c.url_slug)) related.push({ slug: c.url_slug, name: formatBrandName(c.name) })
       }
     }
   }
   for (const t of topActive) {
-    if (related.length >= 10) break
+    if (related.length >= 12) break
     if (t.slug === slug || related.some((r) => r.slug === t.slug)) continue
     related.push({ slug: t.slug, name: formatBrandName(t.name) })
   }
@@ -239,211 +248,186 @@ export default async function CompanyPage({ params }: Props) {
     ],
   }
 
+  const [first, ...others] = announcements as any[]
+  const firstParsed = first ? parseAnnouncementDescription(first.description) : null
+
+  const steps = [
+    codesCount > 0 ? `Copie un code de cette page.` : `Récupère un code auprès d'un proche déjà client, ou reviens quand un parrain aura publié le sien.`,
+    `Ouvre le site ou l'application ${name} et commence ton inscription.`,
+    `Colle le code dans le champ « code parrainage », « code promo » ou « code ami », avant de valider.`,
+    bonus
+      ? `La prime (${bonus}) est versée par ${name} une fois ses conditions remplies.`
+      : `Si ${name} prévoit une prime de parrainage, elle est versée une fois ses conditions remplies.`,
+  ]
+
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-text)", color: 'var(--text-strong)' }}>
+    <div className="bp">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
 
       <Navbar />
 
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '2rem 1.5rem 6rem' }}>
+      <main>
+        {/* ── En-tête : la marque, la prime, et le code le plus récent ── */}
+        <section className="bp-hero">
+          <div className="wrap">
+            <nav aria-label="Fil d'Ariane" className="bp-crumbs">
+              <a href="/">Accueil</a>
+              <span aria-hidden="true">/</span>
+              {category ? (
+                <a href={`/code-parrainage/categorie/${category.slug}`}>{category.short}</a>
+              ) : (
+                <a href="/codes">Codes de parrainage</a>
+              )}
+              <span aria-hidden="true">/</span>
+              <span>{name}</span>
+            </nav>
 
-        {/* ── Fil d'Ariane (cohérent avec le BreadcrumbList JSON-LD) ── */}
-        <nav aria-label="Fil d'Ariane" style={{ fontSize: '.78rem', color: 'var(--text-faint)', marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
-          <a href="/" style={{ color: 'var(--text-dim)', textDecoration: 'none' }}>Accueil</a>
-          <span aria-hidden="true">›</span>
-          {category ? (
-            <a href={`/code-parrainage/categorie/${category.slug}`} style={{ color: 'var(--text-dim)', textDecoration: 'none' }}>{category.short}</a>
-          ) : (
-            <a href="/codes" style={{ color: 'var(--text-dim)', textDecoration: 'none' }}>Codes de parrainage</a>
-          )}
-          <span aria-hidden="true">›</span>
-          <span style={{ color: 'var(--text-muted)' }}>{name}</span>
-        </nav>
-
-        {/* ── En-tête entreprise ── */}
-        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.75rem', marginBottom: '1.25rem' }}>
-          <div className="brand-head" style={{ marginBottom: bonus || codesCount > 0 ? '1.25rem' : 0 }}>
-            <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(255,212,59,.12)', border: '1px solid rgba(255,212,59,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
-              <CompanyLogo domain={domain} name={name} />
-            </div>
-            <div>
-              <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.4rem,3vw,1.9rem)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-                Code parrainage {name} {year}
-              </h1>
-              <p style={{ color: 'var(--text-dim)', fontSize: '.85rem', margin: '4px 0 0' }}>{tagline}</p>
-            </div>
-          </div>
-
-          {/* Offre — UNIQUEMENT si la donnée existe en base (fini le « null ») */}
-          {bonus && (
-            <div style={{ background: 'rgba(255,212,59,.1)', border: '1px solid rgba(255,212,59,.25)', borderRadius: 14, padding: '1rem 1.25rem', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <div className="bp-hero-grid">
               <div>
-                <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--accent-text)', marginBottom: 4 }}>Offre de parrainage</div>
-                <div style={{ color: 'var(--text-strong)', fontWeight: 600, fontSize: '.95rem' }}>{bonus}</div>
-              </div>
-            </div>
-          )}
-
-          {/* E-E-A-T : signaux réels de fraîcheur et de vérification communautaire */}
-          {codesCount > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1.25rem', marginTop: bonus ? '0.875rem' : 0, fontSize: '.78rem', color: 'var(--text-muted)' }}>
-              <span>{codesCount} code{codesCount > 1 ? 's' : ''} publié{codesCount > 1 ? 's' : ''}</span>
-              <span>{parrainsCount} parrain{parrainsCount > 1 ? 's' : ''} inscrit{parrainsCount > 1 ? 's' : ''}</span>
-              {dateStr && <span>Dernière mise à jour le {dateStr}</span>}
-            </div>
-          )}
-        </div>
-
-        {/* ── Liste des codes ── */}
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: '1rem' }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', margin: 0, color: 'var(--text-strong)' }}>
-            {codesCount} code{codesCount > 1 ? 's' : ''} parrainage {name} disponible{codesCount > 1 ? 's' : ''}
-          </h2>
-          <a href="/publier" style={{ fontSize: '.78rem', color: 'var(--accent-text)', textDecoration: 'none', fontWeight: 600 }}>
-            + Publier le mien
-          </a>
-        </div>
-
-        {codesCount > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-            {announcements.map((ann: any) => {
-              const { gain, description } = parseAnnouncementDescription(ann.description)
-              return (
-                <div key={ann.id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 18, padding: '1.25rem 1.375rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-code,rgba(255,212,59,.07))', border: '1px solid var(--border)', borderRadius: 12, padding: '.75rem 1rem', marginBottom: '0.875rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 6px var(--accent)', display: 'inline-block', flexShrink: 0 }} />
-                      <code style={{ fontFamily: "'Courier New',monospace", fontSize: '.95rem', fontWeight: 700, color: 'var(--text-strong)', letterSpacing: '.08em', wordBreak: 'break-all' }}>
-                        {ann.code}
-                      </code>
-                    </div>
-                    <CopyButton code={ann.code} />
-                  </div>
-
-                  {/* Gain custom (préfixe __gain__) parsé — plus jamais rendu brut */}
-                  {gain && (
-                    <span style={{ display: 'inline-block', padding: '.3rem .625rem', background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.25)', borderRadius: 8, color: '#16a34a', fontSize: '.8rem', fontWeight: 700, marginBottom: '.75rem' }}>
-                      {gain}
-                    </span>
-                  )}
-
-                  {description && (
-                    <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', margin: '0 0 .875rem', lineHeight: 1.55 }}>{description}</p>
-                  )}
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,212,59,.2)', border: '1px solid rgba(255,212,59,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.72rem', fontWeight: 700, color: 'var(--accent-text)', flexShrink: 0 }}>
-                      {ann.users?.pseudo?.slice(0, 1).toUpperCase()}
-                    </div>
-                    <a href={`/u/${encodeURIComponent(ann.users?.pseudo ?? '')}`} style={{ fontSize: '.8rem', color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 500 }}>
-                      {ann.users?.pseudo}
-                    </a>
-                    {ann.users?.level && (
-                      <span style={{ fontSize: '.7rem', fontWeight: 600, color: 'var(--accent-text)', background: 'rgba(255,212,59,.12)', border: '1px solid rgba(255,212,59,.25)', borderRadius: 100, padding: '1px 8px' }}>
-                        {ann.users.level}
-                      </span>
-                    )}
-                    <span style={{ fontSize: '.75rem', color: 'var(--text-faint)', marginLeft: 'auto' }}>
-                      {new Date(ann.last_bumped_at ?? ann.created_at).toLocaleDateString('fr-FR')}
-                    </span>
-                  </div>
+                <div className="bp-brand">
+                  <span className="bp-logo"><CompanyLogo domain={domain} name={name} /></span>
+                  <span className="bp-brand-name">{name}</span>
                 </div>
-              )
-            })}
+                <h1 className="bp-title">Code parrainage {name} {year}</h1>
+                <p className="bp-tagline">{tagline}</p>
+
+                {bonus && (
+                  <div className="bp-bonus">
+                    <span className="bp-bonus-label">Prime annoncée par {name}</span>
+                    <span className="bp-bonus-value">{bonus}</span>
+                  </div>
+                )}
+
+                {codesCount > 0 && (
+                  <p className="bp-facts tnum">
+                    {codesCount} code{codesCount > 1 ? 's' : ''} publié{codesCount > 1 ? 's' : ''} par {parrainsCount} parrain{parrainsCount > 1 ? 's' : ''}
+                    {dateStr && <>, dernière mise à jour le {dateStr}</>}
+                  </p>
+                )}
+              </div>
+
+              {first ? (
+                <div className="bp-top">
+                  <p className="bp-top-label">Le code le plus récent</p>
+                  <div className="bp-ticket">
+                    <span className="bp-ticket-code code-str" title={first.code}>
+                      {isLink(first.code) ? first.code.replace(/^https?:\/\/(www\.)?/i, '') : first.code}
+                    </span>
+                    <CopyButton code={first.code} variant="ink" />
+                  </div>
+                  {firstParsed?.gain && <p className="bp-gain">{firstParsed.gain}</p>}
+                  {firstParsed?.description && <p className="bp-desc">{firstParsed.description}</p>}
+                  <p className="bp-by">
+                    Publié par{' '}
+                    <a href={`/u/${encodeURIComponent(first.users?.pseudo ?? '')}`}>{first.users?.pseudo ?? 'un membre'}</a>
+                    {first.users?.level && <span className="bp-level">{first.users.level}</span>}
+                    <span className="bp-date">le {new Date(first.last_bumped_at ?? first.created_at).toLocaleDateString('fr-FR')}</span>
+                  </p>
+                  {isLink(first.code) && <p className="bp-hint">C&apos;est un lien : ouvre-le, ou copie-le dans ton navigateur pour t&apos;inscrire.</p>}
+                </div>
+              ) : (
+                <div className="bp-top bp-empty">
+                  <p className="bp-empty-title">
+                    {pickVariant(slug, [
+                      `Aucun code ${name} pour l'instant.`,
+                      `Personne n'a encore partagé de code ${name}.`,
+                      `Pas encore de code ${name} publié.`,
+                    ], 21)}
+                  </p>
+                  <p className="bp-desc">Tu es client {name} ? Ton code se trouve dans ton espace client ou dans l&apos;application. Publie-le : il apparaîtra ici.</p>
+                  <a href="/publier" className="btn btn-accent">Publier le premier code</a>
+                </div>
+              )}
+            </div>
+
+            {betting && (
+              <p className="bp-anj">
+                Jouer comporte des risques : endettement, isolement, dépendance. Pour être aidé, appelle le 09 74 75 13 13
+                (appel non surtaxé). Les jeux d&apos;argent sont interdits aux moins de 18 ans.
+              </p>
+            )}
           </div>
-        ) : (
-          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 18, padding: '3rem 2rem', textAlign: 'center' }}>
-            <p style={{ color: 'var(--text-muted)', fontSize: '.9rem', marginBottom: '1.25rem' }}>
-              {pickVariant(slug, [
-                `Aucun code parrainage ${name} pour l'instant — sois le premier parrain.`,
-                `Personne n'a encore partagé de code ${name}. Client ${name} ? Publie le tien.`,
-                `Pas encore de code ${name} publié par la communauté.`,
-              ], 21)}
-            </p>
-            <a href="/publier" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--accent)', color: 'var(--accent-ink)', fontWeight: 700, fontSize: '.875rem', padding: '.7rem 1.5rem', borderRadius: 12, textDecoration: 'none' }}>
-              Publier le premier code
-            </a>
-          </div>
+        </section>
+
+        {/* ── Les autres codes ── */}
+        {others.length > 0 && (
+          <section className="bp-list-section">
+            <div className="wrap">
+              <div className="bp-list-head">
+                <h2>Les autres codes {name}</h2>
+                <a href="/publier" className="bp-publish">Publier le mien</a>
+              </div>
+              <ul className="bp-list">
+                {others.map((ann: any) => {
+                  const { gain, description } = parseAnnouncementDescription(ann.description)
+                  return (
+                    <li key={ann.id} className="bp-row">
+                      <div className="bp-row-code">
+                        <span className="code-str" title={ann.code}>
+                          {isLink(ann.code) ? ann.code.replace(/^https?:\/\/(www\.)?/i, '') : ann.code}
+                        </span>
+                        <CopyButton code={ann.code} />
+                      </div>
+                      {(gain || description) && (
+                        <p className="bp-row-desc">
+                          {gain && <span className="bp-row-gain">{gain}</span>}
+                          {description}
+                        </p>
+                      )}
+                      <p className="bp-row-by">
+                        <a href={`/u/${encodeURIComponent(ann.users?.pseudo ?? '')}`}>{ann.users?.pseudo ?? 'un membre'}</a>
+                        {ann.users?.level && <span className="bp-level">{ann.users.level}</span>}
+                        <span className="bp-date">{new Date(ann.last_bumped_at ?? ann.created_at).toLocaleDateString('fr-FR')}</span>
+                      </p>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          </section>
         )}
 
-        {/* ── Comment utiliser ── */}
-        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginTop: '1.5rem', marginBottom: '1.25rem' }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
-            Comment utiliser un code parrainage {name} ?
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[
-              codesCount > 0 ? `Choisis un code dans la liste ci-dessus.` : `Reviens quand un parrain aura publié son code, ou récupères-en un auprès d'un proche déjà client.`,
-              `Copie-le et rends-toi sur le site ou l'application ${name}.`,
-              `Entre le code lors de ton inscription (champ « code parrainage » ou « code promo »).`,
-              bonus
-                ? `${bonus} — la récompense est créditée après validation des conditions.`
-                : `Valide ton inscription : si ${name} prévoit un bonus de parrainage, il est crédité une fois les conditions remplies.`,
-            ].map((step, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,212,59,.2)', border: '1px solid rgba(255,212,59,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.7rem', fontWeight: 800, color: 'var(--accent-text)', flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
-                <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.55 }}>{step}</p>
-              </div>
-            ))}
+        {/* ── Mode d'emploi et questions ── */}
+        <section className="band-paper bp-help">
+          <div className="wrap bp-help-grid">
+            <div>
+              <h2>Comment utiliser un code parrainage {name}</h2>
+              <ol className="bp-steps">
+                {steps.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ol>
+            </div>
+            <div>
+              <h2>Questions sur le parrainage {name}</h2>
+              {faq.map((item, i) => (
+                <details key={i} className="bp-qa">
+                  <summary><h3>{item.q}</h3></summary>
+                  <p>{item.a}</p>
+                </details>
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* ── FAQ : questions dont la réponse dépend des données de la page ── */}
-        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
-            Questions fréquentes — parrainage {name}
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {faq.map((item, i, arr) => (
-              <details key={i} style={{ borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none', padding: '0.75rem 0' }}>
-                <summary style={{ fontSize: '.875rem', fontWeight: 600, color: 'var(--text-strong)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                  <h3 style={{ fontSize: '.875rem', fontWeight: 600, margin: 0, fontFamily: 'inherit' }}>{item.q}</h3>
-                  <span className="faq-arrow" style={{ color: 'var(--text-faint)', fontSize: '.75rem', flexShrink: 0, transition: 'transform .2s' }} aria-hidden="true">▼</span>
-                </summary>
-                <p style={{ fontSize: '.85rem', color: 'var(--text-muted)', margin: '.625rem 0 0', lineHeight: 1.6 }}>{item.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
+        </section>
 
         {/* ── Maillage interne ── */}
-        <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-          {category && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '0.875rem', fontFamily: "var(--font-display)" }}>
-                {category.label}
-              </div>
-              <a href={`/code-parrainage/categorie/${category.slug}`} style={{ fontSize: '.8rem', color: 'var(--accent-text)', textDecoration: 'none', fontWeight: 600 }}>
-                Voir tous les codes {category.short.toLowerCase()} →
-              </a>
+        <section className="bp-related">
+          <div className="wrap">
+            <h2>{category ? `Autres codes ${category.short.toLowerCase()}` : 'Autres codes de parrainage'}</h2>
+            <ul className="bp-related-list">
+              {related.map((r) => (
+                <li key={r.slug}>
+                  <a href={`/code-parrainage/${r.slug}`}>Code parrainage {r.name}</a>
+                </li>
+              ))}
+            </ul>
+            <div className="bp-related-foot">
+              {category && <a href={`/code-parrainage/categorie/${category.slug}`} className="btn btn-ghost">Tous les codes {category.short.toLowerCase()}</a>}
+              <a href="/codes" className="btn btn-ghost">Toutes les marques</a>
             </div>
-          )}
-          <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '0.875rem', fontFamily: "var(--font-display)" }}>
-            Autres codes populaires
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {related.map((r) => (
-              <a key={r.slug} href={`/code-parrainage/${r.slug}`} style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'var(--bg-card-md)', border: '1px solid var(--border)', color: 'var(--text-dim)', textDecoration: 'none' }}>
-                Code parrainage {r.name}
-              </a>
-            ))}
-            <a href="/codes" style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'rgba(255,212,59,.1)', border: '1px solid rgba(255,212,59,.25)', color: 'var(--accent-text)', textDecoration: 'none', fontWeight: 600 }}>
-              Tous les codes →
-            </a>
-          </div>
-        </div>
-
-      </div>
-
-      <style>{`
-        details summary::-webkit-details-marker { display: none; }
-        details[open] .faq-arrow { transform: rotate(180deg); }
-        .brand-head { display: flex; align-items: center; gap: 16px; }
-        @media (max-width: 600px) {
-          .brand-head { align-items: flex-start; gap: 12px; }
-          .brand-head h1 { font-size: 1.3rem !important; }
-        }
-      `}</style>
+        </section>
+      </main>
     </div>
   )
 }

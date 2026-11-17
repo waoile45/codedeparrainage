@@ -1,0 +1,21 @@
+/* Page catégorie. Reprend la liste et la FAQ de l'accueil (home.css) et le fil
+   d'Ariane / maillage de la page marque (brand.css). Préfixe cp-. */
+
+.cp { background: var(--bg); color: var(--text-strong); min-height: 100vh; }
+.cp h2 { font-weight: 800; font-size: clamp(1.6rem, 3.2vw, 2.4rem); line-height: 1.05; margin: 0 0 1.5rem; }
+
+.cp-hero { padding: clamp(1.5rem, 4vw, 3rem) 0 clamp(3rem, 6vw, 4.5rem); }
+.cp-title { font-weight: 800; font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 1; letter-spacing: -0.015em; margin: 0 0 1rem; font-stretch: 118%; max-width: 18ch; }
+.cp-count { margin: 0 0 1.75rem; font-weight: 600; color: var(--text-muted); }
+.cp-intro { max-width: 68ch; }
+.cp-intro p { margin: 0 0 1rem; color: var(--text-muted); line-height: 1.65; font-size: 1.04rem; }
+
+.cp-brands { padding: clamp(3rem, 7vw, 5.5rem) 0; }
+.cp-logo { width: 32px; height: 32px; display: grid; place-items: center; overflow: hidden; border-radius: 7px; }
+.cp-logo img, .cp-logo > div { width: 32px !important; height: 32px !important; }
+.cp-date { display: block; margin-top: 2px; font-size: .85rem; color: rgba(20,20,20,.55); }
+
+.cp-faq { padding: clamp(3.5rem, 8vw, 6rem) 0; }
+.cp-faq .hp-qa summary h3 { margin: 0; font-family: var(--font-text), sans-serif; font-stretch: 100%; font-weight: 700; font-size: 1.06rem; line-height: 1.4; color: var(--text-strong); }
+
+.cp-others { padding: 0 0 clamp(4rem, 8vw, 6rem); }

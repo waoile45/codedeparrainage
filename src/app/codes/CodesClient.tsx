@@ -48,7 +48,7 @@ function CopyButton({ code }: { code: string }) {
   return (
     <button onClick={handleCopy} className={`copy-btn ${state==="copied"?"copied":""}`}>
       {state==="copied"
-        ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Copié !</>
+        ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Copié</>
         : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier</>
       }
     </button>
@@ -72,7 +72,7 @@ function MiniStars({ avg, count, topTag }: { avg:number; count:number; topTag?:s
       )}
       {tagInfo && (
         <span style={{ fontSize:".7rem", color:"rgba(255,255,255,.35)", background:"rgba(255,255,255,.05)", borderRadius:100, padding:"1px 7px", border:"1px solid rgba(255,255,255,.08)" }}>
-          {tagInfo.emoji} {tagInfo.label}
+          {tagInfo.label}
         </span>
       )}
       <span style={{ fontSize:".7rem", color:"rgba(255,255,255,.2)" }}>({count} avis)</span>
@@ -148,8 +148,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
 
         {done ? (
           <div style={{ textAlign:"center", padding:"1rem 0" }}>
-            <div style={{ fontSize:"2.5rem", marginBottom:".75rem" }}>⭐</div>
-            <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Avis envoyé !</p>
+            <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Avis envoyé</p>
             <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem" }}>Merci pour ton retour.</p>
             <button onClick={onClose} style={{ marginTop:"1.25rem", background:"var(--accent)", color:"var(--accent-ink)", border:"none", borderRadius:12, padding:".7rem 1.5rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>Fermer</button>
           </div>
@@ -170,7 +169,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
                 return (
                   <button key={t.key} type="button" onClick={() => toggleTag(t.key)}
                     style={{ display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", borderRadius:100, border:`1px solid ${active?"rgba(34,197,94,.5)":"rgba(255,255,255,.1)"}`, background:active?"rgba(34,197,94,.12)":"rgba(255,255,255,.03)", color:active?"#4ade80":"rgba(255,255,255,.5)", fontSize:".8rem", fontWeight:500, cursor:"pointer", transition:"all .15s", fontFamily:"var(--font-text)" }}>
-                    <span>{t.emoji}</span>{t.label}
+                    {t.label}
                   </button>
                 );
               })}
@@ -184,7 +183,7 @@ function RatingModal({ card, onClose, onSubmitted }: RatingModalProps) {  // esl
                 return (
                   <button key={t.key} type="button" onClick={() => toggleTag(t.key)}
                     style={{ display:"inline-flex", alignItems:"center", gap:5, padding:".35rem .75rem", borderRadius:100, border:`1px solid ${active?"rgba(239,68,68,.4)":"rgba(255,255,255,.1)"}`, background:active?"rgba(239,68,68,.1)":"rgba(255,255,255,.03)", color:active?"#f87171":"rgba(255,255,255,.5)", fontSize:".8rem", fontWeight:500, cursor:"pointer", transition:"all .15s", fontFamily:"var(--font-text)" }}>
-                    <span>{t.emoji}</span>{t.label}
+                    {t.label}
                   </button>
                 );
               })}
@@ -232,7 +231,7 @@ function CodeCardItem({ card, index, onRate, onContact, onEdit, onDelete, curren
   const isOwn = currentUserId !== null && currentUserId === card.userId;
   return (
     <div ref={ref} className={`code-card ${card.boosted?"boosted":""} ${isOwn?"own":""} ${visible?"visible":""}`}>
-      {card.boosted && <div className="boost-badge"><span className="boost-lightning">⚡</span><span>Annonce boostée</span></div>}
+      {card.boosted && <div className="boost-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg><span>Annonce boostée</span></div>}
       <div className="card-top">
         <div className="brand-row">
           <BrandLogo slug={card.slug} brand={card.brand} />
@@ -299,7 +298,13 @@ export default function CodesClient() {
   const [search, setSearch]         = useState("");
   const [activeCategory, setActiveCategory] = useState<Category>("Tout");
   const [sort, setSort]             = useState<"popular"|"recent">("popular");
-  const [count, setCount]           = useState(0);
+  const [count, setCount]           = useState(0); // eslint-disable-line @typescript-eslint/no-unused-vars
+  // Total réel en base pour l'en-tête (count ne compte que les codes chargés).
+  const [total, setTotal]           = useState<number | null>(null);
+  useEffect(() => {
+    createClient().from("announcements").select("id", { count: "exact", head: true })
+      .then(({ count: n }) => { if (typeof n === "number") setTotal(n); });
+  }, []);
   const [ratingModal, setRatingModal] = useState<CodeCard|null>(null);
   const [editModal, setEditModal]   = useState<CodeCard|null>(null);
   const [editCode, setEditCode]     = useState("");
@@ -468,90 +473,78 @@ export default function CodesClient() {
       <style>{`
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         body{background:var(--bg);color:var(--text);font-family:var(--font-text);min-height:100vh;overflow-x:hidden}
-        .page-wrapper{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:3rem 1.5rem 6rem}
-        .page-header{margin-bottom:2.5rem}
-        .header-label{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem}
-        .header-label::before{content:'';display:block;width:18px;height:1px;background:var(--accent)}
-        .page-title{font-family:var(--font-display);font-weight:800;font-size:clamp(1.75rem,4vw,2.5rem);line-height:1.1;color:var(--text-strong);letter-spacing:-.03em;margin-bottom:.5rem}
-        .page-subtitle{color:var(--text-dim);font-size:.9rem;display:flex;align-items:center;gap:8px}
-        .live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;animation:pulse 2s ease-in-out infinite;flex-shrink:0}
-        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
-        .count-num{color:var(--text-strong);font-weight:700}
+        .page-wrapper{position:relative;z-index:1;max-width:940px;margin:0 auto;padding:clamp(2rem,5vw,3.5rem) var(--gutter) 5rem}
+        .page-header{margin-bottom:2.25rem;max-width:760px}
+        .page-title{font-family:var(--font-display);font-stretch:118%;font-weight:800;font-size:clamp(2.3rem,5.4vw,4rem);line-height:1;color:var(--text-strong);letter-spacing:-.015em;margin:0 0 1rem}
+        .page-subtitle{color:var(--text-muted);font-size:1.08rem;line-height:1.55;margin:0}
+        .count-num{color:var(--text-strong);font-weight:700;font-variant-numeric:tabular-nums}
+        .codes-layout{max-width:860px}
         .search-wrap{position:relative;margin-bottom:1.25rem}
-        .search-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-faint);pointer-events:none}
-        .search-input{width:100%;background:var(--bg-input);border:1px solid var(--border-md);border-radius:14px;padding:.875rem 1rem .875rem 2.75rem;color:var(--text-strong);font-size:.9rem;font-family:var(--font-text);outline:none;transition:all .2s}
+        .search-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none}
+        .search-input{width:100%;height:52px;background:var(--bg-raised);border:1.5px solid var(--border-lg);border-radius:12px;padding:0 1rem 0 2.75rem;color:var(--text-strong);font-size:1rem;font-family:var(--font-text);outline:none;transition:border-color .2s}
         .search-input::placeholder{color:var(--text-faint)}
-        .search-input:focus{border-color:rgba(255,212,59,.5);background:rgba(255,212,59,.05);box-shadow:0 0 0 3px rgba(255,212,59,.1)}
-        .sort-row{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem}
-        .sort-tab{display:flex;align-items:center;gap:6px;padding:.4rem .875rem;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:10px;color:var(--text-nav);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
-        .sort-tab:hover{color:var(--text-strong);border-color:var(--border-lg)}
-        .sort-tab.active{background:rgba(255,212,59,.15);border-color:rgba(255,212,59,.4);color:var(--accent-text)}
-        .cats-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2.5rem}
-        .cat-pill{display:inline-flex;align-items:center;gap:5px;padding:.4rem .875rem;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:100px;color:var(--text-link);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
-        .cat-pill:hover{color:var(--text-strong);border-color:rgba(255,212,59,.3);background:rgba(255,212,59,.08)}
-        .cat-pill.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 0 16px rgba(255,212,59,.35)}
-        .cards-list{display:flex;flex-direction:column;gap:1rem}
-        .code-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:1.5rem;opacity:0;transform:translateY(16px);transition:opacity .4s ease,transform .4s ease,border-color .2s,box-shadow .2s;position:relative;overflow:hidden}
-        .code-card:hover{border-color:rgba(255,212,59,.25);box-shadow:0 8px 32px rgba(0,0,0,.15)}
-        .code-card.visible{opacity:1;transform:translateY(0)}
-        .code-card.boosted{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03)}
-        .code-card.boosted::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#22c55e,transparent)}
-        .code-card:not(.boosted){border-color:rgba(255,212,59,.2);background:rgba(255,212,59,.03)}
-        .code-card.own{border-color:rgba(255,212,59,.55)!important;background:rgba(255,212,59,.08)!important;box-shadow:0 0 0 1px rgba(255,212,59,.2)}
-        .code-card.own .code-dot{background:var(--accent-text);box-shadow:0 0 8px var(--accent-text)}
-        .code-card.own .code-text{color:var(--accent-text)!important}
-        .boost-badge{display:inline-flex;align-items:center;gap:5px;padding:.25rem .625rem;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:100px;font-size:.72rem;font-weight:600;color:#22c55e;margin-bottom:1rem}
-        .boost-lightning{animation:flicker 1.5s ease-in-out infinite}
-        @keyframes flicker{0%,100%{opacity:1}50%{opacity:.6}}
-        .card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem}
-        .brand-row{display:flex;align-items:center;gap:12px;flex:1}
-        .brand-logo{width:44px;height:44px;border-radius:12px;background:#fff;border:1px solid var(--border-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
-        .brand-logo-fallback{background:rgba(255,212,59,.15)!important;border:1px solid rgba(255,212,59,.2)!important;font-family:var(--font-display);font-weight:800;font-size:1.1rem;color:var(--accent-text)}
-        .brand-info{flex:1}
-        .brand-name{font-family:var(--font-display);font-weight:700;font-size:1rem;color:var(--text-strong);margin-bottom:2px}
-        .brand-desc{color:var(--text-muted);font-size:.8rem}
-        .reward-pill{padding:.3rem .625rem;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:8px;color:#16a34a;font-size:.8rem;font-weight:700;white-space:nowrap;flex-shrink:0}
-        .code-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg-code);border:1px solid var(--border);border-radius:12px;padding:.75rem .875rem;margin-bottom:1.25rem}
-        .code-display{display:flex;align-items:center;gap:8px}
-        .code-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);flex-shrink:0}
-        .code-text{font-family:'Courier New',monospace;font-size:.95rem;font-weight:700;color:var(--text-strong);letter-spacing:.08em}
-        .copy-btn{display:inline-flex;align-items:center;gap:6px;padding:.4rem .875rem;background:rgba(255,212,59,.15);border:1px solid rgba(255,212,59,.35);border-radius:8px;color:var(--accent-text);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-text);white-space:nowrap}
-        .copy-btn:hover{background:rgba(255,212,59,.25);color:#fff;transform:scale(1.03)}
-        .copy-btn.copied{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.35);color:#16a34a}
+        .search-input:focus{border-color:var(--accent)}
+        .sort-row{display:flex;align-items:center;gap:1.25rem;margin-bottom:1.25rem;border-bottom:1px solid var(--border-md)}
+        .sort-tab{position:relative;display:flex;align-items:center;gap:6px;padding:.6rem 0 .75rem;background:none;border:0;color:var(--text-muted);font-size:.95rem;font-weight:600;cursor:pointer;font-family:var(--font-text)}
+        .sort-tab:hover{color:var(--text-strong)}
+        .sort-tab.active{color:var(--text-strong)}
+        .sort-tab.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:2px;background:var(--accent)}
+        .cats-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2rem}
+        .cat-pill{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 .95rem;background:transparent;border:0;box-shadow:inset 0 0 0 1.5px var(--border-lg);border-radius:100px;color:var(--text-muted);font-size:.9rem;font-weight:600;cursor:pointer;transition:color .15s,box-shadow .15s;font-family:var(--font-text)}
+        .cat-pill:hover{color:var(--text-strong);box-shadow:inset 0 0 0 1.5px var(--text-dim)}
+        .cat-pill.active{background:var(--accent);box-shadow:none;color:var(--accent-ink)}
+        .cards-list{display:flex;flex-direction:column;gap:.9rem}
+        .code-card{background:var(--bg-raised);border-radius:18px;padding:1.4rem;box-shadow:inset 0 0 0 1px var(--border-md);opacity:0;transform:translateY(12px);transition:opacity .4s ease,transform .4s ease,box-shadow .2s;position:relative}
+        .code-card:hover{box-shadow:inset 0 0 0 1px var(--border-lg)}
+        .code-card.visible{opacity:1;transform:none}
+        .code-card.boosted{box-shadow:inset 0 0 0 1.5px var(--accent)}
+        .code-card.own{box-shadow:inset 0 0 0 1.5px var(--accent-text)}
+        .boost-badge{display:inline-flex;align-items:center;gap:6px;padding:.25rem .65rem;background:var(--accent);border-radius:100px;font-size:.78rem;font-weight:700;color:var(--accent-ink);margin-bottom:1rem}
+        .card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.1rem}
+        .brand-row{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+        .brand-logo{width:44px;height:44px;border-radius:11px;background:var(--paper);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+        .brand-logo-fallback{background:var(--accent)!important;font-family:var(--font-display);font-weight:800;font-size:1.1rem;color:var(--accent-ink)}
+        .brand-info{flex:1;min-width:0}
+        .brand-name{font-family:var(--font-display);font-stretch:112%;font-weight:800;font-size:1.2rem;color:var(--text-strong);margin:0 0 3px}
+        .brand-desc{color:var(--text-muted);font-size:.92rem;line-height:1.45;margin:0}
+        .reward-pill{padding:.3rem .65rem;background:rgba(76,195,138,.14);border-radius:8px;color:var(--ok);font-size:.88rem;font-weight:700;white-space:nowrap;flex-shrink:0;margin-left:.75rem}
+        .code-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--bg);border-radius:12px;padding:.7rem .75rem .7rem 1rem;box-shadow:inset 0 0 0 1px var(--border-md)}
+        .code-display{display:flex;align-items:center;gap:8px;min-width:0}
+        .code-dot{display:none}
+        .code-text{font-family:var(--font-code),ui-monospace,monospace;font-size:1.08rem;font-weight:600;color:var(--text-strong);letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .copy-btn{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 1rem;background:var(--accent);border:0;border-radius:10px;color:var(--accent-ink);font-size:.92rem;font-weight:700;cursor:pointer;transition:background-color .15s;font-family:var(--font-text);white-space:nowrap;flex-shrink:0}
+        .copy-btn:hover{background:var(--accent-hover)}
+        .copy-btn.copied{background:var(--ok);color:#0B2016}
         .card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
         .parrain-info{display:flex;align-items:center;gap:8px}
-        .parrain-avatar{width:26px;height:26px;border-radius:50%;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0}
-        .parrain-name{font-size:.82rem;font-weight:500;color:var(--text-muted)}
-        .niveau-badge{font-size:.72rem;font-weight:600;padding:.15rem .5rem;border:1px solid;border-radius:100px}
+        .parrain-avatar{width:28px;height:28px;border-radius:50%;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--text-strong);flex-shrink:0}
+        .parrain-name{font-size:.92rem;font-weight:700;color:var(--text-strong)}
+        .niveau-badge{font-size:.75rem;font-weight:600;padding:.12rem .5rem;border:1px solid;border-radius:100px}
         .card-actions{display:flex;gap:6px}
-        .action-btn{display:inline-flex;align-items:center;gap:5px;padding:.35rem .75rem;background:var(--bg-card-md);border:1px solid var(--border-md);border-radius:8px;color:var(--text-muted);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
-        .action-btn:hover{color:var(--text-strong);border-color:var(--border-lg);background:var(--bg-btn)}
-        .action-btn-own{background:rgba(255,212,59,.12);border-color:rgba(255,212,59,.35);color:var(--accent-text)}
-        .action-btn-own:hover{background:rgba(255,212,59,.22);color:var(--accent-text)}
-        .action-btn-delete{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25);color:#f87171}
-        .action-btn-delete:hover{background:rgba(239,68,68,.15);color:#fca5a5}
-        .code-url{color:#60a5fa !important;text-decoration:underline;word-break:break-all}
+        .action-btn{display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:0 .8rem;background:transparent;border:0;box-shadow:inset 0 0 0 1px var(--border-lg);border-radius:9px;color:var(--text-muted);font-size:.85rem;font-weight:600;cursor:pointer;transition:color .15s,box-shadow .15s;font-family:var(--font-text)}
+        .action-btn:hover{color:var(--text-strong);box-shadow:inset 0 0 0 1px var(--text-dim)}
+        .action-btn-own{color:var(--accent-text);box-shadow:inset 0 0 0 1px var(--accent-text)}
+        .action-btn-delete{color:var(--danger);box-shadow:inset 0 0 0 1px rgba(242,102,90,.45)}
+        .action-btn-delete:hover{color:var(--danger);box-shadow:inset 0 0 0 1px var(--danger)}
+        .code-url{color:var(--text-muted)!important;font-family:var(--font-text)!important;font-size:.95rem!important;letter-spacing:0!important}
         .results-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
-        .results-count{font-size:.8rem;color:var(--text-faint)}
-        .results-count strong{color:var(--text-muted)}
-        .load-more-btn{display:inline-flex;align-items:center;gap:8px;padding:.65rem 1.75rem;background:rgba(255,212,59,.15);border:1px solid rgba(255,212,59,.35);border-radius:12px;color:var(--accent-text);font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
-        .load-more-btn:hover{background:rgba(255,212,59,.25);color:#fff}
+        .results-count{font-size:.92rem;color:var(--text-dim);margin:0}
+        .results-count strong{color:var(--text-strong)}
+        .load-more-btn{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 1.6rem;background:transparent;border:0;box-shadow:inset 0 0 0 1.5px var(--border-lg);border-radius:12px;color:var(--text-strong);font-size:.95rem;font-weight:700;cursor:pointer;transition:box-shadow .2s;font-family:var(--font-text)}
+        .load-more-btn:hover{box-shadow:inset 0 0 0 1.5px var(--accent)}
         .load-more-btn:disabled{opacity:.5;cursor:not-allowed}
-        .empty-state{text-align:center;padding:4rem 2rem;color:var(--text-faint)}
-        .empty-icon{font-size:2.5rem;margin-bottom:1rem}
+        .empty-state{text-align:center;padding:4rem 2rem;color:var(--text-dim)}
         .loading-wrap{display:flex;flex-direction:column;gap:1rem}
-        .loading-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:1.5rem}
+        .loading-card{background:var(--bg-raised);border-radius:18px;padding:1.4rem}
         .skeleton{background:var(--border-md);border-radius:8px;animation:shimmer 1.5s ease-in-out infinite}
         @keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
         @keyframes spin{to{transform:rotate(360deg)}}
         @media(max-width:600px){
-          .page-wrapper{padding:1.5rem 1rem 4rem}
-          .code-card{padding:1.125rem}
-          .card-top{flex-direction:column;align-items:stretch;gap:.625rem}
-          .reward-pill{white-space:normal;align-self:flex-start}
+          .code-card{padding:1.1rem}
+          .card-top{flex-direction:column;align-items:stretch;gap:.65rem}
+          .brand-row{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:start;column-gap:12px;row-gap:.6rem}
+          .reward-pill{grid-column:2;justify-self:start;white-space:normal;margin-left:0}
           .brand-desc{word-break:break-word}
-          .code-row{flex-wrap:wrap;gap:.625rem}
-          .code-text{word-break:break-all;font-size:.9rem}
           .card-footer{flex-direction:column;align-items:flex-start}
           .card-actions{flex-wrap:wrap}
           .search-input{font-size:16px}
@@ -562,11 +555,11 @@ export default function CodesClient() {
 
       <main className="page-wrapper">
         <header className="page-header">
-          <div className="header-label">Annuaire</div>
           <h1 className="page-title">Codes de parrainage</h1>
           <p className="page-subtitle">
-            <span className="live-dot" />
-            <span className="count-num">{count}</span>&nbsp;codes publiés par des membres inscrits
+            {total !== null
+              ? <><span className="count-num">{total.toLocaleString("fr-FR")}</span> codes publiés par des membres inscrits, du plus remonté au plus ancien. Cherche une marque ou filtre par catégorie.</>
+              : <>Les codes publiés par des membres inscrits, du plus remonté au plus ancien. Cherche une marque ou filtre par catégorie.</>}
           </p>
         </header>
 
@@ -685,7 +678,6 @@ export default function CodesClient() {
       {deleteConfirm && (
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.65)", backdropFilter:"blur(4px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }} onClick={() => setDeleteConfirm(null)}>
           <div style={{ background:"var(--bg-card)", border:"1px solid rgba(239,68,68,.3)", borderRadius:24, padding:"1.75rem", maxWidth:400, width:"100%", textAlign:"center" }} onClick={e=>e.stopPropagation()}>
-            <div style={{ fontSize:"2rem", marginBottom:".75rem" }}>🗑️</div>
             <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1rem", color:"var(--text-strong)", marginBottom:".5rem" }}>Supprimer cette annonce ?</p>
             <p style={{ fontSize:".875rem", color:"var(--text-muted)", marginBottom:"1.5rem" }}>Cette action est irréversible.</p>
             <div style={{ display:"flex", gap:10, justifyContent:"center" }}>

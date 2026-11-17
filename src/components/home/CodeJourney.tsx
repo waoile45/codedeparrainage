@@ -16,7 +16,7 @@ export type JourneyData = {
   code: string;
 };
 
-const STEPS = ["Recherche", "Code copié", "Inscription", "Prime"] as const;
+const STEPS = ["Recherche", "Copie", "Inscription", "Prime"] as const;
 
 export default function CodeJourney({ data }: { data: JourneyData }) {
   const query = `code parrainage ${data.brand.toLowerCase()}`;
@@ -68,6 +68,7 @@ export default function CodeJourney({ data }: { data: JourneyData }) {
 
     const cycle = () => {
       t = 0;
+      timers.length = 0; // les minuteurs du tour précédent ont tous expiré
       // 1. La recherche se tape, le résultat apparaît, on clique dessus.
       at(t, () => { setStep(0); setShowResult(false); setCopied(false); setTypedQuery(""); setTypedCode(""); setCursor({ ...corner(), press: false, on: false }); });
       for (let i = 1; i <= query.length; i++) at((t += 55), () => setTypedQuery(query.slice(0, i)));
@@ -89,7 +90,8 @@ export default function CodeJourney({ data }: { data: JourneyData }) {
       at((t += 900), () => setStep(3));
       at((t += 3200), cycle);
     };
-    cycle();
+    // Départ différé : on laisse la page finir de charger et le titre se lire.
+    at(1500, cycle);
     return () => timers.forEach(clearTimeout);
   }, [running, query, data.code]);
 

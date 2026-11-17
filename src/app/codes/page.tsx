@@ -8,7 +8,7 @@ export const revalidate = 1800
 
 export const metadata = {
   title: 'Codes de parrainage — Annuaire complet',
-  description: 'Parcours tous les codes de parrainage disponibles : banque, paris sportifs, crypto, cashback. Codes vérifiés par la communauté et mis à jour en temps réel.',
+  description: 'Parcours tous les codes de parrainage disponibles : banque, paris sportifs, crypto, cashback. Codes publiés par la communauté et mis à jour en temps réel.',
   alternates: {
     canonical: 'https://www.codedeparrainage.com/codes',
   },
@@ -45,7 +45,7 @@ export default async function CodesPage() {
       {/* ── Annuaire crawlable : marques avec codes actifs + hubs catégorie ── */}
       <section
         aria-label="Toutes les marques avec codes actifs"
-        style={{ position: 'relative', zIndex: 1, maxWidth: 860, margin: '0 auto', padding: '0 1.5rem 5rem', fontFamily: "var(--font-text)" }}
+        style={{ position: 'relative', zIndex: 1, maxWidth: 940, margin: '0 auto', padding: '0 var(--gutter) 5rem', fontFamily: "var(--font-text)" }}
       >
         <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: 'var(--text-strong)', margin: '0 0 1rem' }}>
           Toutes les marques avec codes actifs

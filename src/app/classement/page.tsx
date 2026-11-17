@@ -119,7 +119,7 @@ function RankRow({ parrain, rank, index }: { parrain:Parrain; rank:number; index
   const color = NIVEAU_COLOR[parrain.level] ?? "#A39E93";
 
   return (
-    <div ref={ref} style={{ display:"flex", alignItems:"center", gap:12, padding:"0.875rem 1.25rem", background:parrain.isMe?"rgba(255,212,59,.07)":"var(--bg-card)", border:`1px solid ${parrain.isMe?"rgba(255,212,59,.3)":"var(--border)"}`, borderRadius:14, opacity:visible?1:0, transform:visible?"translateX(0)":"translateX(-12px)", transition:"all 0.35s ease", position:"relative", overflow:"hidden" }}>
+    <div ref={ref} data-rank={rank} style={{ display:"flex", alignItems:"center", gap:12, padding:"0.875rem 1.25rem", background:parrain.isMe?"rgba(255,212,59,.07)":"var(--bg-card)", border:`1px solid ${parrain.isMe?"rgba(255,212,59,.3)":"var(--border)"}`, borderRadius:14, opacity:visible?1:0, transform:visible?"translateX(0)":"translateX(-12px)", transition:"all 0.35s ease", position:"relative", overflow:"hidden" }}>
       {parrain.isMe && <div style={{ position:"absolute", top:0, left:0, bottom:0, width:2, background:"var(--accent)", borderRadius:"2px 0 0 2px" }} />}
       <div style={{ width:28, textAlign:"center", flexShrink:0 }}>
         <RankBadge rank={rank} />
@@ -177,19 +177,39 @@ export default function ClassementPage() {
       // Utilisateur connecté
       const { data: { user } } = await supabase.auth.getUser();
 
-      // Users triés par XP
-      const { data: users } = await supabase
-        .from("users")
-        .select("id, pseudo, xp, level, streak_days, avatar_url")
-        .order("xp", { ascending: false })
-        .limit(50);
+      // Tous les membres, triés par XP. Plus de limite à 50 : les suivants
+      // n'apparaissaient jamais (ni leur rang). La base renvoie au plus 1 000
+      // lignes par requête, d'où le chargement par paquets.
+      const PAGE = 1000;
+      async function fetchAll<T>(build: (from: number, to: number) => PromiseLike<{ data: T[] | null }>): Promise<T[]> {
+        const all: T[] = [];
+        for (let from = 0; ; from += PAGE) {
+          const { data } = await build(from, from + PAGE - 1);
+          all.push(...(data ?? []));
+          if (!data || data.length < PAGE) break;
+        }
+        return all;
+      }
 
-      if (!users) { setLoading(false); return; }
+      const users = await fetchAll<{ id: string; pseudo: string | null; xp: number | null; level: string | null; streak_days: number | null; avatar_url: string | null }>(
+        (from, to) => supabase
+          .from("users")
+          .select("id, pseudo, xp, level, streak_days, avatar_url")
+          .order("xp", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to)
+      );
 
-      // Compter les annonces par user
-      const { data: countRows } = await supabase
-        .from("announcements")
-        .select("user_id");
+      if (users.length === 0) { setLoading(false); return; }
+
+      // Compter les annonces par user (même plafond de 1 000 lignes par requête)
+      const countRows = await fetchAll<{ user_id: string }>(
+        (from, to) => supabase
+          .from("announcements")
+          .select("user_id")
+          .order("id", { ascending: true })
+          .range(from, to)
+      );
 
       const annonceCount: Record<string, number> = {};
       for (const row of countRows ?? []) {

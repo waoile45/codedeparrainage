@@ -188,7 +188,7 @@ export default async function HomePage() {
               {d.brands.length > 0 && (
                 <p className="hp-popular">
                   <span>Les plus partagées :</span>
-                  {d.brands.slice(0, 5).map((b) => (
+                  {d.brands.filter((b) => !BETTING.has(b.urlSlug)).slice(0, 5).map((b) => (
                     <Link key={b.urlSlug} href={`/code-parrainage/${b.urlSlug}`}>{b.name}</Link>
                   ))}
                 </p>

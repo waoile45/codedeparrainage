@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation'
 import { createAnonSupabase } from '@/lib/supabase-server'
 import Navbar from '@/components/Navbar'
 import CompanyLogo from '@/components/CompanyLogo'
+import '../../../home.css'
+import '../../[slug]/brand.css'
+import './cat.css'
 import { safeJsonLd } from '@/lib/sanitize'
 import { SITE_URL, formatBrandName, formatDateFr } from '@/lib/seo'
 import { CATEGORIES, CATEGORY_BY_SLUG } from '@/data/categories'
@@ -126,109 +129,86 @@ export default async function CategoryPage({ params }: Props) {
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', fontFamily: "var(--font-text)", color: 'var(--text-strong)' }}>
+    <div className="cp">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(itemListJsonLd) }} />
 
       <Navbar />
 
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '2rem 1.5rem 6rem' }}>
-
-        {/* ── Fil d'Ariane ── */}
-        <nav aria-label="Fil d'Ariane" style={{ fontSize: '.78rem', color: 'var(--text-faint)', marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
-          <a href="/" style={{ color: 'var(--text-dim)', textDecoration: 'none' }}>Accueil</a>
-          <span aria-hidden="true">›</span>
-          <span style={{ color: 'var(--text-muted)' }}>{cat.label}</span>
-        </nav>
-
-        {/* ── En-tête ── */}
-        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.5rem,3.5vw,2.1rem)', margin: '0 0 .75rem', letterSpacing: '-0.02em', lineHeight: 1.15 }}>
-          {cat.h1}
-        </h1>
-        {totalCodes > 0 && (
-          <p style={{ fontSize: '.8rem', color: 'var(--text-faint)', margin: '0 0 1rem' }}>
-            {totalCodes} code{totalCodes > 1 ? 's' : ''} actif{totalCodes > 1 ? 's' : ''} partagé{totalCodes > 1 ? 's' : ''} par la communauté dans cette catégorie
-          </p>
-        )}
-        {cat.intro.map((p, i) => (
-          <p key={i} style={{ fontSize: '.9rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: '0 0 .875rem', maxWidth: 720 }}>{p}</p>
-        ))}
-
-        {/* ── Cartes marques ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem', marginTop: '1.75rem' }}>
-          {brands.map((b) => (
-            <a
-              key={b.slug}
-              href={`/code-parrainage/${b.slug}`}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 18, padding: '1rem 1.125rem', textDecoration: 'none', color: 'var(--text-strong)', minWidth: 0 }}
-            >
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(255,212,59,.12)', border: '1px solid rgba(255,212,59,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
-                <CompanyLogo domain={b.domain} name={b.name} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '.95rem' }}>
-                  Code parrainage {b.name}
-                </div>
-                <div style={{ fontSize: '.8rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                  {b.bonus ?? `Codes partagés par la communauté`}
-                </div>
-                <div style={{ fontSize: '.72rem', color: 'var(--text-faint)', marginTop: 4, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  {b.codesCount > 0 ? (
-                    <>
-                      <span>{b.codesCount} code{b.codesCount > 1 ? 's' : ''} actif{b.codesCount > 1 ? 's' : ''}</span>
-                      {formatDateFr(b.lastDateIso) && <span>Mis à jour le {formatDateFr(b.lastDateIso)}</span>}
-                    </>
-                  ) : (
-                    <span>Sois le premier à publier un code</span>
-                  )}
-                </div>
-              </div>
-              <span style={{ color: 'var(--accent-text)', fontSize: '.875rem', flexShrink: 0 }} aria-hidden="true">→</span>
-            </a>
-          ))}
-        </div>
-
-        {/* ── FAQ catégorie (même source que le JSON-LD) ── */}
-        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: '1.5rem', marginTop: '2rem' }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', margin: '0 0 .875rem', color: 'var(--text-strong)' }}>
-            Questions fréquentes — {cat.label}
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {cat.faq.map((item, i, arr) => (
-              <details key={i} style={{ borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none', padding: '0.75rem 0' }}>
-                <summary style={{ fontSize: '.875rem', fontWeight: 600, color: 'var(--text-strong)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                  <h3 style={{ fontSize: '.875rem', fontWeight: 600, margin: 0, fontFamily: 'inherit' }}>{item.q}</h3>
-                  <span className="faq-arrow" style={{ color: 'var(--text-faint)', fontSize: '.75rem', flexShrink: 0, transition: 'transform .2s' }} aria-hidden="true">▼</span>
-                </summary>
-                <p style={{ fontSize: '.85rem', color: 'var(--text-muted)', margin: '.625rem 0 0', lineHeight: 1.6 }}>{item.a}</p>
-              </details>
-            ))}
+      <main>
+        <section className="cp-hero">
+          <div className="wrap">
+            <nav aria-label="Fil d'Ariane" className="bp-crumbs">
+              <a href="/">Accueil</a>
+              <span aria-hidden="true">/</span>
+              <span>{cat.label}</span>
+            </nav>
+            <h1 className="cp-title">{cat.h1}</h1>
+            {totalCodes > 0 && (
+              <p className="cp-count tnum">
+                {totalCodes} code{totalCodes > 1 ? 's' : ''} partagé{totalCodes > 1 ? 's' : ''} par la communauté, pour {brands.filter((b) => b.codesCount > 0).length} marque{brands.filter((b) => b.codesCount > 0).length > 1 ? 's' : ''}
+              </p>
+            )}
+            <div className="cp-intro">
+              {cat.intro.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* ── Autres catégories ── */}
-        <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-          <div style={{ fontSize: '.72rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '0.875rem', fontFamily: "var(--font-display)" }}>
-            Autres catégories
+        <section className="band-paper cp-brands">
+          <div className="wrap">
+            <ol className="hp-brand-list">
+              {brands.map((b) => (
+                <li key={b.slug}>
+                  <a href={`/code-parrainage/${b.slug}`} className="hp-brand-row">
+                    <span className="cp-logo"><CompanyLogo domain={b.domain} name={b.name} /></span>
+                    <span className="hp-brand-name">{b.name}</span>
+                    <span className="hp-brand-bonus">
+                      {b.bonus ?? 'Prime selon les conditions de la marque'}
+                      {formatDateFr(b.lastDateIso) && <span className="cp-date">Mis à jour le {formatDateFr(b.lastDateIso)}</span>}
+                    </span>
+                    <span className="hp-brand-count tnum">
+                      {b.codesCount > 0 ? `${b.codesCount} code${b.codesCount > 1 ? 's' : ''}` : 'Aucun code'}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ol>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {otherCats.map((c) => (
-              <a key={c.slug} href={`/code-parrainage/categorie/${c.slug}`} style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'var(--bg-card-md)', border: '1px solid var(--border)', color: 'var(--text-dim)', textDecoration: 'none' }}>
-                {c.label}
-              </a>
-            ))}
-            <a href="/codes" style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'rgba(255,212,59,.1)', border: '1px solid rgba(255,212,59,.25)', color: 'var(--accent-text)', textDecoration: 'none', fontWeight: 600 }}>
-              Tous les codes →
-            </a>
+        </section>
+
+        <section className="cp-faq">
+          <div className="wrap hp-faq-grid">
+            <h2>Questions sur le parrainage {cat.short.toLowerCase()}</h2>
+            <div>
+              {cat.faq.map((item, i) => (
+                <details key={i} className="hp-qa">
+                  <summary><h3>{item.q}</h3></summary>
+                  <p>{item.a}</p>
+                </details>
+              ))}
+            </div>
           </div>
-        </div>
+        </section>
 
-      </div>
-
-      <style>{`
-        details summary::-webkit-details-marker { display: none; }
-        details[open] .faq-arrow { transform: rotate(180deg); }
-      `}</style>
+        <section className="cp-others">
+          <div className="wrap">
+            <h2>Autres catégories</h2>
+            <ul className="bp-related-list">
+              {otherCats.map((c) => (
+                <li key={c.slug}>
+                  <a href={`/code-parrainage/categorie/${c.slug}`}>{c.label}</a>
+                </li>
+              ))}
+            </ul>
+            <div className="bp-related-foot">
+              <a href="/codes" className="btn btn-ghost">Toutes les marques</a>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   )
 }

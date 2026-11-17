@@ -102,7 +102,7 @@
 .cj-cursor.press path { transform: scale(.82); }
 
 .cj-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 16px; }
-.cj-steps { display: flex; gap: 1.1rem; list-style: none; margin: 0; padding: 0; font-size: .86rem; font-weight: 600; color: var(--text-faint); }
+.cj-steps { display: flex; gap: 1.1rem; list-style: none; margin: 0; padding: 0; font-size: .86rem; font-weight: 600; color: var(--text-dim); }
 .cj-steps li { position: relative; padding-bottom: 6px; transition: color .3s ease; }
 .cj-steps li::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .4s ease; }
 .cj-steps li.on { color: var(--text-strong); }
@@ -114,7 +114,7 @@
 .hp-brands { padding: clamp(4rem, 9vw, 7.5rem) 0; }
 .hp-brand-list { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--ink); }
 .hp-brand-row {
-  display: grid; grid-template-columns: 32px minmax(9rem, 1fr) minmax(0, 2fr) auto; align-items: center; gap: 1.25rem;
+  display: grid; grid-template-columns: 32px minmax(9rem, 1fr) minmax(0, 2fr) 6.5rem; align-items: center; gap: 1.25rem;
   padding: 1.15rem .5rem; border-bottom: 1px solid rgba(20,20,20,.14); text-decoration: none; color: var(--ink);
   transition: background-color .2s ease;
 }
@@ -122,7 +122,7 @@
 .hp-brand-row img { border-radius: 7px; }
 .hp-brand-name { font-family: var(--font-display), sans-serif; font-stretch: 115%; font-weight: 800; font-size: clamp(1.15rem, 2vw, 1.5rem); }
 .hp-brand-bonus { color: var(--ink-soft); font-size: .98rem; line-height: 1.4; }
-.hp-brand-count { font-weight: 700; font-size: .95rem; white-space: nowrap; }
+.hp-brand-count { font-weight: 700; font-size: .95rem; white-space: nowrap; justify-self: end; }
 .hp-brands-foot { display: flex; align-items: flex-start; gap: 2rem; flex-wrap: wrap; margin-top: 2.25rem; }
 .hp-anj { flex: 1; min-width: 260px; margin: 0; font-size: .82rem; line-height: 1.5; color: var(--ink-soft); }
 
@@ -183,6 +183,7 @@ html.js .hp-annonce.reveal.in { transform: rotate(1.5deg); }
 }
 @media (max-width: 720px) {
   .hp-brand-row { grid-template-columns: 28px 1fr auto; gap: .35rem .9rem; }
+  .hp-brand-count { justify-self: end; }
   .hp-brand-row img { width: 28px; height: 28px; }
   .hp-brand-bonus { grid-column: 2 / -1; grid-row: 2; font-size: .92rem; }
   .hp-cat-list { grid-template-columns: 1fr; }
@@ -192,6 +193,6 @@ html.js .hp-annonce.reveal.in { transform: rotate(1.5deg); }
 }
 @media (max-width: 420px) {
   .hp-search-row { flex-direction: column; }
+  .hp-search input { flex: none; }
   .hp-search .btn { width: 100%; }
-  .cj-steps li:nth-child(2) { display: none; }
 }

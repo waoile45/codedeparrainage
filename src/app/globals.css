@@ -86,6 +86,7 @@ html, body { max-width: 100%; overflow-x: hidden; }
 }
 
 body {
+  margin: 0;
   background: var(--bg);
   color: var(--text-strong);
   font-family: var(--font-text), system-ui, sans-serif;

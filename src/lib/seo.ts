@@ -94,7 +94,7 @@ export function buildBrandTitle({ slug, name, bonus, codesCount }: BrandMetaInpu
     if (t.length <= 62) return t
   }
   if (codesCount > 0) {
-    const t = `${base} : ${codesCount} code${codesCount > 1 ? 's' : ''} vérifié${codesCount > 1 ? 's' : ''}`
+    const t = `${base} : ${codesCount} code${codesCount > 1 ? 's' : ''} partagé${codesCount > 1 ? 's' : ''}`
     if (t.length <= 62) return t
   }
   return base
@@ -109,7 +109,7 @@ export function buildBrandDescription({ slug, name, bonus, codesCount, lastDateI
   if (bonus) {
     parts.push(
       pickVariant(slug, [
-        `${bonus} avec un code parrainage ${name} vérifié.`,
+        `${bonus} avec le code parrainage ${name} d'un membre.`,
         `Profite de l'offre ${name} : ${bonus.charAt(0).toLowerCase()}${bonus.slice(1)}.`,
         `Code parrainage ${name} ${year} : ${bonus.charAt(0).toLowerCase()}${bonus.slice(1)}.`,
       ], 2)
