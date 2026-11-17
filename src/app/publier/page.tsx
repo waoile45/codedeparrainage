@@ -26,8 +26,8 @@ const RECOMMENDED: Entreprise[] = [
 ];
 
 // ── Constantes ─────────────────────────────────────────────────────────────────
-const CATEGORIES = ["banque","crypto","energie","cashback","telephonie","paris","assurance","shopping"];
-const CAT_LABELS: Record<string,string> = { banque:"Banque", crypto:"Crypto", energie:"Énergie", cashback:"Cashback", telephonie:"Téléphonie", paris:"Paris", assurance:"Assurance", shopping:"Shopping" };
+const CATEGORIES = ["banque","crypto","energie","cashback","telephonie","paris","assurance","shopping","autre"];
+const CAT_LABELS: Record<string,string> = { banque:"Banque", crypto:"Crypto", energie:"Énergie", cashback:"Cashback", telephonie:"Téléphonie", paris:"Paris", assurance:"Assurance", shopping:"Shopping", autre:"Autre" };
 const XP_GAIN = 10;
 const MAX_DISPLAY = 200;
 

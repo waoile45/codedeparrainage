@@ -14,6 +14,7 @@ const CAT_META: Record<string, { label: string; color: string }> = {
   shopping:   { label: 'Shopping',       color: '#14b8a6' },
   assurance:  { label: 'Assurance',      color: '#f97316' },
   bourse:     { label: 'Bourse',         color: '#6366f1' },
+  autre:      { label: 'Autre',          color: '#64748b' },
 }
 
 type CompanyRow = {

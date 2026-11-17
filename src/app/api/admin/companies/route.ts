@@ -9,12 +9,15 @@ import { z } from 'zod'
 // un insert/update depuis le navigateur échoue en 42501, même connecté.
 // On passe donc par le service_role, après contrôle admin (même schéma que give-boost).
 
-const CATEGORIES = ['banque', 'paris', 'cashback', 'energie', 'telephonie', 'crypto', 'assurance', 'shopping']
+// « autre » : pour les marques hors des 8 secteurs (ex. Nous Portal, plateforme d'IA).
+const CATEGORIES = ['banque', 'paris', 'cashback', 'energie', 'telephonie', 'crypto', 'assurance', 'shopping', 'autre']
 
 const companySchema = z.object({
   name: z.string().trim().min(1).max(100),
   slug: z.string().trim().min(1).max(200),
-  category: z.enum(CATEGORIES as [string, ...string[]]).or(z.literal('')).optional(),
+  // Obligatoire : companies.category est NOT NULL en base. Une valeur vide
+  // passait la validation puis échouait en 23502 (« Insertion refusée par la base »).
+  category: z.enum(CATEGORIES as [string, ...string[]]),
   referral_bonus_description: z.string().trim().max(300).optional(),
 })
 
@@ -65,7 +68,7 @@ export async function POST(request: Request) {
 
   const result = companySchema.safeParse(await request.json().catch(() => null))
   if (!result.success) {
-    return NextResponse.json({ error: 'Données invalides (nom et slug/domaine requis)' }, { status: 400 })
+    return NextResponse.json({ error: 'Données invalides : nom, slug/domaine et catégorie sont requis' }, { status: 400 })
   }
   const { name, slug, category, referral_bonus_description } = result.data
 
@@ -75,7 +78,7 @@ export async function POST(request: Request) {
       name,
       slug,
       url_slug: slugifyName(name), // sinon la page /code-parrainage/[slug] ne résout jamais
-      category: category || null,
+      category,
       referral_bonus_description: referral_bonus_description || null,
       logo_url: `https://www.google.com/s2/favicons?domain=${slug}&sz=64`,
     })
@@ -96,7 +99,7 @@ export async function PUT(request: Request) {
 
   const result = updateSchema.safeParse(await request.json().catch(() => null))
   if (!result.success) {
-    return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
+    return NextResponse.json({ error: 'Données invalides : nom, slug/domaine et catégorie sont requis' }, { status: 400 })
   }
   const { id, name, slug, category, referral_bonus_description } = result.data
 
@@ -106,7 +109,7 @@ export async function PUT(request: Request) {
     .update({
       name,
       slug,
-      category: category || null,
+      category,
       referral_bonus_description: referral_bonus_description || null,
     })
     .eq('id', id)

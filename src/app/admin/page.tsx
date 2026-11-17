@@ -49,7 +49,7 @@ function TabBtn({ label, count, active, onClick }: { label: string; count?: numb
   )
 }
 
-const CATEGORIES = ['banque', 'paris', 'cashback', 'energie', 'telephonie', 'crypto', 'assurance', 'shopping']
+const CATEGORIES = ['banque', 'paris', 'cashback', 'energie', 'telephonie', 'crypto', 'assurance', 'shopping', 'autre']
 
 export default function AdminPage() {
   const [tab, setTab]                 = useState<Tab>('annonces')
