@@ -69,7 +69,7 @@ export async function proxy(req: NextRequest) {
 
     // Vérification email admin — fail-closed : si ADMIN_EMAIL n'est pas
     // configuré, personne ne passe (plutôt que tout utilisateur connecté).
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL
+    const adminEmail = process.env.ADMIN_EMAIL
     if (!adminEmail || user.email !== adminEmail) {
       return NextResponse.redirect(new URL('/', req.url))
     }

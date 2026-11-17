@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== (process.env.ADMIN_EMAIL ?? process.env.NEXT_PUBLIC_ADMIN_EMAIL)) {
+  if (!user || !process.env.ADMIN_EMAIL || user.email !== process.env.ADMIN_EMAIL) {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
   }
 

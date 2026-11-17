@@ -50,7 +50,7 @@ async function requireAdmin() {
     }
   )
   const { data: { user } } = await supabase.auth.getUser()
-  const adminEmail = process.env.ADMIN_EMAIL ?? process.env.NEXT_PUBLIC_ADMIN_EMAIL
+  const adminEmail = process.env.ADMIN_EMAIL
   return !!user && !!adminEmail && user.email === adminEmail
 }
 

@@ -1,11 +1,13 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { safeNext } from '@/lib/safe-next'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  const next = requestUrl.searchParams.get('next') ?? '/profil'
+  // Chemin interne uniquement : voir safeNext (open redirect corrigé).
+  const next = safeNext(requestUrl.searchParams.get('next'))
 
   if (code) {
     const cookieStore = await cookies()
