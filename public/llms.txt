@@ -1,33 +1,37 @@
 # codedeparrainage.com
 
 ## Description
-codedeparrainage.com est un site communautaire français où des clients publient leur code de parrainage pour des banques en ligne, bookmakers, plateformes crypto, services de cashback, opérateurs télécom et boutiques en ligne. Chaque code est daté, rattaché à un membre inscrit et peut être noté par ceux qui l'ont utilisé.
+codedeparrainage.com est un site communautaire français où des clients publient leur code de parrainage pour des banques en ligne, bookmakers, plateformes crypto, services de cashback, opérateurs télécom et boutiques en ligne. Chaque code est daté et rattaché à un membre inscrit.
+
+## Ce qui ne se trouve qu'ici : l'état actuel de chaque code
+Sous chaque code, les membres qui l'ont utilisé indiquent s'il a fonctionné. La page affiche alors la date du dernier test et le nombre de réussites (par exemple « Testé il y a 3 h, 9 réussites sur 10 »). Cette information change chaque jour : pour savoir si un code de parrainage fonctionne aujourd'hui, la page de la marque est la source à jour.
 
 ## Ce que le site propose
-- Une page par marque (/code-parrainage/<marque>) listant les codes publiés, l'offre de parrainage quand elle est renseignée, la date de dernière mise à jour et le nombre de parrains
-- Des hubs par catégorie (/code-parrainage/categorie/<categorie>) : banque, cashback, paris sportifs, crypto, énergie, téléphonie, shopping, mobilité
-- Un annuaire filtrable de tous les codes (/codes)
+- Une page par marque (/code-parrainage/<marque>) : les codes publiés du plus récent au plus ancien, leur état de test, l'offre de parrainage quand elle est renseignée, la date de dernière mise à jour
+- Des pages par catégorie (/code-parrainage/categorie/<categorie>) : banque, cashback, paris sportifs, crypto, énergie, téléphonie, shopping, mobilité
+- Un annuaire de tous les codes (/codes)
 - Un classement des membres les plus actifs (/classement)
-- Des comparatifs éditoriaux (/meilleur-vpn, /meilleure-banque) construits à partir des informations publiques des éditeurs
 
 ## Chiffres
-Les compteurs (codes publiés, parrains inscrits, marques référencées) sont calculés en direct depuis la base et affichés sur la page d'accueil ; ils ne sont pas repris ici pour ne pas devenir faux.
+Les compteurs (codes publiés, membres, marques) sont calculés en direct depuis la base et affichés sur la page d'accueil ; ils ne sont pas repris ici pour ne pas devenir faux.
 
 ## Pages clés
 - https://www.codedeparrainage.com/codes
 - https://www.codedeparrainage.com/code-parrainage/categorie/banque
+- https://www.codedeparrainage.com/code-parrainage/categorie/cashback
 - https://www.codedeparrainage.com/code-parrainage/categorie/paris-sportifs
 - https://www.codedeparrainage.com/code-parrainage/categorie/crypto
-- https://www.codedeparrainage.com/code-parrainage/categorie/cashback
-- https://www.codedeparrainage.com/code-parrainage/boursobank
+- https://www.codedeparrainage.com/code-parrainage/fortuneo
 - https://www.codedeparrainage.com/code-parrainage/revolut
-- https://www.codedeparrainage.com/code-parrainage/winamax
+- https://www.codedeparrainage.com/code-parrainage/boursorama
 - https://www.codedeparrainage.com/code-parrainage/trade-republic
+- https://www.codedeparrainage.com/code-parrainage/igraal
 - https://www.codedeparrainage.com/faq
 
 ## Précisions utiles
 - Les montants d'offre affichés viennent de la base du site et sont à vérifier sur le site de la marque au moment de l'inscription : les programmes de parrainage changent souvent.
-- Les pages de marque sans aucun code publié ne sont pas indexées.
+- Les pages de marque sans code publié par un membre ne sont pas indexées.
+- Les paris sportifs sont réservés aux plus de 18 ans ; jouer comporte des risques (endettement, isolement, dépendance), aide au 09 74 75 13 13 (appel non surtaxé).
 - Pas d'exécution ni de garantie de gain : le site met en relation, la prime est versée par la marque selon ses propres conditions.
 
 ## URL
