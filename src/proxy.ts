@@ -37,6 +37,8 @@ const RATE_LIMITED_PATHS = [
   '/api/proposer-entreprise',
   '/api/verify-turnstile',
   '/api/codes/test',
+  '/api/code-copy',
+  '/api/me/copies',
 ]
 
 export async function proxy(req: NextRequest) {

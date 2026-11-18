@@ -90,3 +90,9 @@ html.js .bp-ticket { animation: bp-drop .75s cubic-bezier(.2,.8,.2,1) .15s both;
 @keyframes bp-fade { from { opacity: 0; transform: translate3d(0, 14px, 0); } to { opacity: 1; transform: none; } }
 html.js .bp-top { animation: bp-fade .6s ease both; }
 html.js .bp-bonus { animation: bp-fade .6s ease .1s both; }
+
+/* Lien partagé par un parrain (#code-<id>) : on défile jusqu'à son code,
+   sous la barre fixe, et on le met en évidence. */
+.bp-top, .bp-row { scroll-margin-top: 96px; }
+.bp-row:target { background: var(--accent-tint); border-radius: 12px; padding-left: 1rem; padding-right: 1rem; box-shadow: inset 0 0 0 1.5px var(--accent); }
+.bp-top:target { box-shadow: inset 0 0 0 2px var(--accent); }

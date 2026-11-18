@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase";
 import { ENTREPRISES, type Entreprise } from "@/data/entreprises";
 import { CategoryIcon } from "@/components/CategoryIcons";
 import { Building, Bulb, Check, Envelope, Stamp } from "@/components/Pictos";
+import ShareCode from "@/components/ShareCode";
 
 // ── Entreprises recommandées (prioritaires) ────────────────────────────────────
 const RECOMMENDED: Entreprise[] = [
@@ -89,6 +90,8 @@ function Steps({ current }: { current: 1|2|3 }) {
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function PublierPage() {
   const [step, setStep]                         = useState<1|2|3>(1);
+  // Annonce publiée : de quoi proposer « Partager mon code » sur l'écran de succès
+  const [published, setPublished] = useState<{ id: string; urlSlug: string | null } | null>(null);
   const [selectedEntreprise, setSelectedEntreprise] = useState<Entreprise|null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [search, setSearch]                     = useState("");
@@ -165,7 +168,7 @@ export default function PublierPage() {
 
     const { data: existing } = await supabase
       .from("companies")
-      .select("id")
+      .select("id, url_slug")
       .eq("slug", slug)
       .single();
 
@@ -184,14 +187,16 @@ export default function PublierPage() {
     const finalDesc = gainPrefix + (desc.trim() || "");
 
     // Insérer l'annonce
-    const { error: insertError } = await supabase
+    const { data: inserted, error: insertError } = await supabase
       .from("announcements")
       .insert({
         user_id:    user.id,
         company_id: companyId,
         code:       code.trim(),
         description: finalDesc || null,
-      });
+      })
+      .select("id")
+      .single();
 
     if (insertError) {
       // Pas de message interne de la base côté visiteur. La limite de
@@ -227,6 +232,7 @@ export default function PublierPage() {
         .eq("id", user.id);
     }
 
+    if (inserted?.id) setPublished({ id: inserted.id, urlSlug: existing.url_slug ?? null });
     setStep(3);
     setSubmitting(false);
   };
@@ -625,9 +631,15 @@ export default function PublierPage() {
               <h2 className="success-title">Annonce publiée !</h2>
               <p className="success-sub">Ton code {selectedEntreprise?.nom} est maintenant visible par toute la communauté.</p>
               <div className="success-xp">+{XP_GAIN} XP gagnés</div>
+              {published && selectedEntreprise && (
+                <div style={{ margin:"0 0 1.5rem" }}>
+                  <p style={{ color:"var(--text-muted)", margin:"0 0 .75rem" }}>Envoie-le à ceux qui pensent ouvrir un compte {selectedEntreprise.nom} :</p>
+                  <ShareCode announcementId={published.id} brand={selectedEntreprise.nom} code={code.trim()} urlSlug={published.urlSlug} bonus={gain.trim() || null} variant="accent" />
+                </div>
+              )}
               <div className="success-actions">
                 <a href="/codes" className="btn-success-primary">Voir les codes</a>
-                <button className="btn-success-ghost" onClick={() => { setStep(1); setSelectedEntreprise(null); setSelectedCategory(""); setCode(""); setDesc(""); setGain(""); setError(""); }}>
+                <button className="btn-success-ghost" onClick={() => { setStep(1); setPublished(null); setSelectedEntreprise(null); setSelectedCategory(""); setCode(""); setDesc(""); setGain(""); setError(""); }}>
                   Publier un autre code
                 </button>
                 <a href="/profil" className="btn-success-ghost">Mon profil</a>
@@ -641,8 +653,8 @@ export default function PublierPage() {
           <div style={{ marginTop:"1.25rem", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:14, padding:"1rem 1.25rem", display:"flex", alignItems:"flex-start", gap:10 }}>
             <span style={{ flexShrink:0, color:"var(--accent-text)", display:"inline-flex" }}><Bulb size={18} /></span>
             <p style={{ fontSize:".78rem", color:"var(--text-dim)", lineHeight:1.6 }}>
-              Les annonces avec une description claire reçoivent <strong style={{ color:"var(--text-muted)" }}>2× plus de clics</strong>.
-              Précise le montant offert et les conditions pour maximiser tes parrainages.
+              Précise le montant offert et les conditions (dépôt minimum, délai de versement) :
+              c&apos;est ce que regardent ceux qui hésitent entre deux codes.
             </p>
           </div>
         )}

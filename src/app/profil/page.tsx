@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import type { ReactNode } from "react";
 import { Bolt, Chat, Check, Crown, Cross, Flame, Gift, Handshake, Lock, Medal, Pencil, Sleep, Stamp, Star, ThumbDown, ThumbUp, Ticket, Trophy, TrendUp, Warning, Clock } from "@/components/Pictos";
+import ShareCode from "@/components/ShareCode";
 
 type NavSection = "profil" | "annonces" | "messages" | "badges" | "quetes" | "credits" | "parametres" | "avis";
 
@@ -26,8 +27,10 @@ interface Annonce {
   description: string | null;
   bumps_today: number;
   created_at: string;
-  companies: { name: string; category: string } | null;
+  companies: { name: string; category: string; url_slug?: string | null; referral_bonus_description?: string | null } | null;
 }
+
+type CopyStats = { last7d: number; total: number; byAnnouncement: Record<string, { last7d: number; total: number }> };
 
 interface Badge { id: string; label: string; icon: ReactNode; unlocked: boolean; desc: string; }
 
@@ -320,7 +323,7 @@ function Sidebar({ active, setActive, user }: { active:NavSection; setActive:(s:
 }
 
 // ── Section Profil ─────────────────────────────────────────────────────────────
-function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:UserProfile; annonces:Annonce[]; onPseudoSave:(v:string)=>Promise<string|null>; onAvatarUpload:(url:string)=>void }) {
+function SectionProfil({ user, annonces, copyStats, onPseudoSave, onAvatarUpload }: { user:UserProfile; annonces:Annonce[]; copyStats:CopyStats|null; onPseudoSave:(v:string)=>Promise<string|null>; onAvatarUpload:(url:string)=>void }) {
   const { xpNext, xpNextLabel } = getXpInfo(user.xp);
   return (
     <div className="sc">
@@ -372,10 +375,10 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
         <div className="action-card">
           <div style={{ position:"absolute", inset:0, background:"none", pointerEvents:"none", borderRadius:"inherit" }} />
           <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"var(--border-md)" }} />
-          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.4)" }}><I.msg /></div><span className="action-label">Messages</span></div>
-          <p className="action-value" style={{ color:"var(--accent-text)", position:"relative", zIndex:1 }}>0</p>
-          <p className="action-sub" style={{ position:"relative", zIndex:1 }}>0 non lu</p>
-          <a href="/messages" className="action-btn" style={{ position:"relative", zIndex:1 }}>Messagerie <I.arrow /></a>
+          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.4)" }}><Ticket size={18} /></div><span className="action-label">Copies cette semaine</span></div>
+          <p className="action-value tnum" style={{ color:"var(--accent-text)", position:"relative", zIndex:1 }}>{copyStats ? copyStats.last7d : "…"}</p>
+          <p className="action-sub" style={{ position:"relative", zIndex:1 }}>{copyStats ? `${copyStats.total} copie${copyStats.total > 1 ? "s" : ""} au total` : "Chargement…"}</p>
+          <a href="/profil?tab=annonces" className="action-btn" style={{ position:"relative", zIndex:1 }}>Détail par code <I.arrow /></a>
         </div>
       </div>
 
@@ -400,8 +403,9 @@ function SectionProfil({ user, annonces, onPseudoSave, onAvatarUpload }: { user:
 }
 
 // ── Section Annonces ───────────────────────────────────────────────────────────
-function SectionAnnonces({ annonces, onDelete, onEdit }: {
+function SectionAnnonces({ annonces, copyStats, onDelete, onEdit }: {
   annonces: Annonce[];
+  copyStats: CopyStats | null;
   onDelete: (id: string) => void;
   onEdit:   (id: string, code: string, description: string) => Promise<void>;
 }) {
@@ -468,6 +472,19 @@ function SectionAnnonces({ annonces, onDelete, onEdit }: {
               )}
               <button className="btn-ghost-sm danger" onClick={() => onDelete(a.id)}>Supprimer</button>
             </div>
+          </div>
+
+          {/* Bilan des copies et partage */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
+            <span style={{ fontSize:".88rem", color:"var(--text-muted)" }}>
+              {(() => {
+                if (!copyStats) return "…";
+                const s = copyStats.byAnnouncement[a.id];
+                if (!s || s.total === 0) return "Pas encore copié";
+                return <>Copié <strong style={{ color:"var(--text-strong)" }}>{s.last7d}</strong> fois cette semaine, {s.total} au total</>;
+              })()}
+            </span>
+            <ShareCode announcementId={a.id} brand={a.companies?.name ?? ""} code={a.code} urlSlug={a.companies?.url_slug} bonus={gainLabel ?? a.companies?.referral_bonus_description} />
           </div>
 
           {/* Formulaire de modification inline */}
@@ -1139,6 +1156,11 @@ export default function ProfilPage() {
   const [active, setActive]     = useState<NavSection>("profil");
   const [user, setUser]         = useState<UserProfile | null>(null);
   const [annonces, setAnnonces] = useState<Annonce[]>([]);
+  // Bilan des copies (route serveur : la table est fermée aux clés publiques)
+  const [copyStats, setCopyStats] = useState<CopyStats | null>(null);
+  useEffect(() => {
+    fetch("/api/me/copies").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d) setCopyStats(d); }).catch(() => {});
+  }, []);
   const [hasReview, setHasReview] = useState(false);
   const [isTop3, setIsTop3]       = useState(false);
   const [loading, setLoading]   = useState(true);
@@ -1156,7 +1178,7 @@ export default function ProfilPage() {
       // email exclu : il n'est plus lisible via l'API publique (RLS colonne).
       // On le récupère depuis la session d'auth juste après (authUser.email).
       supabase.from("users").select("id, pseudo, avatar_url, bio, xp, level, streak_days, last_login, created_at, badge_parrain_mois").eq("id", authUser.id).single(),
-      supabase.from("announcements").select("id, code, description, bumps_today, created_at, companies(name, category)").eq("user_id", authUser.id).order("created_at", { ascending: false }),
+      supabase.from("announcements").select("id, code, description, bumps_today, created_at, companies(name, category, url_slug, referral_bonus_description)").eq("user_id", authUser.id).order("created_at", { ascending: false }),
       supabase.from("platform_reviews").select("id").eq("user_id", authUser.id).maybeSingle(),
       supabase.from("users").select("id").order("xp", { ascending: false }).limit(3),
     ]);
@@ -1225,8 +1247,8 @@ export default function ProfilPage() {
   const renderSection = () => {
     if (loading || !user) return <Skeleton />;
     switch (active) {
-      case "profil":     return <SectionProfil user={user} annonces={annonces} onPseudoSave={handlePseudoSave} onAvatarUpload={handleAvatarUpload} />;
-      case "annonces":   return <SectionAnnonces annonces={annonces} onDelete={handleDeleteAnnonce} onEdit={handleEditAnnonce} />;
+      case "profil":     return <SectionProfil user={user} annonces={annonces} copyStats={copyStats} onPseudoSave={handlePseudoSave} onAvatarUpload={handleAvatarUpload} />;
+      case "annonces":   return <SectionAnnonces annonces={annonces} copyStats={copyStats} onDelete={handleDeleteAnnonce} onEdit={handleEditAnnonce} />;
       case "messages":   return <SectionMessages />;
       case "badges":     return <SectionBadges xp={user.xp} annoncesCount={annonces.length} isTop3={isTop3} />;
       case "quetes":     return <SectionQuetes user={user} annonces={annonces} hasReview={hasReview} />;

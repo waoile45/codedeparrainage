@@ -308,13 +308,13 @@ export default async function CompanyPage({ params }: Props) {
               </div>
 
               {first ? (
-                <div className="bp-top">
+                <div className="bp-top" id={`code-${first.id}`}>
                   <p className="bp-top-label">Le code le plus récent</p>
                   <div className="bp-ticket">
                     <span className="bp-ticket-code code-str" title={first.code}>
                       {isLink(first.code) ? first.code.replace(/^https?:\/\/(www\.)?/i, '') : first.code}
                     </span>
-                    <CopyButton code={first.code} variant="ink" />
+                    <CopyButton code={first.code} variant="ink" announcementId={first.id} />
                   </div>
                   {firstParsed?.gain && <p className="bp-gain">{firstParsed.gain}</p>}
                   {firstParsed?.description && <p className="bp-desc">{firstParsed.description}</p>}
@@ -363,12 +363,12 @@ export default async function CompanyPage({ params }: Props) {
                 {others.map((ann: any) => {
                   const { gain, description } = parseAnnouncementDescription(ann.description)
                   return (
-                    <li key={ann.id} className="bp-row reveal">
+                    <li key={ann.id} id={`code-${ann.id}`} className="bp-row reveal">
                       <div className="bp-row-code">
                         <span className="code-str" title={ann.code}>
                           {isLink(ann.code) ? ann.code.replace(/^https?:\/\/(www\.)?/i, '') : ann.code}
                         </span>
-                        <CopyButton code={ann.code} />
+                        <CopyButton code={ann.code} announcementId={ann.id} />
                       </div>
                       {(gain || description) && (
                         <p className="bp-row-desc">

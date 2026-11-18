@@ -1,14 +1,16 @@
 "use client"
 
 import { useState } from "react"
+import { trackCodeCopy } from "@/lib/track-copy"
 
 // variant « ink » : bouton encre, posé sur le ticket jaune.
 // variant « line » : bouton cerclé, dans les listes sur fond sombre.
-export default function CopyButton({ code, variant = "line" }: { code: string; variant?: "ink" | "line" }) {
+export default function CopyButton({ code, variant = "line", announcementId }: { code: string; variant?: "ink" | "line"; announcementId?: string }) {
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
     try { await navigator.clipboard.writeText(code) } catch {}
+    trackCodeCopy(announcementId)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
