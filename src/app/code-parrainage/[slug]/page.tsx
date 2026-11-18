@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { createAnonSupabase } from '@/lib/supabase-server'
 import Navbar from '@/components/Navbar'
 import CopyButton from '@/components/CopyButton'
+import TestCode from '@/components/TestCode'
 import CompanyLogo from '@/components/CompanyLogo'
 import './brand.css'
 import { safeJsonLd } from '@/lib/sanitize'
@@ -324,6 +325,7 @@ export default async function CompanyPage({ params }: Props) {
                     <span className="bp-date">le {new Date(first.last_bumped_at ?? first.created_at).toLocaleDateString('fr-FR')}</span>
                   </p>
                   {isLink(first.code) && <p className="bp-hint">C&apos;est un lien : ouvre-le, ou copie-le dans ton navigateur pour t&apos;inscrire.</p>}
+                  <TestCode announcementId={first.id} stats={{ tests_ok: first.tests_ok, tests_ko: first.tests_ko, last_tested_at: first.last_tested_at }} />
                 </div>
               ) : (
                 <div className="bp-top bp-empty">
@@ -379,6 +381,7 @@ export default async function CompanyPage({ params }: Props) {
                         {ann.users?.level && <span className="bp-level">{ann.users.level}</span>}
                         <span className="bp-date">{new Date(ann.last_bumped_at ?? ann.created_at).toLocaleDateString('fr-FR')}</span>
                       </p>
+                      <TestCode announcementId={ann.id} stats={{ tests_ok: ann.tests_ok, tests_ko: ann.tests_ko, last_tested_at: ann.last_tested_at }} />
                     </li>
                   )
                 })}

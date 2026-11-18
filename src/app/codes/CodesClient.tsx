@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import { CategoryIcon } from "@/components/CategoryIcons";
 import { Cross } from "@/components/Pictos";
+import { FraicheurCode } from "@/components/FraicheurCode";
 
 type Category = "Tout" | "banque" | "paris" | "cashback" | "energie" | "telephonie" | "crypto" | "assurance" | "shopping";
 
@@ -21,6 +22,9 @@ interface CodeCard {
   niveau: string;
   boosted: boolean;
   avgRating: number;
+  testsOk: number;
+  testsKo: number;
+  lastTestedAt: string | null;
   ratingCount: number;
   topTag: string;
 }
@@ -278,6 +282,7 @@ function CodeCardItem({ card, index, onRate, onContact, onEdit, onDelete, curren
           )}
         </div>
       </div>
+      <div style={{ marginBottom: ".7rem" }}><FraicheurCode stats={{ tests_ok: card.testsOk, tests_ko: card.testsKo, last_tested_at: card.lastTestedAt }} /></div>
       <div className="code-row">
         <div className="code-display">
           <span className="code-dot" />
@@ -343,7 +348,7 @@ export default function CodesClient() {
     }
 
     let annQuery = supabase.from("announcements")
-      .select(`id, user_id, code, description, bumps_today, created_at, companies(name, slug, category, referral_bonus_description), users(pseudo, level), boosts(active, ends_at)`)
+      .select(`id, user_id, code, description, bumps_today, created_at, tests_ok, tests_ko, last_tested_at, companies(name, slug, category, referral_bonus_description), users(pseudo, level), boosts(active, ends_at)`)
       .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
 
     if (sortMode === "popular") annQuery = annQuery.order("bumps_today", { ascending: false }).order("created_at", { ascending: false });
@@ -401,6 +406,9 @@ export default function CodesClient() {
         parrain:     row.users?.pseudo ?? "Anonyme",
         niveau:      row.users?.level ?? "Débutant",
         avgRating:   avg,
+        testsOk:     row.tests_ok ?? 0,
+        testsKo:     row.tests_ko ?? 0,
+        lastTestedAt: row.last_tested_at ?? null,
         ratingCount: totalRatings,
         topTag,
       };

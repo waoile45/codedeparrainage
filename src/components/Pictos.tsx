@@ -148,3 +148,21 @@ export function Inbox(p: P) {
 export function Plus(p: P) {
   return <Svg {...p}><path d="M12 5v14M5 12h14" /></Svg>;
 }
+export function Server(p: P) {
+  return <Svg {...p}><rect x="4" y="4" width="16" height="6.5" rx="1.5" /><rect x="4" y="13.5" width="16" height="6.5" rx="1.5" /><path d="M7.5 7.2h.01M7.5 16.7h.01" /></Svg>;
+}
+export function Phone(p: P) {
+  return <Svg {...p}><rect x="6.5" y="2.5" width="11" height="19" rx="2.5" /><path d="M10.5 18.5h3" /></Svg>;
+}
+export function Refund(p: P) {
+  return <Svg {...p}><path d="M4 12a8 8 0 1 0 2.4-5.7" /><path d="M4 4v4h4" /><path d="M12 8v4l2.5 1.5" /></Svg>;
+}
+export function Euro(p: P) {
+  return <Svg {...p}><path d="M17.5 6.5A6.5 6.5 0 1 0 17.5 17.5" /><path d="M5 10.5h8M5 13.5h8" /></Svg>;
+}
+export function Heart(p: P & { filled?: boolean }) {
+  return <Svg {...p} fill={p.filled ? "currentColor" : "none"}><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z" /></Svg>;
+}
+export function ExternalLink(p: P) {
+  return <Svg {...p}><path d="M14 4.5h5.5V10M19.5 4.5L11 13" /><path d="M18 14v4.5a1 1 0 0 1-1 1H5.5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1H10" /></Svg>;
+}

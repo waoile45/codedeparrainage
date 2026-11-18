@@ -36,6 +36,7 @@ const RATE_LIMITED_PATHS = [
   '/api/stripe/checkout',
   '/api/proposer-entreprise',
   '/api/verify-turnstile',
+  '/api/codes/test',
 ]
 
 export async function proxy(req: NextRequest) {

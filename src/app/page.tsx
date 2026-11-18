@@ -22,9 +22,9 @@ type Row = { user_id: string | null; code: string | null; company_id: string | n
 
 type Brand = { name: string; urlSlug: string; domain: string; bonus: string | null; count: number }
 
-// Marques retirées de la vitrine de l'accueil (elles restent dans l'annuaire) :
-// Taptap Send n'a pas de logo, son domaine en base (taptap-send.com) est faux.
-const HIDDEN_FROM_HOME = new Set(['taptap-send'])
+// Marques retirées de la vitrine de l'accueil (elles restent dans l'annuaire).
+// Vide depuis la correction du domaine de Taptap Send (taptapsend.com).
+const HIDDEN_FROM_HOME = new Set<string>([])
 
 const BETTING = new Set(CATEGORIES.find((c) => c.slug === 'paris-sportifs')?.brands ?? [])
 const BANKING = new Set(CATEGORIES.find((c) => c.slug === 'banque')?.brands ?? [])

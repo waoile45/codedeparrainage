@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import { CategoryIcon } from "@/components/CategoryIcons";
+import { Heart, Search } from "@/components/Pictos";
 
 interface Reply {
   id: string;
@@ -172,9 +173,9 @@ export default function ForumPostPage() {
       <>
         <Navbar activePage="forum" />
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "4rem 1.5rem", textAlign: "center" }}>
-          <div style={{ fontSize: "2rem", marginBottom: 12 }}>😕</div>
+          <div style={{ marginBottom: 12, color: "var(--text-dim)" }}><Search size={40} /></div>
           <div style={{ color: "var(--text-muted)" }}>Post introuvable</div>
-          <a href="/forum" style={{ color: "var(--accent-text)", fontSize: ".875rem", display: "block", marginTop: 12 }}>← Retour au forum</a>
+          <a href="/forum" style={{ color: "var(--accent-text)", fontSize: ".875rem", display: "block", marginTop: 12 }}>Retour au forum</a>
         </div>
       </>
     );
@@ -202,7 +203,7 @@ export default function ForumPostPage() {
 
         {/* Retour */}
         <a href="/forum" style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "var(--text-dim)", fontSize: ".82rem", textDecoration: "none", marginBottom: "1.25rem", fontFamily: "var(--font-text)" }}>
-          ← Retour au forum
+          Retour au forum
         </a>
 
         {/* Post principal */}
@@ -222,7 +223,7 @@ export default function ForumPostPage() {
             {post.users?.level && <span className="level-badge">{post.users.level}</span>}
             <span style={{ fontSize: ".78rem", color: "var(--text-faint)" }}>{timeAgo(post.created_at)}</span>
             <button className={`like-btn ${post.liked ? "liked" : ""}`} onClick={handleLikePost} disabled={!userId}>
-              ♥ {post.likes}
+              <Heart size={14} /> {post.likes}
             </button>
           </div>
         </div>
@@ -250,7 +251,7 @@ export default function ForumPostPage() {
                 {reply.users?.level && <span className="level-badge">{reply.users.level}</span>}
                 <span style={{ fontSize: ".75rem", color: "var(--text-faint)" }}>{timeAgo(reply.created_at)}</span>
                 <button className={`like-btn ${reply.liked ? "liked" : ""}`} onClick={() => handleLikeReply(reply)} disabled={!userId}>
-                  ♥ {reply.likes}
+                  <Heart size={14} /> {reply.likes}
                 </button>
               </div>
             </div>

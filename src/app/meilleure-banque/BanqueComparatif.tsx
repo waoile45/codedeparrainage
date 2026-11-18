@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar'
 import { BanqueEntry, BanqueCasKey, BANQUE_CAS, BANQUE_CAS_KEYS, BANQUE_UPDATED_AT } from '@/data/comparatifs/banque'
 import { safeJsonLd } from '@/lib/sanitize'
+import { Check, Cross, Euro, ExternalLink, Gift, Globe, Shield } from "@/components/Pictos";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -24,7 +25,7 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
   )
 }
 
-function StatChip({ icon, value, label }: { icon: string; value: string; label: string }) {
+function StatChip({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
     <div style={{ background: 'var(--bg-card-md)', border: '1px solid var(--border)', borderRadius: 10, padding: '.5rem .75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, minWidth: 80, flex: 1 }}>
       <span style={{ fontSize: '1rem' }}>{icon}</span>
@@ -77,10 +78,10 @@ function BanqueCard({ banque, rank }: { banque: BanqueEntry; rank: number }) {
       <div style={{ padding: '1.25rem 1.5rem' }}>
         {/* Stats chips */}
         <div style={{ display: 'flex', gap: 8, marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-          <StatChip icon="💶" value={banque.fraisMensuels} label="frais/mois" />
-          <StatChip icon="🌍" value={`${banque.paysDisponibles}+`} label="pays" />
-          <StatChip icon="🎁" value={banque.bonusBienvenue} label="bonus" />
-          <StatChip icon="🛡️" value={banque.garantieDepots} label="garantie dépôts" />
+          <StatChip icon={<Euro size={18} />} value={banque.fraisMensuels} label="frais/mois" />
+          <StatChip icon={<Globe size={18} />} value={`${banque.paysDisponibles}+`} label="pays" />
+          <StatChip icon={<Gift size={18} />} value={banque.bonusBienvenue} label="bonus" />
+          <StatChip icon={<Shield size={18} />} value={banque.garantieDepots} label="garantie dépôts" />
         </div>
 
         <p style={{ fontSize: '.875rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: '0 0 1.25rem' }}>
@@ -102,7 +103,7 @@ function BanqueCard({ banque, rank }: { banque: BanqueEntry; rank: number }) {
             <div style={{ fontSize: '.7rem', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: '#10b981', marginBottom: '.625rem' }}>Avantages</div>
             {banque.pros.map((pro, i) => (
               <div key={i} style={{ display: 'flex', gap: 7, alignItems: 'flex-start', marginBottom: 6 }}>
-                <span style={{ color: '#10b981', fontSize: '.85rem', flexShrink: 0, marginTop: 1 }}>✓</span>
+                <span style={{ color: 'var(--ok)', flexShrink: 0, marginTop: 1, display: 'inline-flex' }}><Check size={15} /></span>
                 <span style={{ fontSize: '.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>{pro}</span>
               </div>
             ))}
@@ -111,7 +112,7 @@ function BanqueCard({ banque, rank }: { banque: BanqueEntry; rank: number }) {
             <div style={{ fontSize: '.7rem', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: '#f43f5e', marginBottom: '.625rem' }}>Inconvénients</div>
             {banque.cons.map((con, i) => (
               <div key={i} style={{ display: 'flex', gap: 7, alignItems: 'flex-start', marginBottom: 6 }}>
-                <span style={{ color: '#f43f5e', fontSize: '.85rem', flexShrink: 0, marginTop: 1 }}>✗</span>
+                <span style={{ color: 'var(--danger)', flexShrink: 0, marginTop: 1, display: 'inline-flex' }}><Cross size={15} /></span>
                 <span style={{ fontSize: '.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>{con}</span>
               </div>
             ))}
@@ -129,7 +130,7 @@ function BanqueCard({ banque, rank }: { banque: BanqueEntry; rank: number }) {
           </div>
           <a href={banque.affiliateUrl === '#' ? `https://${banque.domain}` : banque.affiliateUrl} target="_blank" rel={banque.affiliateUrl === '#' ? 'nofollow noopener' : 'nofollow sponsored noopener'} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--accent)', color: 'var(--accent-ink)', fontWeight: 700, fontSize: '.875rem', padding: '.65rem 1.25rem', borderRadius: 12, textDecoration: 'none' }}>
             Ouvrir un compte {banque.name}
-            <span style={{ fontSize: '.8rem' }}>↗</span>
+            <ExternalLink size={14} />
           </a>
         </div>
       </div>
@@ -317,10 +318,10 @@ export default function BanqueComparatif({ banques, h1, intro, currentCas, canon
               </a>
             ))}
             <a href="/meilleur-vpn" style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'var(--bg-card-md)', border: '1px solid var(--border)', color: 'var(--text-dim)', textDecoration: 'none' }}>
-              Comparatif VPN →
+              Comparatif VPN
             </a>
             <a href="/codes" style={{ fontSize: '.8rem', padding: '.4rem .875rem', borderRadius: 10, background: 'var(--bg-card-md)', border: '1px solid var(--border)', color: 'var(--text-dim)', textDecoration: 'none' }}>
-              Codes de parrainage →
+              Codes de parrainage
             </a>
           </div>
         </div>

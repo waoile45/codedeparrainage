@@ -1599,7 +1599,7 @@ export const ENTREPRISES: Entreprise[] = [
   { nom: "tangem", domain: "tangem.com", logo: "https://www.google.com/s2/favicons?domain=tangem.com&sz=64" },
   { nom: "Tangerine", domain: "tangerine.com", logo: "https://www.google.com/s2/favicons?domain=tangerine.com&sz=64" },
   { nom: "tantiem", domain: "tantiem.com", logo: "https://www.google.com/s2/favicons?domain=tantiem.com&sz=64" },
-  { nom: "Taptap Send", domain: "taptap-send.com", logo: "https://icons.duckduckgo.com/ip3/taptap-send.com.ico" },
+  { nom: "Taptap Send", domain: "taptapsend.com", logo: "https://www.google.com/s2/favicons?domain=taptapsend.com&sz=64" },
   { nom: "Tassimo", domain: "tassimo.com", logo: "https://www.google.com/s2/favicons?domain=tassimo.com&sz=64" },
   { nom: "Taxfix", domain: "taxfix.com", logo: "https://www.google.com/s2/favicons?domain=taxfix.com&sz=64" },
   { nom: "Teatap", domain: "teatap.com", logo: "https://www.google.com/s2/favicons?domain=teatap.com&sz=64" },

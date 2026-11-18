@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase";
 import { CategoryIcon } from "@/components/CategoryIcons";
+import { Heart } from "@/components/Pictos";
 
 interface Post {
   id: string;
@@ -252,7 +253,7 @@ export default function ForumPage() {
                     onClick={() => handleLike(post)}
                     disabled={!userId}
                   >
-                    ♥ {post.likes}
+                    <Heart size={14} /> {post.likes}
                   </button>
                 </div>
               </a>

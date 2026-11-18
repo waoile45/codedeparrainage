@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar'
 import { VpnEntry, UseCaseKey, USE_CASES, USE_CASE_KEYS, VPN_UPDATED_AT } from '@/data/comparatifs/vpn'
 import { safeJsonLd } from '@/lib/sanitize'
+import { Check, Cross, ExternalLink, Globe, Phone, Refund, Server } from "@/components/Pictos";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -31,7 +32,7 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
   )
 }
 
-function StatChip({ icon, value, label }: { icon: string; value: string; label: string }) {
+function StatChip({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
     <div
       style={{
@@ -164,14 +165,14 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
 
         {/* Stats chips */}
         <div style={{ display: 'flex', gap: 8, marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-          <StatChip icon="🌐" value={`${vpn.servers.toLocaleString('fr-FR')}+`} label="serveurs" />
-          <StatChip icon="🗺️" value={`${vpn.countries}`} label="pays" />
+          <StatChip icon={<Server size={18} />} value={`${vpn.servers.toLocaleString('fr-FR')}+`} label="serveurs" />
+          <StatChip icon={<Globe size={18} />} value={`${vpn.countries}`} label="pays" />
           <StatChip
-            icon="📱"
+            icon={<Phone size={18} />}
             value={typeof vpn.connections === 'number' ? String(vpn.connections) : '∞'}
             label="appareils"
           />
-          <StatChip icon="🔄" value={`${vpn.guarantee} j`} label="remboursement" />
+          <StatChip icon={<Refund size={18} />} value={`${vpn.guarantee} j`} label="remboursement" />
         </div>
 
         {/* Description */}
@@ -230,7 +231,7 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
             </div>
             {vpn.pros.map((pro, i) => (
               <div key={i} style={{ display: 'flex', gap: 7, alignItems: 'flex-start', marginBottom: 6 }}>
-                <span style={{ color: '#10b981', fontSize: '.85rem', flexShrink: 0, marginTop: 1 }}>✓</span>
+                <span style={{ color: 'var(--ok)', flexShrink: 0, marginTop: 1, display: 'inline-flex' }}><Check size={15} /></span>
                 <span style={{ fontSize: '.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>{pro}</span>
               </div>
             ))}
@@ -258,7 +259,7 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
             </div>
             {vpn.cons.map((con, i) => (
               <div key={i} style={{ display: 'flex', gap: 7, alignItems: 'flex-start', marginBottom: 6 }}>
-                <span style={{ color: '#f43f5e', fontSize: '.85rem', flexShrink: 0, marginTop: 1 }}>✗</span>
+                <span style={{ color: 'var(--danger)', flexShrink: 0, marginTop: 1, display: 'inline-flex' }}><Cross size={15} /></span>
                 <span style={{ fontSize: '.8rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>{con}</span>
               </div>
             ))}
@@ -305,7 +306,7 @@ function VpnCard({ vpn, rank }: { vpn: VpnEntry; rank: number }) {
               }}
             >
               Essayer {vpn.name}
-              <span style={{ fontSize: '.8rem' }}>↗</span>
+              <ExternalLink size={14} />
             </a>
           </div>
         </div>
@@ -742,7 +743,7 @@ export default function VpnComparatif({ vpns, h1, intro, currentCas, canonicalPa
                 textDecoration: 'none',
               }}
             >
-              Codes de parrainage →
+              Codes de parrainage
             </a>
           </div>
         </div>
