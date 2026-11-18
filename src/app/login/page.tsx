@@ -1,8 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Turnstile } from '@marsidev/react-turnstile'
+import { safeNext } from '@/lib/safe-next'
+
+/** Destination après connexion (?next=), validée : chemin interne seulement. */
+function readNext(): string {
+  return safeNext(new URLSearchParams(window.location.search).get('next'))
+}
 
 export default function LoginPage() {
   const [email, setEmail]               = useState('')
@@ -12,13 +18,20 @@ export default function LoginPage() {
   const [loading, setLoading]           = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
+  // Lien « S'inscrire » : garde la destination (ex. tester un code, publier).
+  const [registerHref, setRegisterHref] = useState('/register')
+  useEffect(() => {
+    const next = readNext()
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- lecture de l'URL côté client uniquement
+    if (next !== '/profil') setRegisterHref(`/register?next=${encodeURIComponent(next)}`)
+  }, [])
   const supabase = createClient()
 
   async function handleGoogleLogin() {
     setGoogleLoading(true)
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(readNext())}` },
     })
   }
 
@@ -93,7 +106,7 @@ export default function LoginPage() {
       }
     }
 
-    window.location.href = '/profil'
+    window.location.href = readNext()
   }
 
   return (
@@ -239,7 +252,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="auth-switch">Pas encore de compte ?{' '}<a href="/register">S&apos;inscrire gratuitement</a></p>
+          <p className="auth-switch">Pas encore de compte ?{' '}<a href={registerHref}>S&apos;inscrire gratuitement</a></p>
         </div>
       </div>
     </>

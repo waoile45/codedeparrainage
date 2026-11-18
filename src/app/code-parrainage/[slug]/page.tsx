@@ -18,6 +18,7 @@ import {
   buildBrandDescription,
 } from '@/lib/seo'
 import { CATEGORIES, getCategoryForBrand } from '@/data/categories'
+import { hasIndexableCode } from '@/data/moderation'
 
 // ISR 4h — pages 100% statiques (client anon : PAS de cookies(), sinon la route
 // bascule en rendu dynamique à chaque requête et n'est plus pré-générée).
@@ -104,8 +105,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: { absolute: title },
     description,
     alternates: { canonical: url },
-    // Coquille vide (0 code) → noindex,follow : hors index sans casser le maillage.
-    robots: codesCount > 0 ? { index: true, follow: true } : { index: false, follow: true },
+    // Coquille vide (0 code), ou page qui n'a que des codes publiés en masse
+    // (src/data/moderation.ts) → noindex,follow : hors index sans casser le maillage.
+    robots: hasIndexableCode(announcements.map((a: any) => a.user_id))
+      ? { index: true, follow: true }
+      : { index: false, follow: true },
     openGraph: {
       title,
       description,
@@ -199,6 +203,11 @@ export default async function CompanyPage({ params }: Props) {
   const category = getCategoryForBrand(slug)
   const url = `${SITE_URL}/code-parrainage/${slug}`
   const betting = BETTING_BRANDS.has(slug)
+  // Bouton « Publier » : la marque arrive présélectionnée dans le formulaire
+  // (companies.slug = clé de recherche utilisée par /publier).
+  const publishHref = company.slug
+    ? `/publier?marque=${encodeURIComponent(company.slug)}&nom=${encodeURIComponent(name)}`
+    : '/publier'
 
   // Le domaine pour le favicon — on nettoie au cas où la colonne slug contient un path ou sous-domaine
   const domain = (company.slug ?? slug + '.com').replace(/^(https?:\/\/)?(www\.)?/, '')
@@ -300,6 +309,9 @@ export default async function CompanyPage({ params }: Props) {
                 )}
 
                 {codesCount > 0 && (
+                  <p className="bp-own">Client {name} ? <a href={publishHref} rel="nofollow">Publie ton code</a>, il apparaîtra ici.</p>
+                )}
+                {codesCount > 0 && (
                   <p className="bp-facts tnum">
                     {codesCount} code{codesCount > 1 ? 's' : ''} publié{codesCount > 1 ? 's' : ''} par {parrainsCount} parrain{parrainsCount > 1 ? 's' : ''}
                     {dateStr && <>, dernière mise à jour le {dateStr}</>}
@@ -337,7 +349,7 @@ export default async function CompanyPage({ params }: Props) {
                     ], 21)}
                   </p>
                   <p className="bp-desc">Tu es client {name} ? Ton code se trouve dans ton espace client ou dans l&apos;application. Publie-le : il apparaîtra ici.</p>
-                  <a href="/publier" className="btn btn-accent">Publier le premier code</a>
+                  <a href={publishHref} rel="nofollow" className="btn btn-accent">Publier le premier code</a>
                 </div>
               )}
             </div>
@@ -357,7 +369,7 @@ export default async function CompanyPage({ params }: Props) {
             <div className="wrap">
               <div className="bp-list-head">
                 <h2>Les autres codes {name}</h2>
-                <a href="/publier" className="bp-publish">Publier le mien</a>
+                <a href={publishHref} rel="nofollow" className="bp-publish">Publier le mien</a>
               </div>
               <ul className="bp-list">
                 {others.map((ann: any) => {
