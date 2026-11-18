@@ -6,7 +6,7 @@
  * La clé n'est pas un secret : le protocole exige qu'elle soit publiée à la
  * racine du site (public/<clé>.txt) pour prouver qu'on en est le propriétaire.
  */
-export const INDEXNOW_KEY = '3f6081397bdd48416446f4f8c2b71a80'
+export const INDEXNOW_KEY = '3f6081397bdd48416446f4f8c2b71a80' // gitleaks:allow (clé publique par protocole)
 const HOST = 'www.codedeparrainage.com'
 
 /** N'échoue jamais : un signalement manqué n'empêche rien, Bing repassera. */

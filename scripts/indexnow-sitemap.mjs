@@ -6,7 +6,7 @@
 //
 // La clé est publique par construction (public/<clé>.txt) ; elle doit rester
 // identique à INDEXNOW_KEY de src/lib/indexnow.ts.
-const KEY = '3f6081397bdd48416446f4f8c2b71a80'
+const KEY = '3f6081397bdd48416446f4f8c2b71a80' // gitleaks:allow (clé publique par protocole)
 const HOST = 'www.codedeparrainage.com'
 const dry = process.argv.includes('--dry')
 
