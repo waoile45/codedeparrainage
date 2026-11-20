@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase";
 import type { ReactNode } from "react";
 import { Bolt, Chat, Check, Crown, Cross, Flame, Gift, Handshake, Lock, Medal, Pencil, Sleep, Stamp, Star, ThumbDown, ThumbUp, Ticket, Trophy, TrendUp, Warning, Clock } from "@/components/Pictos";
 import ShareCode from "@/components/ShareCode";
+import Messagerie from "./Messagerie";
 
 type NavSection = "profil" | "annonces" | "messages" | "badges" | "quetes" | "credits" | "parametres" | "avis";
 
@@ -75,7 +76,7 @@ function XPBar({ xp, xpNext, mini=false }: { xp:number; xpNext:number; mini?:boo
   const [w, setW] = useState(0);
   useEffect(() => { const t = setTimeout(() => setW(pct), 350); return () => clearTimeout(t); }, [pct]);
   return (
-    <div style={{ height:mini?4:6, background:"rgba(255,255,255,.07)", borderRadius:100, overflow:"hidden" }}>
+    <div style={{ height:mini?4:6, background:"rgba(250,248,243,.07)", borderRadius:100, overflow:"hidden" }}>
       <div style={{ height:"100%", width:`${w}%`, background:"var(--accent)", borderRadius:100, transition:"width 1.1s cubic-bezier(.4,0,.2,1)" }} />
     </div>
   );
@@ -180,8 +181,8 @@ function AvatarUpload({ letter, avatarUrl, size=72, onUpload }: { letter:string;
       {/* ── Crop Modal ── */}
       {cropSrc && (
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.82)", zIndex:9999, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:16 }}>
-          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1rem", color:"#fff", marginBottom:4 }}>Recadrer la photo</p>
-          <p style={{ fontSize:".78rem", color:"rgba(255,255,255,.4)", marginBottom:8 }}>Glisse pour repositionner · Molette pour zoomer</p>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1rem", color:"var(--text-strong)", marginBottom:4 }}>Recadrer la photo</p>
+          <p style={{ fontSize:".78rem", color:"var(--text-dim)", marginBottom:8 }}>Glisse pour repositionner · Molette pour zoomer</p>
           <div
             style={{ width:CROP_SIZE, height:CROP_SIZE, borderRadius:"50%", overflow:"hidden", cursor:dragging?"grabbing":"grab", userSelect:"none", border:"3px solid rgba(255,212,59,.6)" }}
             onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
@@ -194,19 +195,18 @@ function AvatarUpload({ letter, avatarUrl, size=72, onUpload }: { letter:string;
           </div>
           <div style={{ display:"flex", gap:10 }}>
             <button onClick={confirmCrop} style={{ background:"var(--accent)", color:"var(--accent-ink)", border:"none", borderRadius:12, padding:".65rem 1.5rem", fontWeight:700, fontSize:".9rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>Valider</button>
-            <button onClick={() => setCropSrc(null)} style={{ background:"rgba(255,255,255,.08)", color:"rgba(255,255,255,.5)", border:"1px solid rgba(255,255,255,.12)", borderRadius:12, padding:".65rem 1.25rem", fontWeight:600, fontSize:".9rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>Annuler</button>
+            <button onClick={() => setCropSrc(null)} style={{ background:"rgba(250,248,243,.08)", color:"var(--text-dim)", border:"1px solid rgba(250,248,243,.12)", borderRadius:12, padding:".65rem 1.25rem", fontWeight:600, fontSize:".9rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>Annuler</button>
           </div>
         </div>
       )}
 
       <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
-        <div style={{ position:"absolute", inset:-3, borderRadius:"50%", background:"conic-gradient(var(--accent),var(--accent),#A39E93,var(--accent))", animation:"spin 5s linear infinite" }} />
-        <div style={{ position:"relative", zIndex:1, width:size, height:size, borderRadius:"50%", border:"3px solid var(--bg)", overflow:"hidden", cursor:"pointer", background:"var(--accent)", display:"flex", alignItems:"center", justifyContent:"center" }}
+        <div style={{ position:"relative", zIndex:1, width:size, height:size, borderRadius:"50%", border:"1px solid var(--border-md)", overflow:"hidden", cursor:"pointer", background:"var(--accent)", display:"flex", alignItems:"center", justifyContent:"center" }}
           onMouseEnter={()=>setHover(true)} onMouseLeave={()=>setHover(false)} onClick={()=>ref.current?.click()}>
-          {preview ? <img src={preview} alt="avatar" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:size*.38, color:"#fff" }}>{letter}</span>}
+          {preview ? <img src={preview} alt="avatar" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:size*.38, color:"var(--accent-ink)" }}>{letter}</span>}
           <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.55)", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:3, opacity:(hover||uploading)?1:0, transition:"opacity .2s" }}>
             {uploading ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-              : <><span style={{ color:"#fff" }}><I.cam /></span><span style={{ color:"rgba(255,255,255,.8)", fontSize:"0.58rem", fontWeight:600 }}>Modifier</span></>}
+              : <><span style={{ color:"var(--text-strong)" }}><I.cam /></span><span style={{ color:"var(--text)", fontSize:"0.58rem", fontWeight:600 }}>Modifier</span></>}
           </div>
         </div>
         <input ref={ref} type="file" accept="image/*" style={{ display:"none" }} onChange={handleFile} />
@@ -237,87 +237,90 @@ function EditablePseudo({ value, onSave, size="lg" }: { value:string; onSave:(v:
     <div>
       <div style={{ display:"flex", alignItems:"center", gap:6 }}>
         <input ref={iRef} value={draft} onChange={e=>{ setDraft(e.target.value); setErr(""); }} onKeyDown={e=>{ if(e.key==="Enter") confirm(); if(e.key==="Escape") cancel(); }}
-          style={{ background:"rgba(255,212,59,.15)", border:`1px solid ${err?"rgba(239,68,68,.5)":"rgba(255,212,59,.45)"}`, borderRadius:8, padding:"4px 10px", color:"#fff", fontFamily:"var(--font-display)", fontWeight:800, fontSize:fs, outline:"none", width:160 }} />
+          style={{ background:"rgba(255,212,59,.15)", border:`1px solid ${err?"rgba(239,68,68,.5)":"rgba(255,212,59,.45)"}`, borderRadius:8, padding:"4px 10px", color:"var(--text-strong)", fontFamily:"var(--font-display)", fontWeight:800, fontSize:fs, outline:"none", width:160 }} />
         <button onClick={confirm} disabled={saving} style={{ background:"rgba(34,197,94,.15)", border:"1px solid rgba(34,197,94,.3)", borderRadius:7, padding:"5px 8px", color:"#4ade80", cursor:"pointer", display:"flex" }}>
           {saving ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> : <I.check />}
         </button>
-        <button onClick={cancel} style={{ background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)", borderRadius:7, padding:"5px 8px", color:"rgba(255,255,255,.4)", cursor:"pointer", fontSize:"0.8rem", display:"inline-flex" }}><Cross size={13} /></button>
+        <button onClick={cancel} style={{ background:"rgba(250,248,243,.05)", border:"1px solid rgba(250,248,243,.1)", borderRadius:7, padding:"5px 8px", color:"var(--text-dim)", cursor:"pointer", fontSize:"0.8rem", display:"inline-flex" }}><Cross size={13} /></button>
       </div>
       {err && <p style={{ fontSize:".75rem", color:"#f87171", marginTop:4 }}>{err}</p>}
     </div>
   );
   return (
     <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-      <h2 style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:fs, color:"#fff", letterSpacing:"-.03em" }}>{value}</h2>
-      <button onClick={()=>setEditing(true)} style={{ background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)", borderRadius:7, padding:"5px 7px", color:"rgba(255,255,255,.35)", cursor:"pointer", display:"flex" }}><I.edit /></button>
+      <h2 style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:fs, color:"var(--text-strong)", letterSpacing:"-.03em" }}>{value}</h2>
+      <button onClick={()=>setEditing(true)} aria-label="Modifier le pseudo" className="pf-edit" style={{ alignItems:"center", justifyContent:"center", background:"rgba(250,248,243,.05)", border:"1px solid rgba(250,248,243,.1)", borderRadius:7, padding:0, color:"var(--text-faint)", cursor:"pointer", display:"flex" }}><I.edit /></button>
     </div>
   );
 }
 
-// ── Sidebar mini ───────────────────────────────────────────────────────────────
-function SidebarMini({ user }: { user: UserProfile | null }) {
-  if (!user) return null;
-  const { xpNext } = getXpInfo(user.xp);
+// ── Menu du profil ─────────────────────────────────────────────────────────────
+function SidebarId({ user }: { user: UserProfile | null }) {
+  if (!user) return <div className="pf-id pf-id-skel" aria-hidden="true" />;
+  const { xpNext, xpNextLabel } = getXpInfo(user.xp);
   return (
-    <div style={{ padding:"1rem", background:"rgba(255,212,59,.08)", border:"1px solid rgba(255,212,59,.18)", borderRadius:16, display:"flex", flexDirection:"column", gap:"0.75rem" }}>
-      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-        <div style={{ position:"relative", width:38, height:38, flexShrink:0 }}>
-          <div style={{ position:"absolute", inset:-2, borderRadius:"50%", background:"conic-gradient(var(--accent),var(--accent),var(--accent))", animation:"spin 5s linear infinite" }} />
-          <div style={{ position:"relative", width:38, height:38, borderRadius:"50%", background:"var(--accent)", border:"2px solid var(--bg)", display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden" }}>
-            {user.avatar_url ? <img src={user.avatar_url} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"0.95rem", color:"#fff" }}>{user.pseudo[0]?.toUpperCase()}</span>}
-          </div>
-        </div>
-        <div style={{ flex:1, minWidth:0 }}>
-          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"0.9rem", color:"#fff", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{user.pseudo}</p>
-          <div style={{ display:"flex", alignItems:"center", gap:5, marginTop:1 }}>
-            <span style={{ fontSize:"0.65rem", fontWeight:700, background:"rgba(255,212,59,.25)", color:"var(--accent-text)", padding:"1px 7px", borderRadius:100, border:"1px solid rgba(255,212,59,.3)" }}>{user.level}</span>
-            <span style={{ fontSize:"0.68rem", color:"rgba(255,255,255,.3)" }}>{user.xp} XP</span>
-          </div>
+    <div className="pf-id">
+      <div className="pf-id-top">
+        <span className="pf-id-av">
+          {/* eslint-disable-next-line @next/next/no-img-element -- vignette 40 px déjà en WebP */}
+          {user.avatar_url ? <img src={user.avatar_url} alt="" width={40} height={40} /> : user.pseudo[0]?.toUpperCase()}
+        </span>
+        <div className="pf-id-txt">
+          <p className="pf-id-name">{user.pseudo}</p>
+          <p className="pf-id-lvl">{user.level} · {user.xp} XP</p>
         </div>
       </div>
       <XPBar xp={user.xp} xpNext={xpNext} mini />
+      {xpNextLabel && <p className="pf-id-next">Encore {Math.max(xpNext - user.xp, 0)} XP avant {xpNextLabel}</p>}
     </div>
   );
 }
 
-// ── Sidebar ────────────────────────────────────────────────────────────────────
-const NAV_GROUPS = [
-  { label:"Mon compte",   items:[{key:"profil" as NavSection, label:"Mon profil", icon:<I.user/>},{key:"annonces" as NavSection, label:"Mes annonces", icon:<I.list/>},{key:"messages" as NavSection, label:"Messages", icon:<I.msg/>}] },
-  { label:"Progression",  items:[{key:"badges" as NavSection, label:"Badges", icon:<I.badge/>},{key:"quetes" as NavSection, label:"Quêtes", icon:<I.target/>},{key:"avis" as NavSection, label:"Avis", icon:<I.star/>}] },
-  { label:"Monétisation", items:[{key:"credits" as NavSection, label:"Crédits & Boosts", icon:<I.bolt/>},{key:"parametres" as NavSection, label:"Paramètres", icon:<I.gear/>}] },
+const NAV_GROUPS: { key: NavSection; label: string; icon: ReactNode }[][] = [
+  [
+    { key: "profil",   label: "Mon profil",   icon: <I.user /> },
+    { key: "annonces", label: "Mes annonces", icon: <I.list /> },
+    { key: "messages", label: "Messages",     icon: <I.msg /> },
+  ],
+  [
+    { key: "badges", label: "Badges", icon: <I.badge /> },
+    { key: "quetes", label: "Quêtes", icon: <I.target /> },
+    { key: "avis",   label: "Avis",   icon: <I.star /> },
+  ],
+  [
+    { key: "credits",    label: "Crédits et boosts", icon: <I.bolt /> },
+    { key: "parametres", label: "Paramètres",        icon: <I.gear /> },
+  ],
 ];
 
-function Sidebar({ active, setActive, user }: { active:NavSection; setActive:(s:NavSection)=>void; user:UserProfile|null }) {
+function Sidebar({ active, setActive, user, unread }: { active:NavSection; setActive:(s:NavSection)=>void; user:UserProfile|null; unread:number }) {
+  // Mobile : le menu devient une bande d'onglets qui défile ; on garde
+  // l'onglet actif visible (arrivée par ?tab=messages, par exemple).
+  useEffect(() => {
+    if (!window.matchMedia("(max-width: 768px)").matches) return;
+    document.querySelector(".pf-item.on")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [active]);
   return (
     <aside className="profil-sidebar">
-      <div style={{ display:"flex", flexDirection:"column", gap:"1.5rem" }}>
-        {NAV_GROUPS.map(group => (
-          <div key={group.label}>
-            <p style={{ fontSize:"0.63rem", fontWeight:700, letterSpacing:"0.1em", color:"rgba(255,255,255,.2)", marginBottom:"0.5rem", paddingLeft:"0.875rem" }}>{group.label}</p>
-            <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
-              {group.items.map(item => {
-                const on = active===item.key;
-                return (
-                  <button key={item.key} onClick={()=>setActive(item.key)}
-                    style={{ display:"flex", alignItems:"center", gap:9, padding:"0.55rem 0.875rem", borderRadius:11, background:on?"rgba(255,212,59,.15)":"transparent", border:on?"1px solid rgba(255,212,59,.28)":"1px solid transparent", color:on?"#fff":"rgba(255,255,255,.42)", fontSize:"0.855rem", fontWeight:on?600:500, cursor:"pointer", transition:"all .18s", fontFamily:"var(--font-text)", textAlign:"left", width:"100%" }}
-                    onMouseEnter={e=>{ if(!on){(e.currentTarget as HTMLElement).style.color="rgba(255,255,255,.75)";(e.currentTarget as HTMLElement).style.background="rgba(255,255,255,.04)";} }}
-                    onMouseLeave={e=>{ if(!on){(e.currentTarget as HTMLElement).style.color="rgba(255,255,255,.42)";(e.currentTarget as HTMLElement).style.background="transparent";} }}
-                  >
-                    <span style={{ opacity:on?1:.6, flexShrink:0 }}>{item.icon}</span>
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
+      <SidebarId user={user} />
+      <nav className="pf-nav" aria-label="Sections du profil">
+        {NAV_GROUPS.map((group, gi) => (
+          <div className="pf-group" key={gi}>
+            {group.map(item => {
+              const on = active === item.key;
+              return (
+                <button key={item.key} type="button" className={`pf-item${on ? " on" : ""}`}
+                  aria-current={on ? "page" : undefined} onClick={() => setActive(item.key)}>
+                  <span className="pf-item-ico">{item.icon}</span>
+                  <span className="pf-item-label">{item.label}</span>
+                  {item.key === "messages" && unread > 0 && <span className="pf-badge" aria-label={`${unread} non lus`}>{unread}</span>}
+                </button>
+              );
+            })}
           </div>
         ))}
-      </div>
-      <a href="/publier" style={{ textDecoration:"none" }}>
-        <button style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"0.6rem 0.875rem", background:"rgba(255,212,59,.1)", border:"1px dashed rgba(255,212,59,.35)", borderRadius:11, color:"var(--accent-text)", fontSize:"0.855rem", fontWeight:600, cursor:"pointer", fontFamily:"var(--font-text)" }}>
-          <I.plus />Publier un code
-        </button>
-      </a>
-      <SidebarMini user={user} />
+      </nav>
+      <a href="/publier" className="pf-publish"><I.plus />Publier un code</a>
     </aside>
   );
 }
@@ -325,79 +328,50 @@ function Sidebar({ active, setActive, user }: { active:NavSection; setActive:(s:
 // ── Section Profil ─────────────────────────────────────────────────────────────
 function SectionProfil({ user, annonces, copyStats, onPseudoSave, onAvatarUpload }: { user:UserProfile; annonces:Annonce[]; copyStats:CopyStats|null; onPseudoSave:(v:string)=>Promise<string|null>; onAvatarUpload:(url:string)=>void }) {
   const { xpNext, xpNextLabel } = getXpInfo(user.xp);
+  const stats = [
+    {
+      label: "Codes publiés", value: annonces.length,
+      sub: annonces.length === 0 ? "Aucun pour l'instant" : `${annonces.length} en ligne`,
+      href: "/publier", cta: "Publier un code",
+    },
+    {
+      label: "Copies cette semaine", value: copyStats ? copyStats.last7d : "…",
+      sub: copyStats ? `${copyStats.total} au total` : "Chargement…",
+      href: "/profil?tab=annonces", cta: "Détail par code",
+    },
+    {
+      label: "Série en cours", value: user.streak_days,
+      sub: user.streak_days > 1 ? "jours consécutifs" : "jour",
+      href: "/classement", cta: "Voir le classement",
+    },
+  ];
   return (
     <div className="sc">
-      <div style={{ position:"relative", overflow:"hidden", background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:20, padding:"1.5rem" }}>
-        <div style={{ position:"absolute", top:-50, left:-50, width:200, height:200, background:"none", pointerEvents:"none" }} />
-        <div style={{ display:"flex", alignItems:"center", gap:"1.25rem", flexWrap:"wrap" }}>
-          <AvatarUpload letter={user.pseudo[0]?.toUpperCase()??"?"} avatarUrl={user.avatar_url} size={72} onUpload={onAvatarUpload} />
-          <div style={{ flex:1 }}>
-            <EditablePseudo value={user.pseudo} onSave={onPseudoSave} />
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:6, flexWrap:"wrap" }}>
-              <span style={{ fontSize:"0.72rem", fontWeight:700, background:"rgba(255,212,59,.2)", color:"var(--accent-text)", padding:"4px 10px", borderRadius:100, border:"1px solid rgba(255,212,59,.35)", display:"inline-flex", alignItems:"center" }}>{user.level}</span>
-              <span style={{ fontSize:"0.8rem", color:"var(--accent-text)", fontWeight:700 }}>{user.xp} XP</span>
-              <span style={{ color:"rgba(255,255,255,.2)" }}>·</span>
-              <span style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>{xpNextLabel} à {xpNext} XP</span>
-              <span style={{ color:"rgba(255,255,255,.2)" }}>·</span>
-              <span style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>Membre depuis {formatDate(user.created_at)}</span>
+      <div className="pf-head">
+        <AvatarUpload letter={user.pseudo[0]?.toUpperCase()??"?"} avatarUrl={user.avatar_url} size={72} onUpload={onAvatarUpload} />
+        <div className="pf-head-txt">
+          <EditablePseudo value={user.pseudo} onSave={onPseudoSave} />
+          <p className="pf-head-meta">{user.level} · membre depuis {formatDate(user.created_at)}</p>
+          <div className="pf-xp">
+            <div className="pf-xp-row">
+              <span className="pf-xp-val">{user.xp} XP</span>
+              {xpNextLabel && <span>encore {Math.max(xpNext - user.xp, 0)} XP avant {xpNextLabel}</span>}
             </div>
-            <div style={{ marginTop:"0.875rem" }}>
-              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:5, fontSize:"0.72rem", color:"rgba(255,255,255,.3)" }}>
-                <span>{user.xp} XP</span><span>{xpNextLabel} — {xpNext} XP</span>
-              </div>
-              <XPBar xp={user.xp} xpNext={xpNext} />
-            </div>
-          </div>
-          <div style={{ textAlign:"right", flexShrink:0 }}>
-            <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"2.5rem", color:"#fff", lineHeight:1 }}>{user.xp}</p>
-            <p style={{ color:"rgba(255,255,255,.3)", fontSize:"0.72rem", marginTop:2 }}>XP total</p>
+            <XPBar xp={user.xp} xpNext={xpNext} />
           </div>
         </div>
       </div>
 
-      <div className="g3">
-        <div className="action-card">
-          <div style={{ position:"absolute", inset:0, background:"none", pointerEvents:"none", borderRadius:"inherit" }} />
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"var(--border-md)" }} />
-          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.4)" }}><I.list /></div><span className="action-label">Annonces publiées</span></div>
-          <p className="action-value" style={{ color:"var(--accent-text)", position:"relative", zIndex:1 }}>{annonces.length}</p>
-          <p className="action-sub" style={{ position:"relative", zIndex:1 }}>{annonces.length === 0 ? "Publie ton premier code !" : `${annonces.length} code${annonces.length>1?"s":""} actif${annonces.length>1?"s":""}`}</p>
-          <a href="/publier" className="action-btn" style={{ position:"relative", zIndex:1 }}>Nouvelle annonce <I.arrow /></a>
-        </div>
-        <div className="action-card action-card-boost">
-          <div style={{ position:"absolute", inset:0, background:"none", pointerEvents:"none", borderRadius:"inherit" }} />
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"var(--border-md)" }} />
-          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.4)" }}><I.bolt /></div><span className="action-label">Streak</span></div>
-          <p className="action-value" style={{ color:"var(--accent-text)", position:"relative", zIndex:1 }}>{user.streak_days} <Flame size={20} /></p>
-          <p className="action-sub" style={{ position:"relative", zIndex:1 }}>jours consécutifs</p>
-          <a href="/classement" className="action-btn action-btn-boost" style={{ position:"relative", zIndex:1 }}>Voir le classement <I.arrow /></a>
-        </div>
-        <div className="action-card">
-          <div style={{ position:"absolute", inset:0, background:"none", pointerEvents:"none", borderRadius:"inherit" }} />
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"var(--border-md)" }} />
-          <div className="action-card-top" style={{ position:"relative", zIndex:1 }}><div className="action-icon-wrap" style={{ background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.4)" }}><Ticket size={18} /></div><span className="action-label">Copies cette semaine</span></div>
-          <p className="action-value tnum" style={{ color:"var(--accent-text)", position:"relative", zIndex:1 }}>{copyStats ? copyStats.last7d : "…"}</p>
-          <p className="action-sub" style={{ position:"relative", zIndex:1 }}>{copyStats ? `${copyStats.total} copie${copyStats.total > 1 ? "s" : ""} au total` : "Chargement…"}</p>
-          <a href="/profil?tab=annonces" className="action-btn" style={{ position:"relative", zIndex:1 }}>Détail par code <I.arrow /></a>
-        </div>
-      </div>
-
-      <div className="g4">
-        {[
-          { v: annonces.length,          l:"Annonces" },
-          { v: <>{user.streak_days} <Flame size={16} /></>, l:"Streak" },
-          { v: user.xp,                  l:"XP total" },
-        ].map((s,i) => (
-          <div key={i} style={{ background:"rgba(255,212,59,.05)", border:"1px solid rgba(255,212,59,.2)", borderRadius:14, padding:"0.9rem 0.75rem", display:"flex", flexDirection:"column", alignItems:"center", gap:3, textAlign:"center" }}>
-            <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.35rem", color:"#fff" }}>{s.v}</span>
-            <span style={{ color:"rgba(255,255,255,.35)", fontSize:"0.72rem" }}>{s.l}</span>
+      <dl className="pf-stats">
+        {stats.map(s => (
+          <div key={s.label} className="pf-stat">
+            <dt>{s.label}</dt>
+            <dd className="pf-stat-v">{s.value}</dd>
+            <dd className="pf-stat-sub">{s.sub}</dd>
+            <dd className="pf-stat-cta"><a href={s.href} className="pf-stat-link">{s.cta} <I.arrow /></a></dd>
           </div>
         ))}
-        <div style={{ background:"rgba(255,212,59,.05)", border:"1px solid rgba(255,212,59,.2)", borderRadius:14, padding:"0.9rem 0.75rem", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:5, textAlign:"center" }}>
-          <span style={{ fontSize:"0.75rem", fontWeight:700, background:"rgba(255,212,59,.25)", color:"var(--accent-text)", padding:"3px 10px", borderRadius:100, border:"1px solid rgba(255,212,59,.4)" }}>{user.level}</span>
-          <span style={{ color:"rgba(255,255,255,.35)", fontSize:"0.72rem" }}>Niveau</span>
-        </div>
-      </div>
+      </dl>
     </div>
   );
 }
@@ -437,7 +411,7 @@ function SectionAnnonces({ annonces, copyStats, onDelete, onEdit }: {
         <a href="/publier" className="btn-p"><I.plus />Nouvelle annonce</a>
       </div>
       {annonces.length === 0 && (
-        <div style={{ textAlign:"center", padding:"3rem", color:"rgba(255,255,255,.25)", fontSize:"0.875rem" }}>
+        <div style={{ textAlign:"center", padding:"3rem", color:"var(--text-faint)", fontSize:"0.875rem" }}>
           <div style={{ marginBottom:"0.75rem", color:"var(--text-dim)" }}><Ticket size={40} /></div>
           <p>Aucune annonce — <a href="/publier" style={{ color:"var(--accent-text)", textDecoration:"none" }}>publie ton premier code !</a></p>
         </div>
@@ -453,19 +427,19 @@ function SectionAnnonces({ annonces, copyStats, onDelete, onEdit }: {
               <div style={{ width:8, height:8, borderRadius:"50%", background:"#22c55e", flexShrink:0 }} />
               <div>
                 <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-                  <p style={{ fontWeight:700, color:"#fff", fontSize:"0.9rem" }}>{a.companies?.name ?? "Inconnu"}</p>
+                  <p style={{ fontWeight:700, color:"var(--text-strong)", fontSize:"0.9rem" }}>{a.companies?.name ?? "Inconnu"}</p>
                   {gainLabel && (
                     <span style={{ fontSize:"0.72rem", fontWeight:700, color:"#4ade80", background:"rgba(34,197,94,.12)", border:"1px solid rgba(34,197,94,.3)", borderRadius:7, padding:"2px 9px", whiteSpace:"nowrap" }}>
                       {gainLabel}
                     </span>
                   )}
                 </div>
-                <code style={{ fontFamily:"monospace", fontSize:"0.8rem", color:"rgba(255,255,255,.4)", letterSpacing:"0.06em" }}>{a.code}</code>
+                <code style={{ fontFamily:"monospace", fontSize:"0.8rem", color:"var(--text-dim)", letterSpacing:"0.06em" }}>{a.code}</code>
               </div>
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
               {a.companies?.category && <span className="cat-tag">{a.companies.category}</span>}
-              <span style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>{a.bumps_today}/5 remontées aujourd&apos;hui</span>
+              <span style={{ fontSize:"0.78rem", color:"var(--text-faint)" }}>{a.bumps_today}/5 remontées aujourd&apos;hui</span>
               <a href="/boost" className="btn-ghost-sm"><Bolt size={14} /> Booster</a>
               {editingId !== a.id && (
                 <button className="btn-ghost-sm" onClick={() => startEdit(a)}><Pencil size={14} /> Modifier</button>
@@ -504,7 +478,7 @@ function SectionAnnonces({ annonces, copyStats, onDelete, onEdit }: {
                 />
               </div>
               <div className="form-g">
-                <label className="form-l">DESCRIPTION <span style={{ color:"rgba(255,255,255,.2)", fontWeight:400 }}>optionnel</span></label>
+                <label className="form-l">DESCRIPTION <span style={{ color:"var(--text-faint)", fontWeight:400 }}>optionnel</span></label>
                 <textarea
                   className="form-i form-ta"
                   value={editDesc}
@@ -513,7 +487,7 @@ function SectionAnnonces({ annonces, copyStats, onDelete, onEdit }: {
                   placeholder="Décris ce que le filleul peut gagner..."
                   style={{ resize:"vertical", minHeight:72 }}
                 />
-                <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.25)" }}>{editDesc.length}/280</p>
+                <p style={{ fontSize:".7rem", color:"var(--text-faint)" }}>{editDesc.length}/280</p>
               </div>
               <div style={{ display:"flex", gap:8 }}>
                 <button
@@ -525,7 +499,7 @@ function SectionAnnonces({ annonces, copyStats, onDelete, onEdit }: {
                 </button>
                 <button
                   onClick={cancelEdit}
-                  style={{ background:"rgba(255,255,255,.05)", color:"rgba(255,255,255,.5)", fontWeight:600, fontSize:".82rem", padding:".5rem 1rem", borderRadius:10, border:"1px solid rgba(255,255,255,.1)", cursor:"pointer" }}
+                  style={{ background:"rgba(250,248,243,.05)", color:"var(--text-dim)", fontWeight:600, fontSize:".82rem", padding:".5rem 1rem", borderRadius:10, border:"1px solid rgba(250,248,243,.1)", cursor:"pointer" }}
                 >
                   Annuler
                 </button>
@@ -555,11 +529,11 @@ function SectionBadges({ xp, annoncesCount, isTop3 }: { xp:number; annoncesCount
       <div className="sh"><div><h2 className="st">Badges</h2><p className="ss">{badges.filter(b=>b.unlocked).length}/{badges.length} débloqués</p></div></div>
       <div className="g3">
         {badges.map(b => (
-          <div key={b.id} style={{ position:"relative", background:b.unlocked?"rgba(255,212,59,.07)":"rgba(255,255,255,.03)", border:`1px solid ${b.unlocked?"rgba(255,212,59,.3)":"rgba(255,255,255,.07)"}`, borderRadius:16, padding:"1.4rem 1rem", textAlign:"center", opacity:b.unlocked?1:.42 }}>
+          <div key={b.id} style={{ position:"relative", background:b.unlocked?"rgba(255,212,59,.07)":"rgba(250,248,243,.03)", border:`1px solid ${b.unlocked?"rgba(255,212,59,.3)":"rgba(250,248,243,.07)"}`, borderRadius:16, padding:"1.4rem 1rem", textAlign:"center", opacity:b.unlocked?1:.42 }}>
             {!b.unlocked && <div style={{ position:"absolute", top:10, right:10, color:"var(--text-dim)" }}><Lock size={15} /></div>}
             <div style={{ marginBottom:"0.5rem", color: b.unlocked ? "var(--accent-text)" : "var(--text-dim)" }}>{b.icon}</div>
-            <p style={{ fontWeight:700, fontSize:"0.85rem", color:"#fff", marginBottom:3 }}>{b.label}</p>
-            <p style={{ fontSize:"0.72rem", color:"rgba(255,255,255,.35)" }}>{b.desc}</p>
+            <p style={{ fontWeight:700, fontSize:"0.85rem", color:"var(--text-strong)", marginBottom:3 }}>{b.label}</p>
+            <p style={{ fontSize:"0.72rem", color:"var(--text-faint)" }}>{b.desc}</p>
           </div>
         ))}
       </div>
@@ -581,13 +555,13 @@ function SectionQuetes({ user, annonces, hasReview }: { user:UserProfile; annonc
       <div className="sh"><div><h2 className="st">Quêtes</h2><p className="ss">Complète des quêtes pour gagner de l&apos;XP</p></div></div>
       {quetes.map((q,i) => (
         <div key={i} className={`row-card ${q.done?"done":""}`} style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <div style={{ width:22, height:22, borderRadius:"50%", border:`1.5px solid ${q.done?"rgba(34,197,94,.4)":"rgba(255,255,255,.15)"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.7rem", color:"#4ade80", flexShrink:0, background:q.done?"rgba(34,197,94,.1)":"none" }}>{q.done ? <Check size={13} /> : null}</div>
+          <div style={{ width:22, height:22, borderRadius:"50%", border:`1.5px solid ${q.done?"rgba(34,197,94,.4)":"rgba(250,248,243,.15)"}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.7rem", color:"#4ade80", flexShrink:0, background:q.done?"rgba(34,197,94,.1)":"none" }}>{q.done ? <Check size={13} /> : null}</div>
           <div style={{ flex:1 }}>
-            <p style={{ fontSize:"0.875rem", color:"rgba(255,255,255,.8)", marginBottom:q.done?0:5 }}>{q.label}</p>
+            <p style={{ fontSize:"0.875rem", color:"var(--text)", marginBottom:q.done?0:5 }}>{q.label}</p>
             {!q.done && (
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <div style={{ flex:1, height:4, background:"rgba(255,255,255,.07)", borderRadius:100, overflow:"hidden" }}><div style={{ height:"100%", width:`${Math.min((q.progress/q.total)*100,100)}%`, background:"var(--accent)", borderRadius:100 }} /></div>
-                <span style={{ fontSize:"0.7rem", color:"rgba(255,255,255,.3)", whiteSpace:"nowrap" }}>{Math.min(q.progress,q.total)}/{q.total}</span>
+                <div style={{ flex:1, height:4, background:"rgba(250,248,243,.07)", borderRadius:100, overflow:"hidden" }}><div style={{ height:"100%", width:`${Math.min((q.progress/q.total)*100,100)}%`, background:"var(--accent)", borderRadius:100 }} /></div>
+                <span style={{ fontSize:"0.7rem", color:"var(--text-faint)", whiteSpace:"nowrap" }}>{Math.min(q.progress,q.total)}/{q.total}</span>
               </div>
             )}
           </div>
@@ -597,7 +571,7 @@ function SectionQuetes({ user, annonces, hasReview }: { user:UserProfile; annonc
                 Faire
               </a>
             )}
-            <span style={{ fontSize:"0.82rem", fontWeight:700, color:q.done?"#4ade80":"rgba(255,255,255,.3)", whiteSpace:"nowrap", fontFamily:"var(--font-display)" }}>+{q.xp} XP</span>
+            <span style={{ fontSize:"0.82rem", fontWeight:700, color:q.done?"#4ade80":"var(--text-faint)", whiteSpace:"nowrap", fontFamily:"var(--font-display)" }}>+{q.xp} XP</span>
           </div>
         </div>
       ))}
@@ -629,16 +603,16 @@ function SectionCredits() {
       <div className="g2">
         <div style={{ position:"relative", overflow:"hidden", background:"rgba(255,212,59,.08)", border:"1px solid rgba(255,212,59,.25)", borderRadius:18, padding:"1.75rem" }}>
           <div style={{ position:"relative", zIndex:1 }}>
-            <p style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.4)", marginBottom:4 }}>Solde actuel</p>
+            <p style={{ fontSize:"0.78rem", color:"var(--text-dim)", marginBottom:4 }}>Solde actuel</p>
             <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"2.75rem", color:"var(--accent-text)", lineHeight:1, marginBottom:4 }}>{balance === null ? "…" : balance.toFixed(2).replace(".", ",")}</p>
-            <p style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.3)" }}>crédits disponibles</p>
+            <p style={{ fontSize:"0.78rem", color:"var(--text-faint)" }}>crédits disponibles</p>
           </div>
           <div style={{ position:"absolute", right:"1.5rem", bottom:"1rem", color:"var(--accent-text)", opacity:.45 }}><Bolt size={56} /></div>
         </div>
-        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"1.5rem", display:"flex", flexDirection:"column", gap:"0.875rem" }}>
-          <p style={{ fontSize:"0.8rem", fontWeight:600, color:"rgba(255,255,255,.5)" }}>Pourquoi booster ?</p>
+        <div style={{ background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:18, padding:"1.5rem", display:"flex", flexDirection:"column", gap:"0.875rem" }}>
+          <p style={{ fontSize:"0.8rem", fontWeight:600, color:"var(--text-dim)" }}>Pourquoi booster ?</p>
           {[{ icon:<TrendUp size={16} />, text:<>En tête de l&apos;annuaire</> },{ icon:<Ticket size={16} />, text:<>Badge « Annonce boostée »</> },{ icon:<Bolt size={16} />, text:<>Actif tout de suite</>}].map((item,i) => (
-            <div key={i} style={{ display:"flex", alignItems:"center", gap:8 }}><span>{item.icon}</span><p style={{ fontSize:"0.78rem", color:"rgba(255,255,255,.55)" }}>{item.text}</p></div>
+            <div key={i} style={{ display:"flex", alignItems:"center", gap:8 }}><span>{item.icon}</span><p style={{ fontSize:"0.78rem", color:"var(--text-dim)" }}>{item.text}</p></div>
           ))}
         </div>
       </div>
@@ -654,13 +628,13 @@ function SectionParametres({ user, onPseudoSave, onAvatarUpload, onBioSave }: { 
   return (
     <div className="sc">
       <div className="sh"><div><h2 className="st">Paramètres du compte</h2><p className="ss">Modifie tes informations personnelles</p></div></div>
-      <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:16, padding:"1.25rem 1.5rem" }}>
-        <p style={{ fontSize:"0.7rem", fontWeight:700, letterSpacing:"0.08em", color:"rgba(255,255,255,.3)", marginBottom:"1rem" }}>Photo de profil & nom d&apos;affichage</p>
+      <div style={{ background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:16, padding:"1.25rem 1.5rem" }}>
+        <p style={{ fontSize:"0.7rem", fontWeight:700, letterSpacing:"0.08em", color:"var(--text-faint)", marginBottom:"1rem" }}>Photo de profil & nom d&apos;affichage</p>
         <div style={{ display:"flex", alignItems:"center", gap:"1.5rem" }}>
           <AvatarUpload letter={user.pseudo[0]?.toUpperCase()??"?"} avatarUrl={user.avatar_url} size={60} onUpload={onAvatarUpload} />
           <div style={{ flex:1 }}>
             <EditablePseudo value={user.pseudo} onSave={onPseudoSave} size="sm" />
-            <p style={{ fontSize:"0.7rem", color:"rgba(255,255,255,.25)", marginTop:4 }}>Clique sur le crayon pour modifier ton pseudo, et sur l&apos;avatar pour changer la photo.</p>
+            <p style={{ fontSize:"0.7rem", color:"var(--text-faint)", marginTop:4 }}>Clique sur le crayon pour modifier ton pseudo, et sur l&apos;avatar pour changer la photo.</p>
           </div>
         </div>
       </div>
@@ -671,159 +645,21 @@ function SectionParametres({ user, onPseudoSave, onAvatarUpload, onBioSave }: { 
         <p className="form-h">{bio.length}/300 caractères</p>
       </div>
       <button className={`btn-p${saved?" btn-saved":""}`} onClick={save}>{saved?"Sauvegardé":"Enregistrer"}</button>
-      <div style={{ paddingTop:"1.5rem", borderTop:"1px solid rgba(255,255,255,.06)", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-        <p style={{ fontSize:"0.82rem", color:"rgba(255,255,255,.3)" }}>Zone dangereuse</p>
+      <div style={{ paddingTop:"1.5rem", borderTop:"1px solid rgba(250,248,243,.06)", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <p style={{ fontSize:"0.82rem", color:"var(--text-faint)" }}>Zone dangereuse</p>
         <button className="btn-danger">Supprimer mon compte</button>
       </div>
     </div>
   );
 }
 
-interface Message {
-  id: string;
-  content: string;
-  created_at: string;
-  read: boolean;
-  sender_id: string;
-  receiver_id: string;
-  announcement_id?: string | null;
-  sender?: { pseudo: string };
-  receiver?: { pseudo: string };
-  announcements?: { companies?: { name: string } } | null;
-}
-
-function SectionMessages() {
-  const supabase = createClient();
-  const [messages, setMessages]   = useState<Message[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [userId, setUserId]       = useState<string | null>(null);
-  const [reply, setReply]         = useState<Record<string, string>>({});
-  const [sending, setSending]     = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      setUserId(user.id);
-      const { data } = await supabase
-        .from("messages")
-        .select("*, sender:users!sender_id(pseudo), receiver:users!receiver_id(pseudo), announcements(companies(name))")
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-        .order("created_at", { ascending: false });
-      setMessages((data ?? []) as Message[]);
-      await supabase.from("messages").update({ read: true }).eq("receiver_id", user.id).eq("read", false);
-      setLoading(false);
-    })();
-  }, []);
-
-  async function handleReply(receiverId: string, announcementId: string | null, key: string) {
-    const content = reply[key]?.trim();
-    if (!content) return;
-    setSending(key);
-    await fetch("/api/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ receiverId, announcementId, content }),
-    });
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data } = await supabase
-        .from("messages")
-        .select("*, sender:users!sender_id(pseudo), receiver:users!receiver_id(pseudo), announcements(companies(name))")
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-        .order("created_at", { ascending: false });
-      setMessages((data ?? []) as Message[]);
-    }
-    setReply(p => ({ ...p, [key]: "" }));
-    setSending(null);
-  }
-
-  if (loading) return <div style={{ padding: "3rem", textAlign: "center", color: "rgba(255,255,255,.25)" }}>Chargement...</div>;
-
-  if (messages.length === 0) return (
-    <div style={{ textAlign: "center", padding: "3rem", color: "rgba(255,255,255,.25)", fontSize: "0.875rem" }}>
-      <div style={{ marginBottom: "0.75rem", color: "var(--text-dim)" }}><Chat size={40} /></div>
-      <p>Aucun message pour l&apos;instant</p>
-      <p style={{ marginTop: 8, fontSize: "0.78rem" }}>Tu peux contacter un parrain depuis la page <a href="/codes" style={{ color: "var(--accent-text)" }}>Codes</a></p>
-    </div>
-  );
-
-  const grouped: Record<string, Message[]> = {};
-  messages.forEach(m => {
-    const other = m.sender_id === userId ? m.receiver_id : m.sender_id;
-    if (!grouped[other]) grouped[other] = [];
-    grouped[other].push(m);
-  });
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {Object.entries(grouped).map(([otherId, msgs]) => {
-        const other = msgs[0].sender_id === userId ? msgs[0].receiver : msgs[0].sender;
-        const otherPseudo = other?.pseudo ?? "Utilisateur";
-        const company = msgs[0].announcements?.companies?.name;
-        const hasUnread = msgs.some(m => !m.read && m.receiver_id === userId);
-        const replyKey = otherId;
-        return (
-          <div key={otherId} style={{ background: "rgba(255,255,255,.03)", border: `1px solid ${hasUnread ? "rgba(255,212,59,.4)" : "rgba(255,255,255,.07)"}`, borderRadius: 16, overflow: "hidden" }}>
-            <div style={{ padding: "0.875rem 1rem", borderBottom: "1px solid rgba(255,255,255,.05)", display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,212,59,.2)", border: "1px solid rgba(255,212,59,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.85rem", color: "var(--accent-text)", flexShrink: 0 }}>
-                {otherPseudo[0]?.toUpperCase()}
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
-                  {otherPseudo}
-                  {hasUnread && <span style={{ width: 7, height: 7, background: "#ef4444", borderRadius: "50%", display: "inline-block" }} />}
-                </div>
-                {company && <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,.3)", marginTop: 1 }}>{company}</div>}
-              </div>
-            </div>
-            <div style={{ padding: "0.75rem 1rem", display: "flex", flexDirection: "column", gap: 8, maxHeight: 280, overflowY: "auto" }}>
-              {[...msgs].reverse().map(m => {
-                const isMine = m.sender_id === userId;
-                return (
-                  <div key={m.id} style={{ display: "flex", justifyContent: isMine ? "flex-end" : "flex-start" }}>
-                    <div style={{ maxWidth: "75%", background: isMine ? "rgba(255,212,59,.2)" : "rgba(255,255,255,.05)", border: `1px solid ${isMine ? "rgba(255,212,59,.3)" : "rgba(255,255,255,.08)"}`, borderRadius: isMine ? "12px 12px 3px 12px" : "12px 12px 12px 3px", padding: "0.5rem 0.875rem" }}>
-                      <p style={{ fontSize: "0.875rem", color: "#e2e8f0", margin: 0, lineHeight: 1.5 }}>{m.content}</p>
-                      <p style={{ fontSize: "0.65rem", color: "rgba(255,255,255,.25)", margin: "4px 0 0", textAlign: isMine ? "right" : "left" }}>
-                        {new Date(m.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{ padding: "0.75rem 1rem", borderTop: "1px solid rgba(255,255,255,.05)", display: "flex", gap: 8 }}>
-              <input
-                value={reply[replyKey] ?? ""}
-                onChange={e => setReply(p => ({ ...p, [replyKey]: e.target.value }))}
-                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleReply(otherId, msgs[0].announcement_id ?? null, replyKey); } }}
-                placeholder="Répondre..."
-                style={{ flex: 1, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, padding: "0.5rem 0.875rem", color: "#fff", fontSize: "0.875rem", outline: "none", fontFamily: "inherit" }}
-              />
-              <button
-                onClick={() => handleReply(otherId, msgs[0].announcement_id ?? null, replyKey)}
-                disabled={sending === replyKey}
-                style={{ background: "var(--accent)", border: "none", borderRadius: 10, padding: "0.5rem 1rem", color: "var(--accent-ink)", fontWeight: 600, fontSize: "0.82rem", cursor: "pointer", fontFamily: "inherit", opacity: sending === replyKey ? 0.6 : 1 }}
-              >
-                {sending === replyKey ? "..." : "Envoyer"}
-              </button>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 function Skeleton() {
   return (
-    <div style={{ display:"flex", flexDirection:"column", gap:"1.25rem" }}>
-      {[1,2,3].map(i => (
-        <div key={i} style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:20, padding:"1.5rem" }}>
-          <div style={{ height:16, width:"40%", background:"rgba(255,255,255,.06)", borderRadius:8, marginBottom:12, animation:"shimmer 1.5s ease-in-out infinite" }} />
-          <div style={{ height:12, width:"60%", background:"rgba(255,255,255,.04)", borderRadius:8, animation:"shimmer 1.5s ease-in-out infinite" }} />
-        </div>
-      ))}
+    <div className="pf-skel" aria-busy="true" aria-label="Chargement du profil">
+      <i style={{ width: "36%", height: 24 }} />
+      <i style={{ width: "54%", height: 12 }} />
+      <div className="pf-skel-card" />
+      <div className="pf-skel-card short" />
     </div>
   );
 }
@@ -930,40 +766,40 @@ function SectionAvisRecus({ userId }: { userId:string }) {
       </div>
 
       {loading ? (
-        <div style={{ textAlign:"center", padding:"2rem", color:"rgba(255,255,255,.25)", fontSize:".875rem" }}>Chargement…</div>
+        <div style={{ textAlign:"center", padding:"2rem", color:"var(--text-faint)", fontSize:".875rem" }}>Chargement…</div>
       ) : reviews.length === 0 ? (
-        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2.5rem", textAlign:"center" }}>
+        <div style={{ background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:18, padding:"2.5rem", textAlign:"center" }}>
           <div style={{ marginBottom:".75rem", color:"var(--text-dim)" }}><Star size={36} /></div>
-          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, color:"rgba(255,255,255,.5)", marginBottom:".5rem" }}>Pas encore d'avis</p>
-          <p style={{ fontSize:".825rem", color:"rgba(255,255,255,.25)" }}>Tes avis apparaîtront ici quand des utilisateurs noteront tes annonces.</p>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, color:"var(--text-dim)", marginBottom:".5rem" }}>Pas encore d'avis</p>
+          <p style={{ fontSize:".825rem", color:"var(--text-faint)" }}>Tes avis apparaîtront ici quand des utilisateurs noteront tes annonces.</p>
         </div>
       ) : (
         <>
           {/* Résumé */}
           <div style={{ display:"flex", gap:12, marginBottom:"1.25rem", flexWrap:"wrap" }}>
-            <div style={{ flex:1, minWidth:120, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
-              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"var(--font-display)", color:"#fff", lineHeight:1 }}>
+            <div style={{ flex:1, minWidth:120, background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
+              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"var(--font-display)", color:"var(--text-strong)", lineHeight:1 }}>
                 {avgRating !== null ? avgRating.toFixed(1) : "—"}
               </p>
               {avgRating !== null && <div style={{ display:"flex", justifyContent:"center", margin:"4px 0" }}><ReviewStars value={Math.round(avgRating)} /></div>}
-              <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.3)", marginTop:2 }}>Note moyenne</p>
+              <p style={{ fontSize:".72rem", color:"var(--text-faint)", marginTop:2 }}>Note moyenne</p>
             </div>
-            <div style={{ flex:1, minWidth:120, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
-              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"var(--font-display)", color:"#fff", lineHeight:1 }}>{reviews.length}</p>
-              <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.3)", marginTop:6 }}>Avis reçu{reviews.length>1?"s":""}</p>
+            <div style={{ flex:1, minWidth:120, background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
+              <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"var(--font-display)", color:"var(--text-strong)", lineHeight:1 }}>{reviews.length}</p>
+              <p style={{ fontSize:".72rem", color:"var(--text-faint)", marginTop:6 }}>Avis reçu{reviews.length>1?"s":""}</p>
             </div>
-            <div style={{ flex:1, minWidth:120, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
+            <div style={{ flex:1, minWidth:120, background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:14, padding:"1rem", textAlign:"center" }}>
               <p style={{ fontSize:"1.75rem", fontWeight:800, fontFamily:"var(--font-display)", color:"#4ade80", lineHeight:1 }}>
                 {reviews.filter(r => r.tags.some(t => TAGS_INFO[t]?.positive)).length}
               </p>
-              <p style={{ fontSize:".72rem", color:"rgba(255,255,255,.3)", marginTop:6 }}>Positif{reviews.filter(r=>r.tags.some(t=>TAGS_INFO[t]?.positive)).length>1?"s":""}</p>
+              <p style={{ fontSize:".72rem", color:"var(--text-faint)", marginTop:6 }}>Positif{reviews.filter(r=>r.tags.some(t=>TAGS_INFO[t]?.positive)).length>1?"s":""}</p>
             </div>
           </div>
 
           {/* Liste */}
           <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
             {reviews.map(r => (
-              <div key={r.id} style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:14, padding:"1rem 1.25rem" }}>
+              <div key={r.id} style={{ background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:14, padding:"1rem 1.25rem" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:".625rem" }}>
                   {/* Avatar */}
                   <div style={{ width:32, height:32, borderRadius:"50%", background:"rgba(255,212,59,.25)", border:"1px solid rgba(255,212,59,.35)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
@@ -971,7 +807,7 @@ function SectionAvisRecus({ userId }: { userId:string }) {
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-                      <span style={{ fontWeight:700, fontSize:".875rem", color:"rgba(255,255,255,.85)" }}>{r.raterPseudo}</span>
+                      <span style={{ fontWeight:700, fontSize:".875rem", color:"var(--text)" }}>{r.raterPseudo}</span>
                       {r.companyName && (
                         <span style={{ fontSize:".7rem", color:"var(--accent-text)", background:"rgba(255,212,59,.12)", border:"1px solid rgba(255,212,59,.25)", borderRadius:100, padding:"1px 8px" }}>
                           {r.companyName}
@@ -979,7 +815,7 @@ function SectionAvisRecus({ userId }: { userId:string }) {
                       )}
                       {r.rating !== null && <ReviewStars value={r.rating} />}
                     </div>
-                    <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.25)", marginTop:2 }}>{timeAgo(r.createdAt)}</p>
+                    <p style={{ fontSize:".7rem", color:"var(--text-faint)", marginTop:2 }}>{timeAgo(r.createdAt)}</p>
                   </div>
                 </div>
 
@@ -998,7 +834,7 @@ function SectionAvisRecus({ userId }: { userId:string }) {
                 )}
 
                 {r.comment && (
-                  <p style={{ fontSize:".82rem", color:"rgba(255,255,255,.5)", fontStyle:"italic", borderLeft:"2px solid rgba(255,255,255,.08)", paddingLeft:".75rem", marginTop: r.tags.length ? 0 : ".25rem" }}>
+                  <p style={{ fontSize:".82rem", color:"var(--text-dim)", fontStyle:"italic", borderLeft:"2px solid rgba(250,248,243,.08)", paddingLeft:".75rem", marginTop: r.tags.length ? 0 : ".25rem" }}>
                     &ldquo;{r.comment}&rdquo;
                   </p>
                 )}
@@ -1021,7 +857,7 @@ function StarsInput({ value, onChange }: { value:number; onChange:(n:number)=>vo
       {[1,2,3,4,5].map(n => (
         <button key={n} type="button" onClick={() => onChange(n)} onMouseEnter={() => setHovered(n)} onMouseLeave={() => setHovered(0)}
           style={{ background:"none", border:"none", cursor:"pointer", padding:2, transition:"transform .15s", transform:(hovered||value)>=n?"scale(1.2)":"scale(1)" }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill={(hovered||value)>=n?"#f59e0b":"none"} stroke={(hovered||value)>=n?"#f59e0b":"rgba(255,255,255,.2)"} strokeWidth="1.5">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill={(hovered||value)>=n?"#f59e0b":"none"} stroke={(hovered||value)>=n?"#f59e0b":"rgba(250,248,243,.2)"} strokeWidth="1.5">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
           </svg>
         </button>
@@ -1062,15 +898,15 @@ function SectionAvis({ userId }: { userId:string }) {
     setStep("done");
   }
 
-  if (!checked) return <div className="sc"><div style={{ textAlign:"center", padding:"3rem", color:"rgba(255,255,255,.25)" }}>Chargement…</div></div>;
+  if (!checked) return <div className="sc"><div style={{ textAlign:"center", padding:"3rem", color:"var(--text-faint)" }}>Chargement…</div></div>;
 
   return (
     <div className="sc">
       <div className="sh"><div><h2 className="st">Avis sur le site</h2><p className="ss">Ton retour nous aide à améliorer la plateforme</p></div></div>
 
       {step === "rate" && (
-        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
-          <p style={{ fontSize:"1rem", fontWeight:700, color:"rgba(255,255,255,.85)", marginBottom:"1.5rem", fontFamily:"var(--font-display)" }}>
+        <div style={{ background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
+          <p style={{ fontSize:"1rem", fontWeight:700, color:"var(--text)", marginBottom:"1.5rem", fontFamily:"var(--font-display)" }}>
             Apprécies-tu codedeparrainage.com ?
           </p>
           <StarsInput value={rating} onChange={setRating} />
@@ -1095,10 +931,10 @@ function SectionAvis({ userId }: { userId:string }) {
       )}
 
       {step === "positive" && (
-        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
+        <div style={{ background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
           <div style={{ marginBottom:"1rem", color:"var(--accent-text)" }}><Stamp size={48} /></div>
-          <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Super, merci !</p>
-          <p style={{ color:"rgba(255,255,255,.45)", fontSize:".875rem", marginBottom:"1.5rem" }}>Ça nous ferait vraiment plaisir si tu laissais un avis sur Google — ça prend 30 secondes.</p>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.1rem", color:"var(--text)", marginBottom:".5rem" }}>Super, merci !</p>
+          <p style={{ color:"var(--text-dim)", fontSize:".875rem", marginBottom:"1.5rem" }}>Ça nous ferait vraiment plaisir si tu laissais un avis sur Google — ça prend 30 secondes.</p>
           <a href={GOOGLE_REVIEW_URL} target="_blank" rel="noopener noreferrer"
             style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#4285F4", color:"#fff", textDecoration:"none", borderRadius:12, padding:".8rem 1.5rem", fontWeight:700, fontSize:".875rem", fontFamily:"var(--font-text)" }}
             onClick={async () => {
@@ -1115,33 +951,33 @@ function SectionAvis({ userId }: { userId:string }) {
             }}>
             Laisser un avis Google
           </a>
-          <button onClick={() => setStep("done")} style={{ display:"block", width:"100%", marginTop:".75rem", background:"none", border:"1px solid rgba(255,255,255,.1)", borderRadius:12, padding:".7rem", color:"rgba(255,255,255,.35)", fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>
+          <button onClick={() => setStep("done")} style={{ display:"block", width:"100%", marginTop:".75rem", background:"none", border:"1px solid rgba(250,248,243,.1)", borderRadius:12, padding:".7rem", color:"var(--text-faint)", fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)" }}>
             Plus tard
           </button>
         </div>
       )}
 
       {step === "negative" && (
-        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem" }}>
-          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1rem", color:"rgba(255,255,255,.85)", marginBottom:".5rem" }}>Désolé</p>
-          <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem", marginBottom:"1.25rem" }}>Dis-nous ce que tu changerais — ton retour nous aide vraiment.</p>
+        <div style={{ background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:18, padding:"2rem" }}>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1rem", color:"var(--text)", marginBottom:".5rem" }}>Désolé</p>
+          <p style={{ color:"var(--text-dim)", fontSize:".875rem", marginBottom:"1.25rem" }}>Dis-nous ce que tu changerais — ton retour nous aide vraiment.</p>
           <StarsInput value={rating} onChange={setRating} />
           <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Ce que j'améliorerais…" maxLength={600}
-            style={{ marginTop:"1rem", width:"100%", background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.1)", borderRadius:12, padding:".75rem 1rem", color:"rgba(255,255,255,.8)", fontSize:".875rem", fontFamily:"var(--font-text)", resize:"vertical", minHeight:100, outline:"none" }} />
-          <p style={{ fontSize:".7rem", color:"rgba(255,255,255,.2)", marginTop:3 }}>{comment.length}/600</p>
+            style={{ marginTop:"1rem", width:"100%", background:"rgba(250,248,243,.04)", border:"1px solid rgba(250,248,243,.1)", borderRadius:12, padding:".75rem 1rem", color:"var(--text)", fontSize:".875rem", fontFamily:"var(--font-text)", resize:"vertical", minHeight:100, outline:"none" }} />
+          <p style={{ fontSize:".7rem", color:"var(--text-faint)", marginTop:3 }}>{comment.length}/600</p>
           <button onClick={submitNegative} disabled={sending}
             style={{ marginTop:".875rem", width:"100%", background:"var(--accent)", color:"var(--accent-ink)", border:"none", borderRadius:12, padding:".8rem", fontWeight:700, fontSize:".875rem", cursor:"pointer", fontFamily:"var(--font-text)", opacity:sending?.5:1 }}>
             {sending ? "Envoi…" : "Envoyer mon avis"}
           </button>
-          <button onClick={() => setStep("rate")} style={{ display:"block", width:"100%", marginTop:".5rem", background:"none", border:"none", color:"rgba(255,255,255,.3)", fontSize:".8rem", cursor:"pointer" }}>← Retour</button>
+          <button onClick={() => setStep("rate")} style={{ display:"block", width:"100%", marginTop:".5rem", background:"none", border:"none", color:"var(--text-faint)", fontSize:".8rem", cursor:"pointer" }}>← Retour</button>
         </div>
       )}
 
       {step === "done" && (
-        <div style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
+        <div style={{ background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:18, padding:"2rem", textAlign:"center" }}>
           <div style={{ marginBottom:".75rem", color:"var(--ok)" }}><Stamp size={44} /></div>
-          <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.1rem", color:"rgba(255,255,255,.9)", marginBottom:".5rem" }}>Merci pour ton retour !</p>
-          <p style={{ color:"rgba(255,255,255,.4)", fontSize:".875rem" }}>Ton avis a bien été enregistré.</p>
+          <p style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:"1.1rem", color:"var(--text)", marginBottom:".5rem" }}>Merci pour ton retour !</p>
+          <p style={{ color:"var(--text-dim)", fontSize:".875rem" }}>Ton avis a bien été enregistré.</p>
         </div>
       )}
     </div>
@@ -1164,6 +1000,13 @@ export default function ProfilPage() {
   const [hasReview, setHasReview] = useState(false);
   const [isTop3, setIsTop3]       = useState(false);
   const [loading, setLoading]   = useState(true);
+  const [unread, setUnread]     = useState(0);
+  // La messagerie annonce le nombre de non-lus à chaque changement
+  useEffect(() => {
+    const on = (e: Event) => setUnread(Number((e as CustomEvent<number>).detail) || 0);
+    window.addEventListener("cdp:unread", on);
+    return () => window.removeEventListener("cdp:unread", on);
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1173,15 +1016,20 @@ export default function ProfilPage() {
 
   const fetchData = useCallback(async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser();
-    if (!authUser) { window.location.href = "/login"; return; }
-    const [{ data: profile }, { data: userAnnonces }, { data: reviewData }, { data: top3 }] = await Promise.all([
+    if (!authUser) {
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+      return;
+    }
+    const [{ data: profile }, { data: userAnnonces }, { data: reviewData }, { data: top3 }, { count: unreadCount }] = await Promise.all([
       // email exclu : il n'est plus lisible via l'API publique (RLS colonne).
       // On le récupère depuis la session d'auth juste après (authUser.email).
       supabase.from("users").select("id, pseudo, avatar_url, bio, xp, level, streak_days, last_login, created_at, badge_parrain_mois").eq("id", authUser.id).single(),
       supabase.from("announcements").select("id, code, description, bumps_today, created_at, companies(name, category, url_slug, referral_bonus_description)").eq("user_id", authUser.id).order("created_at", { ascending: false }),
       supabase.from("platform_reviews").select("id").eq("user_id", authUser.id).maybeSingle(),
       supabase.from("users").select("id").order("xp", { ascending: false }).limit(3),
+      supabase.from("messages").select("id", { count: "exact", head: true }).eq("receiver_id", authUser.id).eq("read", false),
     ]);
+    setUnread(unreadCount ?? 0);
     // Fix rétroactif : si l'utilisateur a un avis mais n'a pas reçu les +15 XP
     if (reviewData && profile) {
       const hasAnnonce = (userAnnonces?.length ?? 0) > 0;
@@ -1205,6 +1053,16 @@ export default function ProfilPage() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  const goTo = useCallback((s: NavSection) => {
+    setActive(s);
+    const params = new URLSearchParams(window.location.search);
+    if (s === "profil") params.delete("tab"); else params.set("tab", s);
+    params.delete("to"); params.delete("annonce");
+    const q = params.toString();
+    window.history.replaceState(null, "", `${window.location.pathname}${q ? `?${q}` : ""}`);
+    window.scrollTo({ top: 0 });
+  }, []);
 
   const handlePseudoSave = async (pseudo: string): Promise<string|null> => {
     if (!user) return null;
@@ -1245,11 +1103,16 @@ export default function ProfilPage() {
   };
 
   const renderSection = () => {
+    if (active === "messages") return (
+      <div className="sc">
+        <div className="sh"><div><h2 className="st">Messages</h2><p className="ss">Une conversation par membre et par code.</p></div></div>
+        <Messagerie />
+      </div>
+    );
     if (loading || !user) return <Skeleton />;
     switch (active) {
       case "profil":     return <SectionProfil user={user} annonces={annonces} copyStats={copyStats} onPseudoSave={handlePseudoSave} onAvatarUpload={handleAvatarUpload} />;
       case "annonces":   return <SectionAnnonces annonces={annonces} copyStats={copyStats} onDelete={handleDeleteAnnonce} onEdit={handleEditAnnonce} />;
-      case "messages":   return <SectionMessages />;
       case "badges":     return <SectionBadges xp={user.xp} annoncesCount={annonces.length} isTop3={isTop3} />;
       case "quetes":     return <SectionQuetes user={user} annonces={annonces} hasReview={hasReview} />;
       case "credits":    return <SectionCredits />;
@@ -1263,65 +1126,118 @@ export default function ProfilPage() {
       <style>{`
         @keyframes spin    { to{transform:rotate(360deg)} }
         @keyframes shimmer { 0%,100%{opacity:.5} 50%{opacity:1} }
+        @media (prefers-reduced-motion: reduce){ .pf-skel i{animation:none} }
         @keyframes float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{background:var(--bg);color:#e2e8f0;font-family:var(--font-text);min-height:100vh}
+        body{background:var(--bg);color:var(--text);font-family:var(--font-text);min-height:100vh}
         .layout{display:flex;max-width:1100px;margin:0 auto;padding:2rem 1.5rem;gap:1.75rem}
         .main{flex:1;min-width:0}
         .sc{display:flex;flex-direction:column;gap:1.25rem}
         .sh{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem}
-        .st{font-family:var(--font-display);font-weight:800;font-size:1.45rem;color:#fff;letter-spacing:-.03em}
-        .ss{color:rgba(255,255,255,.35);font-size:.84rem;margin-top:2px}
-        .action-card{position:relative;overflow:hidden;background:rgba(255,212,59,.05);border:1px solid rgba(255,212,59,.25);border-radius:18px;padding:1.25rem;display:flex;flex-direction:column;gap:.6rem;transition:border-color .2s,transform .2s}
-        .action-card:hover{border-color:rgba(255,212,59,.45);transform:translateY(-2px)}
-        .action-card-boost{background:rgba(255,212,59,.07);border-color:rgba(255,212,59,.35)}
-        .action-card-top{display:flex;align-items:center;gap:9px}
-        .action-icon-wrap{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(255,255,255,.7)}
-        .action-label{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.5)}
-        .action-value{font-family:var(--font-display);font-weight:800;font-size:2rem;color:#fff;line-height:1}
-        .action-sub{font-size:.75rem;color:rgba(255,255,255,.3)}
-        .action-btn{display:inline-flex;align-items:center;gap:5px;margin-top:auto;padding:.45rem .875rem;background:rgba(255,212,59,.12);border:1px solid rgba(255,212,59,.3);border-radius:9px;color:var(--accent-text);font-size:.76rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:var(--font-text);justify-content:center}
-        .action-btn:hover{color:#fff;background:rgba(255,212,59,.22);border-color:rgba(255,212,59,.5)}
-        .action-btn-boost{background:rgba(255,212,59,.18);border-color:rgba(255,212,59,.4);color:var(--accent-text)}
-        .row-card{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1rem 1.25rem;transition:border-color .2s}
+        .st{font-family:var(--font-display);font-weight:800;font-size:1.45rem;color:var(--text-strong);letter-spacing:-.03em}
+        .ss{color:var(--text-faint);font-size:.84rem;margin-top:2px}
+        .row-card{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;background:rgba(250,248,243,.03);border:1px solid rgba(250,248,243,.07);border-radius:14px;padding:1rem 1.25rem;transition:border-color .2s}
         .row-card:hover{border-color:rgba(255,212,59,.2)}
         .row-card.done{opacity:.55}
         .cat-tag{padding:.2rem .6rem;background:rgba(255,212,59,.12);border:1px solid rgba(255,212,59,.25);border-radius:100px;font-size:.72rem;color:var(--accent-text);font-weight:600}
         .form-g{display:flex;flex-direction:column;gap:6px}
-        .form-l{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.04em}
-        .form-i{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;color:#fff;font-size:.9rem;font-family:var(--font-text);outline:none;transition:all .2s;width:100%}
+        .form-l{font-size:.78rem;font-weight:600;color:var(--text-dim);letter-spacing:.04em}
+        .form-i{background:rgba(250,248,243,.04);border:1px solid rgba(250,248,243,.08);border-radius:12px;padding:.75rem 1rem;color:var(--text-strong);font-size:.9rem;font-family:var(--font-text);outline:none;transition:all .2s;width:100%}
         .form-i:focus{border-color:rgba(255,212,59,.4);background:rgba(255,212,59,.05);}
         .form-i.disabled{opacity:.4;cursor:not-allowed}
         .form-ta{resize:vertical;min-height:90px}
-        .form-h{font-size:.7rem;color:rgba(255,255,255,.22)}
+        .form-h{font-size:.7rem;color:var(--text-faint)}
         .btn-p{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:var(--accent-ink);border:none;border-radius:10px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:var(--font-text)}
         .btn-p:hover{background:var(--accent-hover);transform:translateY(-1px)}
         .btn-p.btn-saved{background:#16a34a}
-        .btn-o{display:inline-flex;align-items:center;gap:6px;background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:var(--font-text)}
-        .btn-ghost-sm{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5);border-radius:8px;padding:.3rem .625rem;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
-        .btn-ghost-sm:hover{color:#fff;border-color:rgba(255,255,255,.18)}
+        .btn-o{display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--text-muted);border:1px solid rgba(250,248,243,.12);border-radius:10px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:var(--font-text)}
+        .btn-ghost-sm{background:rgba(250,248,243,.04);border:1px solid rgba(250,248,243,.08);color:var(--text-dim);border-radius:8px;padding:.3rem .625rem;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--font-text)}
+        .btn-ghost-sm:hover{color:var(--text-strong);border-color:var(--text-faint)}
         .btn-ghost-sm.danger:hover{color:#f87171;border-color:rgba(248,113,113,.3)}
         .btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:10px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--font-text)}
-        .profil-sidebar{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:1.5rem;position:sticky;top:80px;align-self:flex-start}
+        .profil-sidebar{width:228px;flex-shrink:0;display:flex;flex-direction:column;gap:1.25rem;position:sticky;top:84px;align-self:flex-start}
+        .pf-id{padding:1rem;border:1px solid var(--border);border-radius:12px;background:var(--bg-raised);display:flex;flex-direction:column;gap:.7rem}
+        .pf-id-skel{height:116px}
+        .pf-id-top{display:flex;align-items:center;gap:.7rem}
+        .pf-id-av{width:40px;height:40px;border-radius:50%;overflow:hidden;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:var(--accent-ink);font-family:var(--font-display);font-weight:800}
+        .pf-id-av img{width:100%;height:100%;object-fit:cover;display:block}
+        .pf-id-txt{min-width:0}
+        .pf-id-name{font-family:var(--font-display);font-weight:700;font-size:.95rem;color:var(--text-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .pf-id-lvl{font-size:.75rem;color:var(--text-dim);margin-top:2px}
+        .pf-id-next{font-size:.72rem;color:var(--text-faint)}
+        .pf-nav{display:flex;flex-direction:column}
+        .pf-group{display:flex;flex-direction:column;gap:2px;padding:.5rem 0;border-top:1px solid var(--border)}
+        .pf-group:first-child{border-top:0;padding-top:0}
+        .pf-item{display:flex;align-items:center;gap:.65rem;width:100%;padding:.55rem .75rem;border:0;border-radius:8px;background:transparent;color:var(--text-dim);font:inherit;font-size:.88rem;font-weight:500;text-align:left;cursor:pointer;transition:color .15s ease,background-color .15s ease}
+        .pf-item:hover{color:var(--text-strong);background:var(--bg-card-md)}
+        .pf-item.on{color:var(--text-strong);background:var(--bg-card-hover);box-shadow:inset 3px 0 0 var(--accent)}
+        .pf-item:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+        .pf-item-ico{display:inline-flex;opacity:.7}
+        .pf-item.on .pf-item-ico{opacity:1;color:var(--accent-text)}
+        .pf-item-label{flex:1}
+        .pf-badge{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-size:.7rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+        .pf-publish{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;height:40px;border:1px solid var(--border-lg);border-radius:10px;color:var(--text-strong);font-size:.85rem;font-weight:600;text-decoration:none;transition:border-color .15s ease,background-color .15s ease}
+        .pf-publish:hover{border-color:var(--accent);background:var(--accent-tint)}
+        .pf-head{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;padding:1.5rem;border:1px solid var(--border);border-radius:14px;background:var(--bg-raised)}
+        .pf-head-txt{flex:1;min-width:220px}
+        .pf-head-meta{margin-top:4px;font-size:.84rem;color:var(--text-dim)}
+        .pf-xp{margin-top:1rem;display:flex;flex-direction:column;gap:6px;max-width:460px}
+        .pf-xp-row{display:flex;justify-content:space-between;gap:1rem;font-size:.78rem;color:var(--text-dim)}
+        .pf-xp-val{font-weight:700;color:var(--text-strong)}
+        .pf-stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:14px;background:var(--bg-raised)}
+        .pf-stat{padding:1.25rem 1.4rem;display:flex;flex-direction:column;gap:2px;border-left:1px solid var(--border)}
+        .pf-stat:first-child{border-left:0}
+        .pf-stat dt{font-size:.8rem;color:var(--text-dim)}
+        .pf-stat-v{margin-top:.35rem;font-family:var(--font-display);font-weight:800;font-size:2.1rem;line-height:1.1;color:var(--text-strong);font-variant-numeric:tabular-nums}
+        .pf-stat-sub{font-size:.78rem;color:var(--text-faint)}
+        .pf-stat-link{display:inline-flex;align-items:center;gap:5px;margin-top:.8rem;padding-bottom:1px;font-size:.8rem;font-weight:600;color:var(--text-muted);text-decoration:none;border-bottom:1px solid var(--border-lg);transition:color .15s ease,border-color .15s ease}
+        .pf-stat-link:hover{color:var(--text-strong);border-color:var(--accent)}
+        @media(max-width:640px){
+          .pf-stats{grid-template-columns:1fr}
+          .pf-stat{display:grid;grid-template-columns:1fr auto;grid-template-areas:"l v" "s v" "c c";column-gap:1rem;padding:1rem 1.1rem;border-left:0;border-top:1px solid var(--border)}
+          .pf-stat:first-child{border-top:0}
+          .pf-stat dt{grid-area:l}
+          .pf-stat-v{grid-area:v;align-self:center;margin-top:0;font-size:1.9rem}
+          .pf-stat-sub{grid-area:s}
+          .pf-stat-cta{grid-area:c}
+          .pf-stat-link{margin-top:.55rem}
+        }
+        @media(max-width:520px){
+          .pf-head{flex-wrap:nowrap;align-items:flex-start;gap:1rem;padding:1.1rem}
+          .pf-head-txt{min-width:0}
+          .pf-xp-row{flex-direction:column;gap:2px}
+        }
+        .pf-edit{width:28px;height:28px;flex-shrink:0}
+        @media (pointer: coarse){ .pf-edit{width:40px;height:40px} }
+        .pf-skel{display:flex;flex-direction:column;gap:.75rem}
+        .pf-skel i{display:block;border-radius:6px;background:var(--bg-card-hover);animation:shimmer 1.4s ease-in-out infinite}
+        .pf-skel-card{height:190px;margin-top:.75rem;border:1px solid var(--border);border-radius:14px;background:var(--bg-card)}
+        .pf-skel-card.short{height:110px;margin-top:0}
         .g2{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
         .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem}
-        .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem}
         @media(max-width:768px){
-          .layout{flex-direction:column;padding:1rem}
+          .layout{flex-direction:column;padding:1rem;gap:1.25rem}
           .main{width:100%}
-          .profil-sidebar{width:100%;position:static}
+          .profil-sidebar{width:100%;position:static;gap:0}
+          .pf-id,.pf-publish{display:none}
+          .pf-nav{flex-direction:row;overflow-x:auto;gap:.25rem;margin:0 -1rem;padding:0 1rem .75rem;border-bottom:1px solid var(--border);scrollbar-width:none}
+          .pf-nav::-webkit-scrollbar{display:none}
+          .pf-group{flex-direction:row;padding:0;border:0;gap:.25rem}
+          .pf-item{width:auto;white-space:nowrap;padding:.5rem .85rem;border-radius:999px;font-size:.84rem}
+          .pf-item-ico{display:none}
+          .pf-item.on{box-shadow:none;background:var(--accent);color:var(--accent-ink)}
+          .pf-item.on .pf-badge{background:var(--accent-ink);color:var(--accent)}
           .g3{grid-template-columns:1fr 1fr}
         }
         @media(max-width:520px){
           .g2,.g3{grid-template-columns:1fr}
-          .g4{grid-template-columns:1fr 1fr}
         }
       `}</style>
 
-      <Navbar activePage="profil" />
+      <Navbar activePage={active === "messages" ? "messages" : "profil"} />
 
       <div className="layout">
-        <Sidebar active={active} setActive={setActive} user={user} />
+        <Sidebar active={active} setActive={goTo} user={user} unread={unread} />
         <main className="main">{renderSection()}</main>
       </div>
     </>

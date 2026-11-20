@@ -10,6 +10,30 @@ interface NavbarProps {
   activePage?: "codes" | "classement" | "publier" | "messages" | "profil" | "home" | "forum";
 }
 
+// ── État de connexion partagé entre les pages ──────────────────────────────
+// Le bandeau est recréé à chaque navigation. Sans mémoire, il affichait
+// « Connexion / S'inscrire » à un membre connecté le temps de redemander la
+// session, puis basculait sur son avatar : un clignotement sur chaque page.
+// - `memo` (module) survit aux navigations dans l'onglet ;
+// - le localStorage permet de retrouver le pseudo dès un rechargement ;
+// - tant que l'état est inconnu, la zone de droite reste vide.
+type NavUser = { pseudo: string; avatarUrl: string | null; unread: number };
+let memo: NavUser | null | undefined; // undefined = inconnu, null = déconnecté
+const STORE_KEY = "cdp_nav_user";
+function readStore(): NavUser | null | undefined {
+  try {
+    const v = localStorage.getItem(STORE_KEY);
+    return v === null ? undefined : (JSON.parse(v) as NavUser);
+  } catch { return undefined; }
+}
+function writeStore(u: NavUser | null) {
+  memo = u;
+  try {
+    if (u) localStorage.setItem(STORE_KEY, JSON.stringify(u));
+    else localStorage.removeItem(STORE_KEY);
+  } catch { /* stockage indisponible : le bandeau marche quand même */ }
+}
+
 export default function Navbar({ activePage }: NavbarProps) {
   // Deux états distincts : le tiroir mobile (hamburger) et le menu avatar.
   // Un seul état partagé ouvrait les deux en même temps sur mobile connecté,
@@ -17,25 +41,50 @@ export default function Navbar({ activePage }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   useTheme();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [pseudo, setPseudo] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [auth, setAuth] = useState<NavUser | null | undefined>(memo);
+  const isLoggedIn = !!auth;
+  const pseudo = auth?.pseudo ?? "";
+  const avatarUrl = auth?.avatarUrl ?? null;
+  const unreadCount = auth?.unread ?? 0;
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Rechargement complet : on reprend le dernier état connu sans attendre.
+    if (memo === undefined) {
+      const stored = readStore();
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- lecture du stockage local après hydratation
+      if (stored !== undefined) setAuth(stored);
+    }
     const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return;
+    // getSession lit la session locale (pas d'aller-retour réseau) : on sait
+    // tout de suite si quelqu'un est connecté.
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const user = session?.user;
+      if (!user) { writeStore(null); setAuth(null); return; }
       const [{ data: profile }, { count }] = await Promise.all([
         supabase.from("users").select("pseudo, avatar_url").eq("id", user.id).single(),
         supabase.from("messages").select("*", { count: "exact", head: true }).eq("receiver_id", user.id).eq("read", false),
       ]);
-      setIsLoggedIn(true);
-      setPseudo(profile?.pseudo ?? user.email?.split("@")[0] ?? "Moi");
-      setAvatarUrl(profile?.avatar_url ?? null);
-      setUnreadCount(count ?? 0);
+      const u: NavUser = {
+        pseudo: profile?.pseudo ?? user.email?.split("@")[0] ?? "Moi",
+        avatarUrl: profile?.avatar_url ?? null,
+        unread: count ?? 0,
+      };
+      writeStore(u);
+      setAuth(u);
     });
+  }, []);
+
+  // La messagerie du profil prévient quand des messages passent en lus
+  useEffect(() => {
+    const onUnread = (e: Event) => {
+      if (!memo) return;
+      const u = { ...memo, unread: Number((e as CustomEvent<number>).detail) || 0 };
+      writeStore(u);
+      setAuth(u);
+    };
+    window.addEventListener("cdp:unread", onUnread);
+    return () => window.removeEventListener("cdp:unread", onUnread);
   }, []);
 
   // Fermeture au clic extérieur et à Échap
@@ -65,6 +114,7 @@ export default function Navbar({ activePage }: NavbarProps) {
     setDropdownOpen(false);
     const supabase = createClient();
     await supabase.auth.signOut();
+    writeStore(null);
     window.location.href = "/login";
   }
 
@@ -92,9 +142,11 @@ export default function Navbar({ activePage }: NavbarProps) {
         }
         .nav-home-btn:hover { color: var(--text-strong); border-color: rgba(255,212,59,0.3); background: rgba(255,212,59,0.08); }
 
+        /* Dans le flux (et non centré en absolu) : les liens ne peuvent plus
+           passer sous le logo ou l'avatar quand la largeur manque. */
         .nav-center {
-          display: flex; align-items: center; gap: 2px;
-          position: absolute; left: 50%; transform: translateX(-50%);
+          display: flex; align-items: center; justify-content: center; gap: 2px;
+          flex: 1; min-width: 0; padding: 0 1rem;
         }
         .nav-link {
           position: relative;
@@ -117,6 +169,8 @@ export default function Navbar({ activePage }: NavbarProps) {
         }
 
         .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .nav-skel { display: inline-block; width: 150px; height: 40px; }
+        @media (max-width: 768px) { .nav-skel { width: 90px; } }
 
         /* Déconnecté */
         .nav-btn-ghost {
@@ -229,7 +283,13 @@ export default function Navbar({ activePage }: NavbarProps) {
         .nav-mobile-sep { height: 1px; background: var(--border); margin: 6px 0; }
         .nav-mobile-badge { background: #ef4444; color: #fff; border-radius: 100px; font-size: 0.7rem; font-weight: 700; padding: 1px 7px; margin-left: 4px; }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1100px) {
+          .nav-pseudo, .nav-avatar-btn .nav-chevron { display: none; }
+          .nav-avatar-btn { padding: 0.25rem; border-radius: 50%; }
+          .nav-label-long { display: none; }
+          .nav-label-short { display: inline; }
+        }
+        @media (max-width: 860px) {
           .navbar { padding: 0 1rem; }
           .nav-center { display: none; }
           .nav-hamburger { display: flex; }
@@ -291,7 +351,7 @@ export default function Navbar({ activePage }: NavbarProps) {
                   >
                     <div className="nav-avatar">
                       {avatarUrl
-                        ? <img src={avatarUrl} alt="" onError={() => setAvatarUrl(null)} />
+                        ? <img src={avatarUrl} alt="" onError={() => setAuth(a => (a ? { ...a, avatarUrl: null } : a))} />
                         : pseudo[0]?.toUpperCase()
                       }
                     </div>
@@ -333,6 +393,8 @@ export default function Navbar({ activePage }: NavbarProps) {
                   )}
                 </div>
               </>
+            ) : auth === undefined ? (
+              <span className="nav-skel" aria-hidden="true" />
             ) : (
               <>
                 <Link href="/login" className="nav-btn-ghost">Connexion</Link>
@@ -370,7 +432,7 @@ export default function Navbar({ activePage }: NavbarProps) {
               <button className="nav-mobile-link" style={{ color:"#f87171" }} onClick={signOut}>Déconnexion</button>
             </>
           )}
-          {!isLoggedIn && (
+          {auth === null && (
             <>
               <div className="nav-mobile-sep" />
               <Link href="/login" className="nav-mobile-link">Connexion</Link>

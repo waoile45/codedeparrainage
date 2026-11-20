@@ -461,8 +461,9 @@ export default function CodesClient() {
   }, [activeCategory, sort]);
 
   function handleContact(card: CodeCard) {
-    if (!currentUserId) { window.location.href = `/login?redirect=/codes`; return; }
-    window.location.href = `/messages?to=${card.userId}&annonce=${card.id}`;
+    const dest = `/profil?tab=messages&to=${card.userId}&annonce=${card.id}`;
+    if (!currentUserId) { window.location.href = `/login?next=${encodeURIComponent(dest)}`; return; }
+    window.location.href = dest;
   }
 
   function handleEditOpen(card: CodeCard) {

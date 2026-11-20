@@ -6,6 +6,7 @@ import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/sanitize'
 
 const MAX_MESSAGE_LENGTH = 2000
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function POST(request: Request) {
   const cookieStore = await cookies()
@@ -27,7 +28,11 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
 
-  const { receiverId, announcementId, content } = await request.json()
+  const body = await request.json().catch(() => null)
+  if (!body || typeof body !== 'object') {
+    return NextResponse.json({ error: 'Requête invalide' }, { status: 400 })
+  }
+  const { receiverId, announcementId, content } = body as Record<string, unknown>
 
   if (typeof content !== 'string' || content.trim() === '') {
     return NextResponse.json({ error: 'Message vide' }, { status: 400 })
@@ -37,20 +42,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Message trop long' }, { status: 400 })
   }
 
-  if (!receiverId || typeof receiverId !== 'string') {
+  if (typeof receiverId !== 'string' || !UUID_RE.test(receiverId)) {
     return NextResponse.json({ error: 'Destinataire invalide' }, { status: 400 })
+  }
+
+  if (announcementId != null && (typeof announcementId !== 'string' || !UUID_RE.test(announcementId))) {
+    return NextResponse.json({ error: 'Annonce invalide' }, { status: 400 })
   }
 
   if (receiverId === user.id) {
     return NextResponse.json({ error: 'Vous ne pouvez pas vous écrire à vous-même' }, { status: 400 })
   }
 
-  await supabase.from('messages').insert({
-    sender_id: user.id,
-    receiver_id: receiverId,
-    announcement_id: announcementId,
-    content: content.trim(),
-  })
+  const { data: message, error: insertError } = await supabase
+    .from('messages')
+    .insert({
+      sender_id: user.id,
+      receiver_id: receiverId,
+      announcement_id: announcementId ?? null,
+      content: content.trim(),
+    })
+    .select('id, sender_id, receiver_id, announcement_id, content, read, created_at')
+    .single()
+
+  if (insertError || !message) {
+    return NextResponse.json({ error: "Le message n'a pas pu être envoyé." }, { status: 500 })
+  }
 
   // ── Notification email via Resend ──────────────────────────────────────────
   if (process.env.RESEND_API_KEY) {
@@ -77,7 +94,7 @@ export async function POST(request: Request) {
         await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL ?? 'noreply@codedeparrainage.com',
           to: receiver.email,
-          subject: `💬 Nouveau message de ${senderPseudo.replace(/[\r\n]+/g, ' ')}`,
+          subject: `Nouveau message de ${senderPseudo.replace(/[\r\n]+/g, ' ')}`,
           html: `
             <div style="font-family:'DM Sans',Arial,sans-serif;max-width:520px;margin:0 auto;background:#121211;color:#e2e8f0;border-radius:16px;overflow:hidden;">
               <div style="background:#FFD43B;padding:28px 32px;">
@@ -91,7 +108,7 @@ export async function POST(request: Request) {
                 <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:16px 20px;margin-bottom:24px;">
                   <p style="margin:0;font-size:0.9rem;color:#e2e8f0;line-height:1.6;">${safePreview}${content.trim().length > 120 ? '…' : ''}</p>
                 </div>
-                <a href="https://codedeparrainage.com/messages" style="display:inline-block;background:#FFD43B;color:#141414;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:0.9rem;">
+                <a href="https://www.codedeparrainage.com/profil?tab=messages" style="display:inline-block;background:#FFD43B;color:#141414;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:0.9rem;">
                   Répondre →
                 </a>
               </div>
@@ -109,7 +126,7 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ success: true, message })
 }
 
 export async function GET() {

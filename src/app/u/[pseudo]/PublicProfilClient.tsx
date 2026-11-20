@@ -329,7 +329,7 @@ export default function PublicProfilClient() {
                       </div>
                       <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
                         {currentUserId && currentUserId !== user.id && (
-                          <a href={`/messages?to=${user.id}&annonce=${a.id}`}
+                          <a href={`/profil?tab=messages&to=${user.id}&annonce=${a.id}`}
                             style={{ display:"inline-flex", alignItems:"center", gap:4, padding:".35rem .625rem", background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.1)", borderRadius:8, color:"rgba(255,255,255,.45)", fontSize:".75rem", fontWeight:500, textDecoration:"none", transition:"all .18s" }}>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                           </a>
