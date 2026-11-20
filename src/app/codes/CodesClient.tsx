@@ -349,8 +349,9 @@ export default function CodesClient() {
       }
     }
 
+    const SELECT = `id, user_id, code, description, bumps_today, created_at, tests_ok, tests_ko, last_tested_at, companies(name, slug, category, referral_bonus_description), users(pseudo, level), boosts(active, ends_at)`;
     let annQuery = supabase.from("announcements")
-      .select(`id, user_id, code, description, bumps_today, created_at, tests_ok, tests_ko, last_tested_at, companies(name, slug, category, referral_bonus_description), users(pseudo, level), boosts(active, ends_at)`)
+      .select(SELECT)
       .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
 
     if (sortMode === "popular") annQuery = annQuery.order("bumps_today", { ascending: false }).order("created_at", { ascending: false });
@@ -358,8 +359,27 @@ export default function CodesClient() {
 
     if (companyIds) annQuery = annQuery.in("company_id", companyIds);
 
-    const { data, error } = await annQuery;
+    const { data: pageData, error } = await annQuery;
     if (error) { console.error(error); if (reset) setLoading(false); else setLoadingMore(false); return; }
+
+    // Annonces boostées : en tri « Populaires », TOUTES celles dont le boost est
+    // en cours passent en tête du premier chargement. Avant, elles ne
+    // remontaient qu'à l'intérieur du paquet de 20 chargé : une annonce boostée
+    // hors des 20 plus récentes n'apparaissait jamais en haut (boost payé pour rien).
+    let boostedRows: any[] = [];
+    if (sortMode === "popular" && pageNum === 0) {
+      let bq = supabase.from("announcements")
+        .select(SELECT.replace("boosts(active, ends_at)", "boosts!inner(active, ends_at)"))
+        .eq("boosts.active", true)
+        .gt("boosts.ends_at", new Date().toISOString())
+        .order("created_at", { ascending: false })
+        .limit(60);
+      if (companyIds) bq = bq.in("company_id", companyIds);
+      const { data: bdata } = await bq;
+      boostedRows = bdata ?? [];
+    }
+    const boostedIds = new Set(boostedRows.map((r: any) => r.id));
+    const data = [...boostedRows, ...(pageData ?? []).filter((r: any) => !boostedIds.has(r.id))];
 
     // Ratings only for this page's IDs
     const ids = (data ?? []).map((row: any) => row.id);
@@ -422,14 +442,15 @@ export default function CodesClient() {
       mapped.sort((a, b) => Number(b.boosted) - Number(a.boosted));
     }
 
-    setHasMore((data ?? []).length === PAGE_SIZE);
+    setHasMore((pageData ?? []).length === PAGE_SIZE); // le paquet seul, sans les boostées ajoutées en tête
 
     if (reset) {
       setCodes(mapped);
       setCount(mapped.length);
       setLoading(false);
     } else {
-      setCodes(prev => { const next = [...prev, ...mapped]; setCount(next.length); return next; });
+      // Une annonce boostée déjà affichée en tête ne revient pas dans la suite de la liste.
+      setCodes(prev => { const seen = new Set(prev.map(c => c.id)); const next = [...prev, ...mapped.filter(c => !seen.has(c.id))]; setCount(next.length); return next; });
       setLoadingMore(false);
     }
   }
@@ -539,6 +560,7 @@ export default function CodesClient() {
         .action-btn-delete:hover{color:var(--danger);box-shadow:inset 0 0 0 1px var(--danger)}
         .code-url{color:var(--text-muted)!important;font-family:var(--font-text)!important;font-size:.95rem!important;letter-spacing:0!important}
         .results-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+        .anj-note{margin:0 0 1rem;font-size:.85rem;line-height:1.5;color:var(--text-dim)}
         .results-count{font-size:.92rem;color:var(--text-dim);margin:0}
         .results-count strong{color:var(--text-strong)}
         .load-more-btn{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 1.6rem;background:transparent;border:0;box-shadow:inset 0 0 0 1.5px var(--border-lg);border-radius:12px;color:var(--text-strong);font-size:.95rem;font-weight:700;cursor:pointer;transition:box-shadow .2s;font-family:var(--font-text)}
@@ -598,6 +620,12 @@ export default function CodesClient() {
           ))}
         </div>
 
+        {(activeCategory === "Tout" || activeCategory === "paris") && (
+          <p className="anj-note">
+            Paris sportifs : jouer comporte des risques (endettement, isolement, dépendance). Pour être aidé,
+            appelle le 09 74 75 13 13 (appel non surtaxé). Interdit aux moins de 18 ans.
+          </p>
+        )}
         <div className="results-meta">
           <p className="results-count">
             <strong>{filtered.length}</strong> résultat{filtered.length!==1?"s":""}
