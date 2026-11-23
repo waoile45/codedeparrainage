@@ -134,13 +134,6 @@ export default function Navbar({ activePage }: NavbarProps) {
           color: var(--text-strong); text-decoration: none; letter-spacing: -0.02em;
           white-space: nowrap;
         }
-        .nav-home-btn {
-          display: inline-flex; align-items: center; justify-content: center;
-          background: var(--bg-card-md); border: 1px solid var(--border-md);
-          border-radius: 8px; width: 32px; height: 32px;
-          color: var(--text-muted); text-decoration: none; transition: all 0.18s;
-        }
-        .nav-home-btn:hover { color: var(--text-strong); border-color: rgba(255,212,59,0.3); background: rgba(255,212,59,0.08); }
 
         /* Dans le flux (et non centré en absolu) : les liens ne peuvent plus
            passer sous le logo ou l'avatar quand la largeur manque. */
@@ -301,9 +294,6 @@ export default function Navbar({ activePage }: NavbarProps) {
           .nav-avatar-btn .nav-chevron { display: none; }
           .nav-avatar { width: 32px; height: 32px; }
         }
-        @media (max-width: 420px) {
-          .nav-home-btn { display: none; }
-        }
       `}</style>
 
       <div ref={rootRef} style={{ position: "sticky", top: 0, zIndex: 200 }}>
@@ -312,11 +302,6 @@ export default function Navbar({ activePage }: NavbarProps) {
             <Link href="/" className="nav-logo" aria-label="codedeparrainage.com — accueil">
               <Logo />
             </Link>
-            {activePage && activePage !== "home" && (
-              <Link href="/" className="nav-home-btn" aria-label="Accueil">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              </Link>
-            )}
           </div>
 
           <div className="nav-center">

@@ -133,9 +133,6 @@ export default function ClassementPage() {
     async function fetchClassement() {
       const supabase = createClient();
 
-      // Utilisateur connecté
-      const { data: { user } } = await supabase.auth.getUser();
-
       // Tous les membres, triés par XP. Plus de limite à 50 : les suivants
       // n'apparaissaient jamais (ni leur rang). La base renvoie au plus 1 000
       // lignes par requête, d'où le chargement par paquets.
@@ -150,25 +147,31 @@ export default function ClassementPage() {
         return all;
       }
 
-      const users = await fetchAll<{ id: string; pseudo: string | null; xp: number | null; level: string | null; streak_days: number | null; avatar_url: string | null }>(
-        (from, to) => supabase
-          .from("users")
-          .select("id, pseudo, xp, level, streak_days, avatar_url")
-          .order("xp", { ascending: false })
-          .order("id", { ascending: true })
-          .range(from, to)
-      );
+      // Les trois lectures partent en même temps (avant : l'une après l'autre).
+      // La session est lue localement, sans aller-retour réseau : elle sert
+      // seulement à surligner la ligne du membre connecté.
+      const [{ data: { session } }, users, countRows] = await Promise.all([
+        supabase.auth.getSession(),
+        fetchAll<{ id: string; pseudo: string | null; xp: number | null; level: string | null; streak_days: number | null; avatar_url: string | null }>(
+          (from, to) => supabase
+            .from("users")
+            .select("id, pseudo, xp, level, streak_days, avatar_url")
+            .order("xp", { ascending: false })
+            .order("id", { ascending: true })
+            .range(from, to)
+        ),
+        // Compter les annonces par membre (même plafond de 1 000 lignes par requête)
+        fetchAll<{ user_id: string }>(
+          (from, to) => supabase
+            .from("announcements")
+            .select("user_id")
+            .order("id", { ascending: true })
+            .range(from, to)
+        ),
+      ]);
+      const user = session?.user ?? null;
 
       if (users.length === 0) { setLoading(false); return; }
-
-      // Compter les annonces par user (même plafond de 1 000 lignes par requête)
-      const countRows = await fetchAll<{ user_id: string }>(
-        (from, to) => supabase
-          .from("announcements")
-          .select("user_id")
-          .order("id", { ascending: true })
-          .range(from, to)
-      );
 
       const annonceCount: Record<string, number> = {};
       for (const row of countRows ?? []) {

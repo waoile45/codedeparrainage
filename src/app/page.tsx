@@ -9,7 +9,7 @@ export const revalidate = 1800 // 30 min : compteurs rafraîchis sans recharger 
 
 // Accueil, une idée par écran : la promesse et la démonstration qui joue seule,
 // les marques où il y a le plus de codes, ce que gagne un parrain, les
-// catégories, les questions, puis un dernier écran jaune. Tout est rendu côté
+// questions, puis un dernier écran jaune. Tout est rendu côté
 // serveur (texte et liens dans le HTML) ; seule la démonstration est un îlot client.
 
 type CompanyRow = {
@@ -29,17 +29,10 @@ const HIDDEN_FROM_HOME = new Set<string>([])
 const BETTING = new Set(CATEGORIES.find((c) => c.slug === 'paris-sportifs')?.brands ?? [])
 const BANKING = new Set(CATEGORIES.find((c) => c.slug === 'banque')?.brands ?? [])
 
-// Libellés courts des catégories, écrits pour l'accueil.
-const CAT_LINES: Record<string, string> = {
-  banque: 'Une prime en euros à l’ouverture, souvent après l’activation de la carte.',
-  cashback: 'Quelques euros offerts à l’inscription, puis un pourcentage sur tes achats.',
-  'paris-sportifs': 'Premier pari remboursé ou offert. Réservé aux plus de 18 ans.',
-  crypto: 'Réduction sur les frais ou crypto offerte après un premier achat.',
-  telephonie: 'Un mois offert ou une remise sur le forfait.',
-  energie: 'Un bon d’achat ou une remise sur la première facture.',
-  shopping: 'Une réduction sur la première commande.',
-  mobilite: 'Des crédits sur les premiers trajets.',
-}
+// Annonce montrée dans la démonstration de l'accueil : le lien de parrainage
+// Boursorama du fondateur (choix du 23 nov. 2026). Si elle disparaît, la
+// démonstration reprend une banque avec prime et code court.
+const DEMO_ANNONCE_ID = 'b0098c4f-dbe9-45a0-8733-0482547e2516'
 
 function domainOf(slug: string | null) {
   const s = String(slug ?? '')
@@ -59,14 +52,21 @@ const FALLBACK_JOURNEY: JourneyData = {
 }
 
 async function getHomeData() {
-  const empty = { codesCount: 0, publishers: 0, brandsCount: 0, brands: [] as Brand[], journey: FALLBACK_JOURNEY, catCounts: {} as Record<string, number> }
+  const empty = { codesCount: 0, publishers: 0, brandsCount: 0, brands: [] as Brand[], journey: FALLBACK_JOURNEY }
   try {
     const supabase = createAnonSupabase()
-    const { data, count } = await supabase
-      .from('announcements')
-      .select('user_id, code, company_id, companies(name, slug, url_slug, referral_bonus_description)', { count: 'exact' })
-      .order('last_bumped_at', { ascending: false })
-      .limit(1000)
+    const [{ data, count }, { data: demo }] = await Promise.all([
+      supabase
+        .from('announcements')
+        .select('user_id, code, company_id, companies(name, slug, url_slug, referral_bonus_description)', { count: 'exact' })
+        .order('last_bumped_at', { ascending: false })
+        .limit(1000),
+      supabase
+        .from('announcements')
+        .select('code, description, companies(name, slug, url_slug, referral_bonus_description)')
+        .eq('id', DEMO_ANNONCE_ID)
+        .limit(1),
+    ])
     const rows = (data ?? []) as unknown as Row[]
 
     const publishers = new Set(rows.map((r) => r.user_id).filter(Boolean)).size
@@ -87,19 +87,28 @@ async function getHomeData() {
       byBrand.set(r.company_id, b)
     }
     const all = [...byBrand.values()].sort((a, b) => b.count - a.count)
-    const activeSlugs = new Set(all.map((b) => b.urlSlug))
 
-    // Démonstration : jamais un site de paris ; une banque avec une prime
-    // renseignée et un code court de préférence, sinon la marque la plus active.
+    // Démonstration : l'annonce choisie (DEMO_ANNONCE_ID) avec sa propre prime ;
+    // à défaut, jamais un site de paris, une banque avec une prime renseignée et
+    // un code court de préférence, sinon la marque la plus active.
+    const d0 = (demo?.[0] ?? null) as { code: string | null; description: string | null; companies: CompanyRow | null } | null
+    const demoBonus = d0?.description?.startsWith('__gain__')
+      ? d0.description.split('\n')[0].replace('__gain__', '').trim()
+      : d0?.companies?.referral_bonus_description ?? null
     const shortCode = (b: { codes: string[] }) => b.codes.find((c) => /^[A-Za-z0-9-]{4,16}$/.test(c))
     const candidates = all.filter((b) => b.bonus && !BETTING.has(b.urlSlug) && shortCode(b))
     const pick = candidates.find((b) => BANKING.has(b.urlSlug)) ?? candidates[0]
-    const journey: JourneyData = pick
-      ? { brand: pick.name, slug: pick.urlSlug, domain: pick.domain, bonus: pick.bonus!, code: shortCode(pick)! }
-      : FALLBACK_JOURNEY
-
-    const catCounts: Record<string, number> = {}
-    for (const c of CATEGORIES) catCounts[c.slug] = c.brands.filter((s) => activeSlugs.has(s)).length
+    const journey: JourneyData = d0?.code && d0.companies?.url_slug && demoBonus
+      ? {
+          brand: formatName(d0.companies.name),
+          slug: d0.companies.url_slug,
+          domain: domainOf(d0.companies.slug),
+          bonus: demoBonus,
+          code: d0.code.trim().replace(/^https?:\/\/(www\.)?/i, ''),
+        }
+      : pick
+        ? { brand: pick.name, slug: pick.urlSlug, domain: pick.domain, bonus: pick.bonus!, code: shortCode(pick)! }
+        : FALLBACK_JOURNEY
 
     return {
       codesCount: count ?? rows.length,
@@ -107,7 +116,6 @@ async function getHomeData() {
       brandsCount: all.length,
       brands: all.filter((b) => !HIDDEN_FROM_HOME.has(b.urlSlug)).slice(0, 8).map(({ codes: _codes, ...b }) => b),
       journey,
-      catCounts,
     }
   } catch {
     return empty
@@ -184,7 +192,7 @@ export default async function HomePage() {
               <form className="hp-search" action="/codes" method="get" role="search">
                 <label htmlFor="hp-q" className="hp-search-label">Quelle marque ?</label>
                 <div className="hp-search-row">
-                  <input id="hp-q" name="search" type="search" placeholder="Fortuneo, Revolut, iGraal…" autoComplete="off" />
+                  <input id="hp-q" name="search" type="search" placeholder="Boursorama, Revolut, iGraal…" autoComplete="off" />
                   <button type="submit" className="btn btn-accent">Chercher</button>
                 </div>
               </form>
@@ -237,8 +245,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── 3. Côté parrain ──────────────────────────────────────────────── */}
-        <section className="hp-parrain">
+        {/* ── 3. Côté parrain : bande jaune, l'appel à publier ──────────────── */}
+        <section className="hp-parrain band-accent">
           <div className="wrap hp-parrain-grid">
             <div>
               <h2 className="reveal">Déjà client quelque part ? Ton code peut servir à quelqu&apos;un.</h2>
@@ -261,8 +269,8 @@ export default async function HomePage() {
                 </div>
               </dl>
               <div className="hp-actions reveal">
-                <Link href="/publier" className="btn btn-accent">Publier mon code</Link>
-                <Link href="/classement" className="btn btn-ghost">Voir le classement</Link>
+                <Link href="/publier" className="btn btn-ink">Publier mon code</Link>
+                <Link href="/classement" className="hp-link-ink">Voir le classement</Link>
               </div>
             </div>
 
@@ -286,27 +294,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── 4. Catégories ────────────────────────────────────────────────── */}
-        <section className="band-paper hp-cats">
-          <div className="wrap">
-            <h2 className="reveal">Par type de compte</h2>
-            <ul className="hp-cat-list">
-              {CATEGORIES.map((c, i) => (
-                <li key={c.slug} className="reveal" data-delay={String(i % 2)}>
-                  <Link href={`/code-parrainage/categorie/${c.slug}`} className="hp-cat">
-                    <span className="hp-cat-name">{c.label}</span>
-                    <span className="hp-cat-line">{CAT_LINES[c.slug] ?? c.metaDescription}</span>
-                    <span className="hp-cat-count tnum">
-                      {d.catCounts[c.slug] ?? 0} marque{(d.catCounts[c.slug] ?? 0) > 1 ? 's' : ''} avec des codes
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* ── 5. Questions ─────────────────────────────────────────────────── */}
+        {/* ── 4. Questions ─────────────────────────────────────────────────── */}
         <section className="hp-faq">
           <div className="wrap hp-faq-grid">
             <h2 className="reveal">Questions fréquentes</h2>
@@ -322,14 +310,14 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── 6. Dernier écran ─────────────────────────────────────────────── */}
+        {/* ── 5. Dernier écran ─────────────────────────────────────────────── */}
         <section className="hp-final">
           <div className="wrap">
             <h2 className="display-wide reveal">Avant de valider une inscription, cherche le code.</h2>
             <form className="hp-search hp-search-final reveal" data-delay="1" action="/codes" method="get" role="search">
               <label htmlFor="hp-q2" className="hp-search-label">Quelle marque ?</label>
               <div className="hp-search-row">
-                <input id="hp-q2" name="search" type="search" placeholder="Fortuneo, Revolut, iGraal…" autoComplete="off" />
+                <input id="hp-q2" name="search" type="search" placeholder="Boursorama, Revolut, iGraal…" autoComplete="off" />
                 <button type="submit" className="btn btn-ink">Chercher</button>
               </div>
             </form>

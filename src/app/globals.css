@@ -1,5 +1,7 @@
 *, *::before, *::after { box-sizing: border-box; }
-html, body { max-width: 100%; overflow-x: hidden; }
+/* clip et non hidden : hidden fait du body un conteneur de défilement, ce qui
+   annule le position: sticky de la barre du haut sur toutes les pages. */
+html, body { max-width: 100%; overflow-x: clip; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }

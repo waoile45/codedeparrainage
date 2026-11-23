@@ -306,6 +306,7 @@ export default function CodesClient() {
   const [search, setSearch]         = useState("");
   const [activeCategory, setActiveCategory] = useState<Category>("Tout");
   const [sort, setSort]             = useState<"popular"|"recent">("popular");
+  const [erreur, setErreur]         = useState(false);
   const [count, setCount]           = useState(0); // eslint-disable-line @typescript-eslint/no-unused-vars
   // Total réel en base pour l'en-tête (count ne compte que les codes chargés).
   const [total, setTotal]           = useState<number | null>(null);
@@ -334,8 +335,21 @@ export default function CodesClient() {
     if (s) setSearch(s);
   }, []);
 
+  // Notes des annonces : calculées à part, pour afficher les cartes sans les attendre.
+  function notesDe(ratingsData: any[], id: string) {
+    const lignes = ratingsData.filter((r: any) => r.announcement_id === id);
+    const notes = lignes.map((r: any) => r.rating).filter(Boolean) as number[];
+    const tagCounts: Record<string, number> = {};
+    lignes.forEach((r: any) => (r.tags ?? []).forEach((tag: string) => { tagCounts[tag] = (tagCounts[tag] ?? 0) + 1; }));
+    return {
+      avgRating: notes.length ? notes.reduce((a, b) => a + b, 0) / notes.length : 0,
+      ratingCount: lignes.length,
+      topTag: Object.entries(tagCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "",
+    };
+  }
+
   async function doFetch(pageNum: number, reset: boolean, category: Category, sortMode: "popular"|"recent") {
-    if (reset) setLoading(true); else setLoadingMore(true);
+    if (reset) { setLoading(true); setErreur(false); } else setLoadingMore(true);
 
     // Server-side category filter: get matching company IDs first
     let companyIds: string[] | null = null;
@@ -359,14 +373,10 @@ export default function CodesClient() {
 
     if (companyIds) annQuery = annQuery.in("company_id", companyIds);
 
-    const { data: pageData, error } = await annQuery;
-    if (error) { console.error(error); if (reset) setLoading(false); else setLoadingMore(false); return; }
-
     // Annonces boostées : en tri « Populaires », TOUTES celles dont le boost est
-    // en cours passent en tête du premier chargement. Avant, elles ne
-    // remontaient qu'à l'intérieur du paquet de 20 chargé : une annonce boostée
-    // hors des 20 plus récentes n'apparaissait jamais en haut (boost payé pour rien).
-    let boostedRows: any[] = [];
+    // en cours passent en tête du premier chargement (pas seulement celles du
+    // paquet de 20). Les deux requêtes partent en même temps.
+    let boostQuery: PromiseLike<{ data: any[] | null }> = Promise.resolve({ data: [] });
     if (sortMode === "popular" && pageNum === 0) {
       let bq = supabase.from("announcements")
         .select(SELECT.replace("boosts(active, ends_at)", "boosts!inner(active, ends_at)"))
@@ -375,37 +385,20 @@ export default function CodesClient() {
         .order("created_at", { ascending: false })
         .limit(60);
       if (companyIds) bq = bq.in("company_id", companyIds);
-      const { data: bdata } = await bq;
-      boostedRows = bdata ?? [];
+      boostQuery = bq;
     }
+    const [{ data: pageData, error }, { data: bdata }] = await Promise.all([annQuery, boostQuery]);
+    if (error) {
+      console.error(error);
+      if (reset) { setErreur(true); setLoading(false); } else setLoadingMore(false);
+      return;
+    }
+
+    const boostedRows: any[] = bdata ?? [];
     const boostedIds = new Set(boostedRows.map((r: any) => r.id));
     const data = [...boostedRows, ...(pageData ?? []).filter((r: any) => !boostedIds.has(r.id))];
 
-    // Ratings only for this page's IDs
-    const ids = (data ?? []).map((row: any) => row.id);
-    const { data: ratingsData } = ids.length > 0
-      ? await supabase.from("user_ratings").select("announcement_id, rating, tags").in("announcement_id", ids)
-      : { data: [] };
-
-    const ratingsByAnn: Record<string, number[]> = {};
-    const tagsByAnn: Record<string, Record<string, number>> = {};
-    (ratingsData ?? []).forEach((r: any) => {
-      if (r.rating) {
-        if (!ratingsByAnn[r.announcement_id]) ratingsByAnn[r.announcement_id] = [];
-        ratingsByAnn[r.announcement_id].push(r.rating);
-      }
-      if (r.tags?.length) {
-        if (!tagsByAnn[r.announcement_id]) tagsByAnn[r.announcement_id] = {};
-        r.tags.forEach((tag: string) => { tagsByAnn[r.announcement_id][tag] = (tagsByAnn[r.announcement_id][tag] ?? 0) + 1; });
-      }
-    });
-
-    const mapped: CodeCard[] = (data ?? []).map((row: any) => {
-      const ratings = ratingsByAnn[row.id] ?? [];
-      const avg = ratings.length ? ratings.reduce((a:number,b:number)=>a+b,0)/ratings.length : 0;
-      const tagCounts = tagsByAnn[row.id] ?? {};
-      const topTag = Object.entries(tagCounts).sort((a,b) => b[1]-a[1])[0]?.[0] ?? "";
-      const totalRatings = (ratingsData ?? []).filter((r:any) => r.announcement_id === row.id).length;
+    const mapped: CodeCard[] = data.map((row: any) => {
       // Extraire le gain personnalisé si présent (format: __gain__texte\nreste)
       const rawDesc = row.description ?? "";
       let customReward: string | null = null;
@@ -427,12 +420,12 @@ export default function CodesClient() {
         reward:      customReward ?? row.companies?.referral_bonus_description ?? "Offre de bienvenue",
         parrain:     row.users?.pseudo ?? "Anonyme",
         niveau:      row.users?.level ?? "Débutant",
-        avgRating:   avg,
+        avgRating:   0,
         testsOk:     row.tests_ok ?? 0,
         testsKo:     row.tests_ko ?? 0,
         lastTestedAt: row.last_tested_at ?? null,
-        ratingCount: totalRatings,
-        topTag,
+        ratingCount: 0,
+        topTag:      "",
       };
     });
 
@@ -444,6 +437,7 @@ export default function CodesClient() {
 
     setHasMore((pageData ?? []).length === PAGE_SIZE); // le paquet seul, sans les boostées ajoutées en tête
 
+    // Les cartes s'affichent tout de suite ; les notes arrivent juste après.
     if (reset) {
       setCodes(mapped);
       setCount(mapped.length);
@@ -453,6 +447,13 @@ export default function CodesClient() {
       setCodes(prev => { const seen = new Set(prev.map(c => c.id)); const next = [...prev, ...mapped.filter(c => !seen.has(c.id))]; setCount(next.length); return next; });
       setLoadingMore(false);
     }
+
+    const ids = mapped.map((c) => c.id);
+    if (ids.length === 0) return;
+    const { data: ratingsData } = await supabase.from("user_ratings").select("announcement_id, rating, tags").in("announcement_id", ids);
+    if (!ratingsData?.length) return;
+    const idsAvecNotes = new Set(ratingsData.map((r: any) => r.announcement_id));
+    setCodes(prev => prev.map(c => idsAvecNotes.has(c.id) ? { ...c, ...notesDe(ratingsData, c.id) } : c));
   }
 
   useEffect(() => {
@@ -505,7 +506,7 @@ export default function CodesClient() {
     <>
       <style>{`
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{background:var(--bg);color:var(--text);font-family:var(--font-text);min-height:100vh;overflow-x:hidden}
+        body{background:var(--bg);color:var(--text);font-family:var(--font-text);min-height:100vh;overflow-x:clip}
         .page-wrapper{position:relative;z-index:1;max-width:940px;margin:0 auto;padding:clamp(2rem,5vw,3.5rem) var(--gutter) 5rem}
         .page-header{margin-bottom:2.25rem;max-width:760px}
         .page-title{font-family:var(--font-display);font-stretch:118%;font-weight:800;font-size:clamp(2.3rem,5.4vw,4rem);line-height:1;color:var(--text-strong);letter-spacing:-.015em;margin:0 0 1rem}
@@ -563,6 +564,10 @@ export default function CodesClient() {
         .results-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
         .anj-note{margin:0 0 1rem;font-size:.85rem;line-height:1.5;color:var(--text-dim)}
         .results-count{font-size:.92rem;color:var(--text-dim);margin:0}
+        .publish-strip{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin:0 0 1.25rem;padding:.9rem 1.1rem;border-radius:14px;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-size:.92rem;line-height:1.45}
+        .publish-strip strong{flex-shrink:0;padding:.5rem .9rem;border-radius:10px;background:var(--ink);color:var(--paper);font-size:.85rem}
+        .publish-strip:hover strong{background:#000}
+        .publish-link{display:inline-block;margin-top:.75rem;color:var(--accent-text);font-weight:700;text-decoration:underline;text-underline-offset:4px}
         .results-count strong{color:var(--text-strong)}
         .load-more-btn{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 1.6rem;background:transparent;border:0;box-shadow:inset 0 0 0 1.5px var(--border-lg);border-radius:12px;color:var(--text-strong);font-size:.95rem;font-weight:700;cursor:pointer;transition:box-shadow .2s;font-family:var(--font-text)}
         .load-more-btn:hover{box-shadow:inset 0 0 0 1.5px var(--accent)}
@@ -635,6 +640,11 @@ export default function CodesClient() {
           </p>
         </div>
 
+        <a href="/publier" className="publish-strip">
+          <span>Tu as un code de parrainage ? Publie-le : il apparaît ici et sur la page de la marque.</span>
+          <strong>Publier mon code</strong>
+        </a>
+
         {loading ? (
           <div className="loading-wrap">
             {[1,2,3].map(i => (
@@ -657,9 +667,15 @@ export default function CodesClient() {
               <CodeCardItem key={card.id} card={card} index={i} onRate={setRatingModal} onContact={handleContact} onEdit={handleEditOpen} onDelete={c => setDeleteConfirm(c)} currentUserId={currentUserId} />
             ))}
           </div>
+        ) : erreur ? (
+          <div className="empty-state">
+            <p>Les codes n'ont pas pu être chargés.</p>
+            <button className="load-more-btn" onClick={() => doFetch(0, true, activeCategory, sort)}>Réessayer</button>
+          </div>
         ) : (
           <div className="empty-state">
             <p>Aucun code trouvé pour cette recherche.</p>
+            <a href="/publier" className="publish-link">Tu es client ? Publie le premier code</a>
           </div>
         )}
 

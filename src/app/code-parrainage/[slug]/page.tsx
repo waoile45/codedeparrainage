@@ -25,6 +25,16 @@ import { hasIndexableCode } from '@/data/moderation'
 export const revalidate = 14400
 export const dynamicParams = true
 
+/** Date de la dernière remontée ou publication, sur tous les codes (le premier peut être un code boosté plus ancien). */
+function dateLaPlusRecente(announcements: any[]): string | null {
+  let max: string | null = null
+  for (const a of announcements) {
+    const d = a.last_bumped_at ?? a.created_at ?? null
+    if (d && (!max || new Date(d) > new Date(max))) max = d
+  }
+  return max
+}
+
 type Props = { params: Promise<{ slug: string }> }
 
 /**
@@ -61,11 +71,20 @@ const getPageData = cache(async (slug: string) => {
 
   const { data: announcements } = await supabase
     .from('announcements')
-    .select('*, users (pseudo, xp, level)')
+    .select('*, users (pseudo, xp, level), boosts (active, ends_at)')
     .in('company_id', ids)
     .order('last_bumped_at', { ascending: false })
 
-  return { company, announcements: announcements ?? [] }
+  // Les annonces boostées (boost en cours) passent en tête, donc dans le grand
+  // encadré du haut. sort() est stable : à boost égal, l'ordre de remontée est gardé.
+  const maintenant = Date.now()
+  const rows = (announcements ?? []).map((a: any) => ({
+    ...a,
+    boosted: (a.boosts ?? []).some((b: any) => b.active && new Date(b.ends_at).getTime() > maintenant),
+  }))
+  rows.sort((a: any, b: any) => Number(b.boosted) - Number(a.boosted))
+
+  return { company, announcements: rows }
 })
 
 /** Marques les plus actives (maillage interne) — calcul léger, mis en cache par requête. */
@@ -93,7 +112,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { company, announcements } = data
   const name = formatBrandName(company.name)
   const codesCount = announcements.length
-  const lastDateIso = announcements[0]?.last_bumped_at ?? announcements[0]?.created_at ?? null
+  const lastDateIso = dateLaPlusRecente(announcements)
   const bonus: string | null = company.referral_bonus_description ?? null
 
   const metaInput = { slug, name, bonus, codesCount, lastDateIso }
@@ -197,7 +216,7 @@ export default async function CompanyPage({ params }: Props) {
   const bonus: string | null = company.referral_bonus_description ?? null
   const codesCount = announcements.length
   const parrainsCount = new Set(announcements.map((a: any) => a.user_id).filter(Boolean)).size
-  const lastDateIso = announcements[0]?.last_bumped_at ?? announcements[0]?.created_at ?? null
+  const lastDateIso = dateLaPlusRecente(announcements)
   const dateStr = formatDateFr(lastDateIso)
   const year = new Date().getFullYear()
   const category = getCategoryForBrand(slug)
@@ -321,7 +340,7 @@ export default async function CompanyPage({ params }: Props) {
 
               {first ? (
                 <div className="bp-top" id={`code-${first.id}`}>
-                  <p className="bp-top-label">Le code le plus récent</p>
+                  <p className="bp-top-label">{first.boosted ? 'Code mis en avant' : 'Le code le plus récent'}</p>
                   <div className="bp-ticket">
                     <span className="bp-ticket-code code-str" title={first.code}>
                       {isLink(first.code) ? first.code.replace(/^https?:\/\/(www\.)?/i, '') : first.code}
