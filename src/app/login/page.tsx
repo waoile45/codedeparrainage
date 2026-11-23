@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
+import Logo from '@/components/Logo'
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 import { safeNext } from '@/lib/safe-next'
 
@@ -114,12 +115,7 @@ export default function LoginPage() {
           content:''; position:absolute; top:0; left:0; right:0; height:1px;
           background:var(--border-md);
         }
-        .auth-logo {
-          font-family:var(--font-display); font-weight:800; font-size:1.15rem;
-          color:#fff; text-decoration:none; letter-spacing:-0.02em;
-          display:block; text-align:center; margin-bottom:0.5rem;
-        }
-        .auth-logo span { color:var(--accent); }
+        .auth-logo { display:flex; justify-content:center; text-decoration:none; margin-bottom:0.75rem; }
         .auth-subtitle { text-align:center; color:rgba(255,255,255,0.35); font-size:0.875rem; margin-bottom:1.75rem; }
         .auth-form { display:flex; flex-direction:column; gap:1rem; }
         .auth-field { display:flex; flex-direction:column; gap:6px; }
@@ -171,7 +167,7 @@ export default function LoginPage() {
 
       <div className="auth-bg">
         <div className="auth-card">
-          <a href="/" className="auth-logo" style={{ display:"flex", alignItems:"center", gap:8 }}>code<span>de</span>parrainage.com</a>
+          <a href="/" className="auth-logo" aria-label="codedeparrainage.com, retour à l'accueil"><Logo size={32} /></a>
           <p className="auth-subtitle">Connecte-toi à ton compte</p>
 
           {/* Google */}

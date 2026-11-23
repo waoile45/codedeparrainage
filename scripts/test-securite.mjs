@@ -38,14 +38,16 @@ function verdict(nom, bloque, detail = '') {
   console.log(`${bloque ? 'OK (bloqué)  ' : 'FAILLE       '} ${nom}${detail ? ' — ' + detail : ''}`)
 }
 // Une écriture est bloquée si la base renvoie une erreur, ou si elle ne touche aucune ligne.
+// On ne relit que « id » : l'e-mail des profils n'est pas lisible par l'API publique,
+// un select('*') échouerait pour cette raison et masquerait le vrai résultat.
 const bloqueSi = (res) => !!res.error || (Array.isArray(res.data) && res.data.length === 0)
 
 // ── Sans compte ─────────────────────────────────────────────────────────────
 const anon = createClient(URL_, ANON, { auth: { persistSession: false } })
 verdict('anon : créer un profil avec 99 999 XP',
-  bloqueSi(await anon.from('users').insert({ id: NUL, pseudo: 'zz-test', xp: 99999 }).select()))
+  bloqueSi(await anon.from('users').insert({ id: NUL, pseudo: 'zz-test', xp: 99999 }).select('id')))
 verdict('anon : publier un avis au nom d\'un membre',
-  bloqueSi(await anon.from('platform_reviews').insert({ user_id: NUL, rating: 5, comment: 'test-securite' }).select()))
+  bloqueSi(await anon.from('platform_reviews').insert({ user_id: NUL, rating: 5, comment: 'test-securite' }).select('id')))
 
 // ── Avec le compte de test ──────────────────────────────────────────────────
 const sb = createClient(URL_, ANON, { auth: { persistSession: false } })
@@ -57,12 +59,12 @@ await sb.rpc('assurer_profil')
 const { data: avant } = await sb.from('users').select('xp, level, badge_parrain_mois, bio').eq('id', me).single()
 
 // Règle 8 : XP, niveau, badge, série
-verdict('s\'attribuer 99 999 XP', bloqueSi(await sb.from('users').update({ xp: 99999 }).eq('id', me).select()))
-verdict('s\'attribuer un niveau', bloqueSi(await sb.from('users').update({ level: 'Parrain Légendaire' }).eq('id', me).select()))
-verdict('s\'attribuer le badge du mois', bloqueSi(await sb.from('users').update({ badge_parrain_mois: true }).eq('id', me).select()))
-verdict('modifier sa série', bloqueSi(await sb.from('users').update({ streak_days: 365 }).eq('id', me).select()))
+verdict('s\'attribuer 99 999 XP', bloqueSi(await sb.from('users').update({ xp: 99999 }).eq('id', me).select('id')))
+verdict('s\'attribuer un niveau', bloqueSi(await sb.from('users').update({ level: 'Parrain Légendaire' }).eq('id', me).select('id')))
+verdict('s\'attribuer le badge du mois', bloqueSi(await sb.from('users').update({ badge_parrain_mois: true }).eq('id', me).select('id')))
+verdict('modifier sa série', bloqueSi(await sb.from('users').update({ streak_days: 365 }).eq('id', me).select('id')))
 verdict('appeler ajouter_xp directement', !!(await sb.rpc('ajouter_xp', { p_user: me, p_xp: 1000 })).error)
-const okBio = await sb.from('users').update({ bio: avant?.bio ?? null }).eq('id', me).select()
+const okBio = await sb.from('users').update({ bio: avant?.bio ?? null }).eq('id', me).select('id')
 verdict('(contrôle) modifier sa bio reste permis', !okBio.error, okBio.error?.message)
 
 // Annonce de test (supprimée à la fin) : les tests d'écriture visent une vraie ligne
@@ -75,21 +77,21 @@ if (annErr) console.log('ATTENTION     annonce de test non créée —', annErr.
 
 // Règle 7 : dates et compteurs d'annonce
 verdict('écrire last_bumped_at (rester en tête)',
-  bloqueSi(await sb.from('announcements').update({ last_bumped_at: '2099-01-01T00:00:00Z' }).eq('id', cible).select()))
-verdict('écrire bumps_today', bloqueSi(await sb.from('announcements').update({ bumps_today: 0 }).eq('id', cible).select()))
+  bloqueSi(await sb.from('announcements').update({ last_bumped_at: '2099-01-01T00:00:00Z' }).eq('id', cible).select('id')))
+verdict('écrire bumps_today', bloqueSi(await sb.from('announcements').update({ bumps_today: 0 }).eq('id', cible).select('id')))
 verdict('publier avec une date choisie',
-  bloqueSi(await sb.from('announcements').insert({ user_id: me, company_id: NUL, code: 'X', created_at: '2099-01-01' }).select()))
+  bloqueSi(await sb.from('announcements').insert({ user_id: me, company_id: NUL, code: 'X', created_at: '2099-01-01' }).select('id')))
 verdict('publier au nom d\'un autre',
-  bloqueSi(await sb.from('announcements').insert({ user_id: NUL, company_id: NUL, code: 'X' }).select()))
+  bloqueSi(await sb.from('announcements').insert({ user_id: NUL, company_id: NUL, code: 'X' }).select('id')))
 
 // Règle 14 : avis plateforme et messages
 verdict('avis plateforme au nom d\'un autre',
-  bloqueSi(await sb.from('platform_reviews').insert({ user_id: NUL, rating: 1, comment: 'test-securite' }).select()))
+  bloqueSi(await sb.from('platform_reviews').insert({ user_id: NUL, rating: 1, comment: 'test-securite' }).select('id')))
 verdict('message avec un faux expéditeur',
-  bloqueSi(await sb.from('messages').insert({ sender_id: NUL, receiver_id: me, content: 'test-securite' }).select()))
+  bloqueSi(await sb.from('messages').insert({ sender_id: NUL, receiver_id: me, content: 'test-securite' }).select('id')))
 verdict('réécrire le contenu d\'un message',
-  bloqueSi(await sb.from('messages').update({ content: 'modifié' }).or(`sender_id.eq.${me},receiver_id.eq.${me}`).select()))
-verdict('se créditer', bloqueSi(await sb.from('credits').update({ balance: 9999 }).eq('user_id', me).select()))
+  bloqueSi(await sb.from('messages').update({ content: 'modifié' }).or(`sender_id.eq.${me},receiver_id.eq.${me}`).select('id')))
+verdict('se créditer', bloqueSi(await sb.from('credits').update({ balance: 9999 }).eq('user_id', me).select('id')))
 
 // Règle 12 : fichier qui n'est pas une image
 const html = new Blob(['<script>alert(1)</script>'], { type: 'text/html' })
