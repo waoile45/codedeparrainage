@@ -4,8 +4,9 @@ import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Bolt, Building, Crown, Cross, Megaphone, Search, Users } from "@/components/Pictos";
 import CopiesPanel from './CopiesPanel'
+import AvisPanel from './AvisPanel'
 
-type Tab = 'annonces' | 'utilisateurs' | 'entreprises' | 'copies' | 'stats'
+type Tab = 'annonces' | 'utilisateurs' | 'entreprises' | 'copies' | 'avis' | 'stats'
 
 const S = {
   page:      { minHeight: '100vh', background: '#09090f', color: '#e2e8f0', fontFamily: "'DM Sans', system-ui, sans-serif" } as React.CSSProperties,
@@ -236,6 +237,7 @@ export default function AdminPage() {
           <TabBtn label="Utilisateurs" count={users.length}         active={tab==='utilisateurs'} onClick={() => setTab('utilisateurs')} />
           <TabBtn label="Entreprises"  count={companies.length}     active={tab==='entreprises'}  onClick={() => setTab('entreprises')} />
           <TabBtn label="Copies"                                     active={tab==='copies'}       onClick={() => setTab('copies')} />
+          <TabBtn label="Avis"                                       active={tab==='avis'}         onClick={() => setTab('avis')} />
           <TabBtn label="Stats"                                      active={tab==='stats'}        onClick={() => setTab('stats')} />
         </div>
 
@@ -381,6 +383,12 @@ export default function AdminPage() {
             )}
 
             {/* ── COPIES ── */}
+            {tab === 'avis' && (
+              <div style={S.panel}>
+                <AvisPanel />
+              </div>
+            )}
+
             {tab === 'copies' && (
               <div style={S.panel}>
                 <CopiesPanel />

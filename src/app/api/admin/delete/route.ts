@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-const ALLOWED_TABLES = ['announcements', 'companies'] as const
+const ALLOWED_TABLES = ['announcements', 'companies', 'platform_reviews'] as const
 type AllowedTable = typeof ALLOWED_TABLES[number]
 
 export async function DELETE(request: Request) {
@@ -40,7 +40,10 @@ export async function DELETE(request: Request) {
   )
 
   const { error } = await supabaseAdmin.from(table).delete().eq('id', id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('Admin delete :', table, error.code)
+    return NextResponse.json({ error: 'Suppression refusée par la base' }, { status: 500 })
+  }
 
   return NextResponse.json({ success: true })
 }
