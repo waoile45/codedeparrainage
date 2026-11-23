@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
-import { Turnstile } from '@marsidev/react-turnstile'
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 import { safeNext } from '@/lib/safe-next'
 
 /** Destination après connexion (?next=), validée : chemin interne seulement. */
@@ -18,6 +18,13 @@ export default function LoginPage() {
   const [loading, setLoading]           = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
+  // Un jeton Turnstile ne sert qu'une fois : après un échec, on en redemande
+  // un, sinon le 2e essai échouait toujours sur « anti-bot ».
+  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined)
+  function nouveauJeton() {
+    setTurnstileToken('')
+    turnstileRef.current?.reset()
+  }
   // Lien « S'inscrire » : garde la destination (ex. tester un code, publier).
   const [registerHref, setRegisterHref] = useState('/register')
   useEffect(() => {
@@ -56,6 +63,7 @@ export default function LoginPage() {
     if (!verifyData.success) {
       setError('Vérification anti-bot échouée, réessayez.')
       setLoading(false)
+      nouveauJeton()
       return
     }
 
@@ -64,6 +72,7 @@ export default function LoginPage() {
     if (error) {
       setError('Email ou mot de passe incorrect')
       setLoading(false)
+      nouveauJeton()
       return
     }
 
@@ -208,7 +217,7 @@ export default function LoginPage() {
             </div>
 
             <div className="turnstile-wrap">
-              <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!} onSuccess={token => setTurnstileToken(token)} />
+              <Turnstile ref={turnstileRef} siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!} onSuccess={token => setTurnstileToken(token)} onExpire={() => setTurnstileToken('')} />
             </div>
 
             <button type="submit" className="auth-btn" disabled={loading || !turnstileToken}>
