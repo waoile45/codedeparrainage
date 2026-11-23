@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTheme } from "./ThemeProvider";
 import Logo from "./Logo";
 import { createClient } from "@/lib/supabase";
+import AnimalAvatar from "@/components/AnimalAvatar";
 
 interface NavbarProps {
   activePage?: "codes" | "classement" | "publier" | "messages" | "profil" | "home" | "forum";
@@ -337,7 +338,7 @@ export default function Navbar({ activePage }: NavbarProps) {
                     <div className="nav-avatar">
                       {avatarUrl
                         ? <img src={avatarUrl} alt="" onError={() => setAuth(a => (a ? { ...a, avatarUrl: null } : a))} />
-                        : pseudo[0]?.toUpperCase()
+                        : <AnimalAvatar seed={pseudo} />
                       }
                     </div>
                     <span className="nav-pseudo">{pseudo}</span>

@@ -13,6 +13,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { Chat } from "@/components/Pictos";
 import "./messagerie.css";
+import AnimalAvatar from "@/components/AnimalAvatar";
 
 type Row = {
   id: string;
@@ -76,7 +77,7 @@ function Avatar({ person, size = 36 }: { person: Person | undefined; size?: numb
       {person?.avatarUrl && !broken
         // eslint-disable-next-line @next/next/no-img-element -- petites vignettes, déjà en WebP
         ? <img src={person.avatarUrl} alt="" width={size} height={size} loading="lazy" onError={() => setBroken(true)} />
-        : pseudo[0]?.toUpperCase()}
+        : <AnimalAvatar seed={pseudo} />}
     </span>
   );
 }

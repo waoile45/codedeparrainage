@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { Bolt, Building, Crown, Cross, Megaphone, Search, Users } from "@/components/Pictos";
 import CopiesPanel from './CopiesPanel'
 import AvisPanel from './AvisPanel'
+import AnimalAvatar from "@/components/AnimalAvatar";
 
 type Tab = 'annonces' | 'utilisateurs' | 'entreprises' | 'copies' | 'avis' | 'stats'
 
@@ -313,7 +314,7 @@ export default function AdminPage() {
                   {filteredUsers.map((user: any) => (
                     <div key={user.id} style={S.row}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
-                        <div style={S.avatar}>{user.pseudo?.slice(0,1).toUpperCase()}</div>
+                        <AnimalAvatar seed={user.pseudo ?? ''} size={34} />
                         <div style={{ minWidth: 0 }}>
                           <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#e2e8f0' }}>{user.pseudo}</div>
                           <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{user.email} · {user.level} · {user.xp} XP</div>

@@ -7,6 +7,7 @@ import { CategoryIcon } from "@/components/CategoryIcons";
 import { Cross } from "@/components/Pictos";
 import { FraicheurCode } from "@/components/FraicheurCode";
 import { trackCodeCopy } from "@/lib/track-copy";
+import AnimalAvatar from "@/components/AnimalAvatar";
 
 type Category = "Tout" | "banque" | "paris" | "cashback" | "energie" | "telephonie" | "crypto" | "assurance" | "shopping";
 
@@ -252,7 +253,7 @@ function CodeCardItem({ card, index, onRate, onContact, onEdit, onDelete, curren
       {/* Parrain au-dessus du code */}
       <div className="card-footer" style={{ marginBottom:"0.75rem" }}>
         <div className="parrain-info">
-          <div className="parrain-avatar" style={{ background:niveauColor+"33", borderColor:niveauColor+"66" }}>{card.parrain[0]?.toUpperCase()}</div>
+          <div className="parrain-avatar" style={{ borderColor:niveauColor+"66" }}><AnimalAvatar seed={card.parrain} /></div>
           <div>
             <div style={{ display:"flex", alignItems:"center", gap:6 }}>
               <a href={`/u/${encodeURIComponent(card.parrain)}`} className="parrain-name" style={{ textDecoration:"none" }} onClick={e => e.stopPropagation()}>{card.parrain}</a>

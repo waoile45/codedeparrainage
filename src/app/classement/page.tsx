@@ -6,6 +6,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase";
 import { Medal, Ticket, Flame } from "@/components/Pictos";
 import "./classement.css";
+import AnimalAvatar from "@/components/AnimalAvatar";
 
 // Classement des parrains. Une idée par écran : le podium dessiné (les marches
 // montent à l'arrivée), les récompenses du mois, puis tout le classement avec
@@ -52,7 +53,7 @@ function Avatar({ pseudo, size = 44, avatarUrl }: { pseudo: string; size?: numbe
     <span className="cl-avatar" style={{ width: size, height: size, fontSize: size * 0.4 }}>
       {avatarUrl && !imgErr
         ? <Image src={avatarUrl} alt="" width={size} height={size} sizes={`${size}px`} onError={() => setImgErr(true)} />
-        : pseudo[0]?.toUpperCase()}
+        : <AnimalAvatar seed={pseudo} />}
     </span>
   );
 }

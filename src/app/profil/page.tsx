@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { Bolt, Chat, Check, Crown, Cross, Flame, Gift, Handshake, Lock, Medal, Pencil, Sleep, Stamp, Star, ThumbDown, ThumbUp, Ticket, Trophy, TrendUp, Warning, Clock } from "@/components/Pictos";
 import ShareCode from "@/components/ShareCode";
 import Messagerie from "./Messagerie";
+import AnimalAvatar from "@/components/AnimalAvatar";
 
 type NavSection = "profil" | "annonces" | "messages" | "badges" | "quetes" | "credits" | "parametres" | "avis";
 
@@ -203,7 +204,7 @@ function AvatarUpload({ letter, avatarUrl, size=72, onUpload }: { letter:string;
       <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
         <div style={{ position:"relative", zIndex:1, width:size, height:size, borderRadius:"50%", border:"1px solid var(--border-md)", overflow:"hidden", cursor:"pointer", background:"var(--accent)", display:"flex", alignItems:"center", justifyContent:"center" }}
           onMouseEnter={()=>setHover(true)} onMouseLeave={()=>setHover(false)} onClick={()=>ref.current?.click()}>
-          {preview ? <img src={preview} alt="avatar" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:size*.38, color:"var(--accent-ink)" }}>{letter}</span>}
+          {preview ? <img src={preview} alt="avatar" style={{ width:"100%", height:"100%", objectFit:"cover" }} /> : <AnimalAvatar seed={letter} />}
           <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.55)", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:3, opacity:(hover||uploading)?1:0, transition:"opacity .2s" }}>
             {uploading ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" style={{ animation:"spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
               : <><span style={{ color:"var(--text-strong)" }}><I.cam /></span><span style={{ color:"var(--text)", fontSize:"0.58rem", fontWeight:600 }}>Modifier</span></>}
@@ -263,7 +264,7 @@ function SidebarId({ user }: { user: UserProfile | null }) {
       <div className="pf-id-top">
         <span className="pf-id-av">
           {/* eslint-disable-next-line @next/next/no-img-element -- vignette 40 px déjà en WebP */}
-          {user.avatar_url ? <img src={user.avatar_url} alt="" width={40} height={40} /> : user.pseudo[0]?.toUpperCase()}
+          {user.avatar_url ? <img src={user.avatar_url} alt="" width={40} height={40} /> : <AnimalAvatar seed={user.pseudo} />}
         </span>
         <div className="pf-id-txt">
           <p className="pf-id-name">{user.pseudo}</p>
@@ -348,7 +349,7 @@ function SectionProfil({ user, annonces, copyStats, onPseudoSave, onAvatarUpload
   return (
     <div className="sc">
       <div className="pf-head">
-        <AvatarUpload letter={user.pseudo[0]?.toUpperCase()??"?"} avatarUrl={user.avatar_url} size={72} onUpload={onAvatarUpload} />
+        <AvatarUpload letter={user.pseudo} avatarUrl={user.avatar_url} size={72} onUpload={onAvatarUpload} />
         <div className="pf-head-txt">
           <EditablePseudo value={user.pseudo} onSave={onPseudoSave} />
           <p className="pf-head-meta">{user.level} · membre depuis {formatDate(user.created_at)}</p>
@@ -631,7 +632,7 @@ function SectionParametres({ user, onPseudoSave, onAvatarUpload, onBioSave }: { 
       <div style={{ background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:16, padding:"1.25rem 1.5rem" }}>
         <p style={{ fontSize:"0.7rem", fontWeight:700, letterSpacing:"0.08em", color:"var(--text-faint)", marginBottom:"1rem" }}>Photo de profil & nom d&apos;affichage</p>
         <div style={{ display:"flex", alignItems:"center", gap:"1.5rem" }}>
-          <AvatarUpload letter={user.pseudo[0]?.toUpperCase()??"?"} avatarUrl={user.avatar_url} size={60} onUpload={onAvatarUpload} />
+          <AvatarUpload letter={user.pseudo} avatarUrl={user.avatar_url} size={60} onUpload={onAvatarUpload} />
           <div style={{ flex:1 }}>
             <EditablePseudo value={user.pseudo} onSave={onPseudoSave} size="sm" />
             <p style={{ fontSize:"0.7rem", color:"var(--text-faint)", marginTop:4 }}>Clique sur le crayon pour modifier ton pseudo, et sur l&apos;avatar pour changer la photo.</p>
@@ -802,9 +803,7 @@ function SectionAvisRecus({ userId }: { userId:string }) {
               <div key={r.id} style={{ background:"rgba(250,248,243,.03)", border:"1px solid rgba(250,248,243,.07)", borderRadius:14, padding:"1rem 1.25rem" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:".625rem" }}>
                   {/* Avatar */}
-                  <div style={{ width:32, height:32, borderRadius:"50%", background:"rgba(255,212,59,.25)", border:"1px solid rgba(255,212,59,.35)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                    <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:".8rem", color:"var(--accent-text)" }}>{r.raterPseudo[0]?.toUpperCase()}</span>
-                  </div>
+                  <AnimalAvatar seed={r.raterPseudo} size={32} />
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
                       <span style={{ fontWeight:700, fontSize:".875rem", color:"var(--text)" }}>{r.raterPseudo}</span>

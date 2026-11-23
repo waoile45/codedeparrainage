@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase";
 import type { ReactNode } from "react";
 import { Bolt, Check, Clock, Cross, Flame, Gift, Handshake, Sleep, Ticket, Users, Warning } from "@/components/Pictos";
 import { trackCodeCopy } from "@/lib/track-copy";
+import AnimalAvatar from "@/components/AnimalAvatar";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface PublicUser {
@@ -87,7 +88,6 @@ const TAGS_INFO: Record<string, { label:string; emoji:ReactNode; positive:boolea
 // ── Sub-components ─────────────────────────────────────────────────────────────
 function Avatar({ pseudo, avatarUrl, size=72 }: { pseudo:string; avatarUrl:string|null; size?:number }) {
   const [err, setErr] = useState(false);
-  const niveauColor = "var(--accent)";
   if (avatarUrl && !err) {
     return (
       <div style={{ width:size, height:size, borderRadius:"50%", border:"3px solid rgba(255,212,59,.4)", overflow:"hidden", flexShrink:0 }}>
@@ -96,9 +96,7 @@ function Avatar({ pseudo, avatarUrl, size=72 }: { pseudo:string; avatarUrl:strin
     );
   }
   return (
-    <div style={{ width:size, height:size, borderRadius:"50%", background:`linear-gradient(135deg,${niveauColor},${niveauColor}99)`, border:"3px solid rgba(255,212,59,.4)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-      <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:size*.4, color:"#fff" }}>{pseudo[0]?.toUpperCase()}</span>
-    </div>
+    <AnimalAvatar seed={pseudo} size={size} />
   );
 }
 
@@ -351,9 +349,7 @@ export default function PublicProfilClient() {
                   {reviews.map(r => (
                     <div key={r.id} className="review-card">
                       <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom: (r.tags.length||r.comment) ? ".5rem" : 0 }}>
-                        <div style={{ width:28, height:28, borderRadius:"50%", background:"rgba(255,212,59,.2)", border:"1px solid rgba(255,212,59,.3)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                          <span style={{ fontFamily:"var(--font-display)", fontWeight:800, fontSize:".7rem", color:"var(--accent-text)" }}>{r.raterPseudo[0]?.toUpperCase()}</span>
-                        </div>
+                        <AnimalAvatar seed={r.raterPseudo} size={28} />
                         <div style={{ flex:1 }}>
                           <div style={{ display:"flex", alignItems:"center", gap:7, flexWrap:"wrap" }}>
                             <span style={{ fontWeight:600, fontSize:".82rem", color:"rgba(255,255,255,.8)" }}>{r.raterPseudo}</span>
