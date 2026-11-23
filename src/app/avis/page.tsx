@@ -62,15 +62,7 @@ export default function AvisPage() {
         rating,
         comment: comment.trim() || null,
       });
-      // +15 XP pour la quête "Laisser un avis"
-      if (user?.id) {
-        const { data: prof } = await supabase.from("users").select("xp").eq("id", user.id).single();
-        if (prof) {
-          const newXp = (prof.xp ?? 0) + 15;
-          const newLevel = newXp >= 10000 ? "Parrain Légendaire" : newXp >= 5000 ? "Super Parrain" : newXp >= 2000 ? "Parrain Or" : newXp >= 500 ? "Parrain Argent" : newXp >= 100 ? "Parrain Bronze" : "Débutant";
-          await supabase.from("users").update({ xp: newXp, level: newLevel }).eq("id", user.id);
-        }
-      }
+      // +15 XP au premier avis d'un membre connecté : versés par la base
     } catch { /* silencieux */ }
     setSending(false);
     setStep("done");
@@ -186,14 +178,6 @@ export default function AvisPage() {
                     const supabase = createClient();
                     const { data: { user } } = await supabase.auth.getUser();
                     await supabase.from("platform_reviews").insert({ user_id: user?.id ?? null, rating: rating || 5, comment: null });
-                    if (user?.id) {
-                      const { data: prof } = await supabase.from("users").select("xp").eq("id", user.id).single();
-                      if (prof) {
-                        const newXp = (prof.xp ?? 0) + 15;
-                        const newLevel = newXp >= 10000 ? "Parrain Légendaire" : newXp >= 5000 ? "Super Parrain" : newXp >= 2000 ? "Parrain Or" : newXp >= 500 ? "Parrain Argent" : newXp >= 100 ? "Parrain Bronze" : "Débutant";
-                        await supabase.from("users").update({ xp: newXp, level: newLevel }).eq("id", user.id);
-                      }
-                    }
                   } catch { /* silencieux */ }
                   setTimeout(() => setStep("done"), 500);
                 }}

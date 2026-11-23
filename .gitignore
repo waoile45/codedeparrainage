@@ -41,3 +41,9 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# Modèle de configuration, sans valeurs (versionné)
+!.env.example
+
+# Binaire local de la CLI Stripe (27 Mo), ne pas versionner
+stripe.exe

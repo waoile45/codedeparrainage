@@ -31,27 +31,11 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (user) {
-      const { data: existingProfile } = await supabase
-        .from('users')
-        .select('id')
-        .eq('id', user.id)
-        .single()
-
-      if (!existingProfile) {
-        // Pseudo : metadata.pseudo (email signup) → full_name Google → email prefix
-        const meta = user.user_metadata ?? {}
-        const pseudo =
-          (meta.pseudo as string | undefined) ??
-          (meta.full_name as string | undefined) ??
-          (meta.name as string | undefined) ??
-          (user.email?.split('@')[0] ?? 'Anonyme')
-
-        await supabase.from('users').insert({
-          id:    user.id,
-          email: user.email,
-          pseudo,
-        })
-      }
+      // Profil créé par la base (trigger à l'inscription) ; filet de sécurité
+      // pour un compte qui n'en aurait pas. Puis série et XP du jour, calculées
+      // par la base : le client n'écrit plus ces colonnes.
+      await supabase.rpc('assurer_profil')
+      await supabase.rpc('enregistrer_connexion')
     }
   }
 

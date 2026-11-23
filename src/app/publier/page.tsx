@@ -238,27 +238,7 @@ export default function PublierPage() {
       return;
     }
 
-    // Mettre à jour les XP
-    const { data: profile } = await supabase
-      .from("users")
-      .select("xp")
-      .eq("id", user.id)
-      .single();
-
-    if (profile) {
-      const newXp = (profile.xp ?? 0) + XP_GAIN;
-      const newLevel =
-        newXp >= 10000 ? "Parrain Légendaire" :
-        newXp >= 5000  ? "Super Parrain" :
-        newXp >= 2000  ? "Parrain Or" :
-        newXp >= 500   ? "Parrain Argent" :
-        newXp >= 100   ? "Parrain Bronze" : "Débutant";
-
-      await supabase
-        .from("users")
-        .update({ xp: newXp, level: newLevel })
-        .eq("id", user.id);
-    }
+    // +10 XP : versés par la base à la création de l'annonce (trigger xp_annonce)
 
     if (inserted?.id) {
       setPublished({ id: inserted.id, urlSlug: existing.url_slug ?? null });

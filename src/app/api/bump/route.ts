@@ -43,50 +43,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Vérification anti-bot échouée' }, { status: 403 })
   }
 
-  const { data: ann } = await supabase
-    .from('announcements')
-    .select('*')
-    .eq('id', announcementId)
-    .single()
-
-  if (!ann) return NextResponse.json({ error: 'Annonce introuvable' }, { status: 404 })
-
-  // Anti-IDOR : on ne peut remonter que sa propre annonce
-  if (ann.user_id !== user.id) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+  if (typeof announcementId !== 'string' || !/^[0-9a-f-]{36}$/i.test(announcementId)) {
+    return NextResponse.json({ error: 'Annonce invalide' }, { status: 400 })
   }
 
-  const lastBump = ann.last_bumped_at ? new Date(ann.last_bumped_at) : null
-  const now = new Date()
-  const isNewDay = !lastBump || lastBump.toDateString() !== now.toDateString()
-  const bumpsToday = isNewDay ? 0 : ann.bumps_today
-
-  if (bumpsToday >= 5) {
-    return NextResponse.json({ error: 'Limite de 5 remontées par jour atteinte' }, { status: 429 })
+  // Contrôle du propriétaire, limite de 5 par jour et +5 XP dans une seule
+  // fonction en base, ligne verrouillée : des requêtes parallèles ne passent plus.
+  const { data: bumpsLeft, error } = await supabase.rpc('remonter_annonce', {
+    p_announcement_id: announcementId,
+  })
+  if (error) {
+    const msg = error.message ?? ''
+    if (msg.includes('limite_remontees')) {
+      return NextResponse.json({ error: 'Limite de 5 remontées par jour atteinte' }, { status: 429 })
+    }
+    if (msg.includes('annonce_introuvable')) {
+      return NextResponse.json({ error: 'Annonce introuvable' }, { status: 404 })
+    }
+    console.error('[/api/bump] remonter_annonce:', error.code)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 
-  await supabase
-    .from('announcements')
-    .update({
-      bumps_today: bumpsToday + 1,
-      last_bumped_at: now.toISOString(),
-      updated_at: now.toISOString(),
-    })
-    .eq('id', announcementId)
-
-  // Gain d'XP : lire l'XP de l'utilisateur (et non ann.xp qui n'existe pas → NaN)
-  const { data: profile } = await supabase
-    .from('users')
-    .select('xp')
-    .eq('id', user.id)
-    .single()
-
-  if (profile) {
-    await supabase
-      .from('users')
-      .update({ xp: (profile.xp ?? 0) + 5 })
-      .eq('id', user.id)
-  }
-
-  return NextResponse.json({ success: true, bumpsLeft: 4 - bumpsToday })
+  return NextResponse.json({ success: true, bumpsLeft })
 }

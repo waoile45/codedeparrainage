@@ -101,10 +101,9 @@ export default function RegisterPage() {
     }
 
     if (data.session) {
-      // Email confirmation désactivée — session immédiate
-      if (data.user) {
-        await supabase.from('users').insert({ id: data.user.id, email, pseudo: pseudo.trim() })
-      }
+      // Email confirmation désactivée — session immédiate. Le profil est créé
+      // par la base à l'inscription (trigger creer_profil_inscription), avec
+      // le pseudo passé dans options.data.
       window.location.href = readNext()
       return
     }

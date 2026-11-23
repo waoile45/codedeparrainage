@@ -1,15 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { PACKS } from '@/lib/packs'
 import Stripe from 'stripe'
 
-const PACKS = [
-  { credits: 5,   price: 500  },  // 5€
-  { credits: 20,  price: 1900 },  // 19€
-  { credits: 50,  price: 4500 },  // 45€
-  { credits: 100, price: 8000 },  // 80€
-  { credits: 300, price: 21000 }, // 210€
-]
 
 export async function POST(request: Request) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {

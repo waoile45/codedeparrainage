@@ -885,14 +885,8 @@ function SectionAvis({ userId }: { userId:string }) {
   async function submitNegative() {
     setSending(true);
     try {
+      // +15 XP au premier avis : versés par la base (trigger xp_avis_plateforme)
       await supabase.from("platform_reviews").insert({ user_id: userId, rating, comment: comment.trim()||null });
-      // +15 XP pour la quête "Laisser un avis sur la plateforme"
-      const { data: prof } = await supabase.from("users").select("xp").eq("id", userId).single();
-      if (prof) {
-        const newXp = (prof.xp ?? 0) + 15;
-        const newLevel = newXp >= 10000 ? "Parrain Légendaire" : newXp >= 5000 ? "Super Parrain" : newXp >= 2000 ? "Parrain Or" : newXp >= 500 ? "Parrain Argent" : newXp >= 100 ? "Parrain Bronze" : "Débutant";
-        await supabase.from("users").update({ xp: newXp, level: newLevel }).eq("id", userId);
-      }
     } catch {}
     setSending(false);
     setStep("done");
@@ -940,12 +934,6 @@ function SectionAvis({ userId }: { userId:string }) {
             onClick={async () => {
               try {
                 await supabase.from("platform_reviews").insert({ user_id: userId, rating: rating||5, comment: null });
-                const { data: prof } = await supabase.from("users").select("xp").eq("id", userId).single();
-                if (prof) {
-                  const newXp = (prof.xp ?? 0) + 15;
-                  const newLevel = newXp >= 10000 ? "Parrain Légendaire" : newXp >= 5000 ? "Super Parrain" : newXp >= 2000 ? "Parrain Or" : newXp >= 500 ? "Parrain Argent" : newXp >= 100 ? "Parrain Bronze" : "Débutant";
-                  await supabase.from("users").update({ xp: newXp, level: newLevel }).eq("id", userId);
-                }
               } catch {}
               setTimeout(() => setStep("done"), 400);
             }}>
@@ -1030,18 +1018,6 @@ export default function ProfilPage() {
       supabase.from("messages").select("id", { count: "exact", head: true }).eq("receiver_id", authUser.id).eq("read", false),
     ]);
     setUnread(unreadCount ?? 0);
-    // Fix rétroactif : si l'utilisateur a un avis mais n'a pas reçu les +15 XP
-    if (reviewData && profile) {
-      const hasAnnonce = (userAnnonces?.length ?? 0) > 0;
-      const minExpected = (hasAnnonce ? 10 : 0) + 15;
-      if ((profile.xp ?? 0) < minExpected) {
-        const newXp = Math.max(profile.xp ?? 0, minExpected);
-        const newLevel = newXp >= 10000 ? "Parrain Légendaire" : newXp >= 5000 ? "Super Parrain" : newXp >= 2000 ? "Parrain Or" : newXp >= 500 ? "Parrain Argent" : newXp >= 100 ? "Parrain Bronze" : "Débutant";
-        await supabase.from("users").update({ xp: newXp, level: newLevel }).eq("id", authUser.id);
-        profile.xp = newXp;
-        profile.level = newLevel;
-      }
-    }
     if (profile) {
       // L'email vient de l'auth (source autorisée), pas de la table users
       setUser({ ...profile, email: authUser.email } as any);

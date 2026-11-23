@@ -60,27 +60,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Vous avez déjà noté cette annonce' }, { status: 400 })
   }
 
-  await supabase.from('reviews').insert({
+  // Un avis par membre et par annonce (index unique) ; le parrain noté et ses
+  // +20 XP (note de 4 ou 5) sont fixés par la base (triggers avis_controle et
+  // xp_avis_recu) : la route ne peut plus écrire dans le profil d'un autre.
+  const { error: insertError } = await supabase.from('reviews').insert({
     reviewer_id: user.id,
     reviewed_user_id: ann.user_id,
     announcement_id: announcementId,
     rating,
     comment,
   })
-
-  if (rating >= 4) {
-    const { data: parrain } = await supabase
-      .from('users')
-      .select('xp')
-      .eq('id', ann.user_id)
-      .single()
-
-    if (parrain) {
-      await supabase
-        .from('users')
-        .update({ xp: parrain.xp + 20 })
-        .eq('id', ann.user_id)
+  if (insertError) {
+    if (insertError.code === '23505') {
+      return NextResponse.json({ error: 'Vous avez déjà noté cette annonce' }, { status: 400 })
     }
+    console.error('[/api/reviews] insert:', insertError.code)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 
   return NextResponse.json({ success: true })

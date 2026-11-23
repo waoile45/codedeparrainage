@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { prixAttendu } from '@/lib/packs'
 import Stripe from 'stripe'
 
 export async function POST(request: Request) {
@@ -39,6 +40,13 @@ export async function POST(request: Request) {
     // terminée est payée ; la vérification protège le jour où un moyen de
     // paiement différé (virement, SEPA) serait ajouté.
     if (session.payment_status !== 'paid') {
+      return NextResponse.json({ received: true })
+    }
+
+    // Le montant payé doit être celui du pack (prix fixé côté serveur)
+    const attendu = prixAttendu(credits)
+    if (attendu === null || session.amount_total !== attendu || session.currency !== 'eur') {
+      console.error('[stripe/webhook] montant inattendu pour la session', session.id)
       return NextResponse.json({ received: true })
     }
 
